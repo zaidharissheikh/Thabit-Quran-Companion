@@ -173,9 +173,14 @@ function App() {
 
   function bookmarkTodayVerse(verse) {
     setState((prev) => {
-      if (prev.bookmarks.some((bookmark) => bookmark.ref === verse.ref)) {
-        showToast('Already saved 🔖')
-        return prev
+      const alreadyBookmarked = prev.bookmarks.some((bookmark) => bookmark.ref === verse.ref)
+
+      if (alreadyBookmarked) {
+        showToast('Bookmark removed')
+        return {
+          ...prev,
+          bookmarks: prev.bookmarks.filter((bookmark) => bookmark.ref !== verse.ref),
+        }
       }
 
       showToast('Verse bookmarked 🔖')
@@ -185,9 +190,14 @@ function App() {
 
   function bookmarkVerse(verse) {
     setState((prev) => {
-      if (prev.bookmarks.some((bookmark) => bookmark.num === verse.num)) {
-        showToast('Already saved')
-        return prev
+      const alreadyBookmarked = prev.bookmarks.some((bookmark) => bookmark.num === verse.num)
+
+      if (alreadyBookmarked) {
+        showToast('Bookmark removed')
+        return {
+          ...prev,
+          bookmarks: prev.bookmarks.filter((bookmark) => bookmark.num !== verse.num),
+        }
       }
 
       showToast('Verse bookmarked 🔖')

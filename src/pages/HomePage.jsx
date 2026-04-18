@@ -23,14 +23,12 @@ export default function HomePage({
   }, [])
 
   const progress = Math.min(100, Math.round((state.versesReadToday / state.goal) * 100))
+  const isTodayVerseBookmarked = state.bookmarks.some((bookmark) => bookmark.ref === verse.ref)
 
   return (
     <div className="geo-dot min-h-screen bg-[#0D2B1F]">
       <header className="fixed top-0 z-50 flex h-20 w-full max-w-[430px] items-center justify-between bg-gradient-to-b from-[#0D2B1F] via-[#0D2B1F]/95 to-transparent px-6">
-        <div className="flex items-center gap-3">
-          <button type="button" className="material-symbols-outlined text-[#C9A84C] transition hover:opacity-70">
-            menu
-          </button>
+        <div className="flex items-center">
           <span className="font-serif text-2xl font-bold text-[#C9A84C]">ثابت</span>
         </div>
         <div className="flex items-center gap-3">
@@ -104,8 +102,8 @@ export default function HomePage({
                   onClick={() => onBookmarkTodayVerse(verse)}
                   className="flex items-center gap-1.5 text-sm text-secondary transition hover:text-primary"
                 >
-                  <span className="material-symbols-outlined text-lg">bookmark</span>
-                  Save
+                  <span className={`material-symbols-outlined text-lg ${isTodayVerseBookmarked ? 'fill-icon' : ''}`}>bookmark</span>
+                  {isTodayVerseBookmarked ? 'Saved' : 'Save'}
                 </button>
                 <Link to="/reader" className="flex items-center gap-1.5 text-sm text-secondary transition hover:text-primary">
                   <span className="material-symbols-outlined text-lg">menu_book</span>
