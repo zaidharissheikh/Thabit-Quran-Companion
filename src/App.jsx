@@ -5,21 +5,36 @@ import Toast from './components/Toast'
 import { VERSES } from './data/content'
 import HomePage from './pages/HomePage'
 import JournalPage from './pages/JournalPage'
+import LoginPage from './pages/LoginPage'
 import MomentumPage from './pages/MomentumPage'
-import OnboardingPage from './pages/OnboardingPage'
+import PlaybackPage from './pages/PlaybackPage'
 import ReaderPage from './pages/ReaderPage'
+import SettingsPage from './pages/SettingsPage'
+import GoalsPage from './pages/GoalsPage'
+import DisplayPage from './pages/DisplayPage'
+import SignupPage from './pages/SignupPage'
+import SurahPage from './pages/SurahPage'
 import ReturnPage from './pages/ReturnPage'
 import { askClaude } from './utils/ai'
 
 const STORAGE_KEY = 'thabit_v3'
 
 const initialState = {
-  name: 'Friend',
+  name: 'Akhi',
   goal: 10,
-  streak: 0,
-  versesReadToday: 0,
+  streak: 3,
+  versesReadToday: 4,
   heartRating: 3,
-  sessions: [],
+  ramadanVerses: 18,
+  sessions: [
+    { date: 'Apr 11', verses: 12, heart: 4 },
+    { date: 'Apr 12', verses: 8, heart: 3 },
+    { date: 'Apr 13', verses: 15, heart: 5 },
+    { date: 'Apr 14', verses: 6, heart: 2 },
+    { date: 'Apr 15', verses: 10, heart: 4 },
+    { date: 'Apr 16', verses: 14, heart: 5 },
+    { date: 'Apr 17', verses: 4, heart: 3 },
+  ],
   bookmarks: [],
   journals: [],
   audioPlaying: false,
@@ -29,17 +44,16 @@ const initialState = {
 function getPersistedState() {
   const raw = localStorage.getItem(STORAGE_KEY)
   if (!raw) {
-    return { state: initialState, isOnboarded: false }
+    return { state: initialState }
   }
 
   try {
     const parsed = JSON.parse(raw)
     return {
       state: { ...initialState, ...parsed },
-      isOnboarded: Boolean(parsed.name && parsed.name !== 'Friend'),
     }
   } catch {
-    return { state: initialState, isOnboarded: false }
+    return { state: initialState }
   }
 }
 
@@ -50,7 +64,8 @@ function App() {
   const persisted = useMemo(() => getPersistedState(), [])
 
   const [state, setState] = useState(persisted.state)
-  const [isOnboarded, setIsOnboarded] = useState(persisted.isOnboarded)
+  const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(localStorage.getItem('thabit_logged_in')))
+  const [theme, setTheme] = useState(() => localStorage.getItem('thabit_theme') || 'system')
   const [nudge, setNudge] = useState('')
   const [reflectionQuestion, setReflectionQuestion] = useState('')
   const [returnMessage, setReturnMessage] = useState('')
@@ -60,10 +75,25 @@ function App() {
   const todayVerse = useMemo(() => VERSES[new Date().getDay() % VERSES.length], [])
 
   useEffect(() => {
-    if (isOnboarded) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  }, [state])
+
+  useEffect(() => {
+    const root = window.document.documentElement
+    if (theme === 'system') {
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      if (systemPrefersDark) {
+        root.classList.add('dark')
+      } else {
+        root.classList.remove('dark')
+      }
+    } else if (theme === 'dark') {
+      root.classList.add('dark')
+    } else {
+      root.classList.remove('dark')
     }
-  }, [state, isOnboarded])
+    localStorage.setItem('thabit_theme', theme)
+  }, [theme])
 
   useEffect(() => {
     return () => {
@@ -107,16 +137,13 @@ function App() {
   }, [state])
 
   useEffect(() => {
-    if (isOnboarded) {
-      const timer = window.setTimeout(() => {
-        generateNudge()
-        generateReflectionQuestion()
-      }, 0)
+    const timer = window.setTimeout(() => {
+      generateNudge()
+      generateReflectionQuestion()
+    }, 0)
 
-      return () => clearTimeout(timer)
-    }
-    return undefined
-  }, [isOnboarded, generateNudge, generateReflectionQuestion])
+    return () => clearTimeout(timer)
+  }, [generateNudge, generateReflectionQuestion])
 
   async function openReflection({ ref, prompt }) {
     setSheet({ open: true, ref, body: '', loading: true })
@@ -135,39 +162,53 @@ function App() {
     setReturnMessage(text)
   }
 
-  function completeOnboarding({ name, goal }) {
-    setState((prev) => ({
-      ...prev,
-      name,
-      goal,
-      streak: 3,
-      versesReadToday: 4,
-      sessions: [
-        { date: 'Apr 11', verses: 12, heart: 4 },
-        { date: 'Apr 12', verses: 8, heart: 3 },
-        { date: 'Apr 13', verses: 15, heart: 5 },
-        { date: 'Apr 14', verses: 6, heart: 2 },
-        { date: 'Apr 15', verses: 10, heart: 4 },
-        { date: 'Apr 16', verses: 14, heart: 5 },
-        { date: 'Apr 17', verses: 4, heart: 3 },
-      ],
-    }))
-    setIsOnboarded(true)
+  function updateGoal(newGoal) {
+    setState((prev) => ({ ...prev, goal: Number(newGoal) }))
+    showToast(`Goal updated to ${newGoal} verses 🎯`)
+  }
+
+  function updateRamadanVerses(newVerses) {
+    setState((prev) => ({ ...prev, ramadanVerses: Number(newVerses) }))
+    showToast(`Ramadan baseline updated to ${newVerses} verses`)
+  }
+
+  function handleLogin({ email, name }) {
+    if (name) {
+      setState((prev) => ({ ...prev, name }))
+    }
+    localStorage.setItem('thabit_logged_in', email)
+    setIsLoggedIn(true)
     navigate('/')
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('thabit_logged_in')
+    setIsLoggedIn(false)
+    navigate('/login')
   }
 
   function markRead() {
     setState((prev) => {
-      const versesReadToday = Math.min(prev.goal, prev.versesReadToday + 5)
-      const streak = versesReadToday >= prev.goal ? prev.streak + 1 : prev.streak
+      const addedVerses = 5
+      const newVersesReadToday = prev.versesReadToday + addedVerses
+      const justReachedGoal = prev.versesReadToday < prev.goal && newVersesReadToday >= prev.goal
+      const streak = justReachedGoal ? prev.streak + 1 : prev.streak
 
-      if (versesReadToday >= prev.goal) {
+      if (justReachedGoal) {
         showToast('🔥 MashaAllah! Streak updated!')
       } else {
-        showToast(`✓ +5 verses logged (${versesReadToday}/${prev.goal})`)
+        showToast(`✓ +${addedVerses} verses logged (${newVersesReadToday}/${prev.goal})`)
       }
 
-      return { ...prev, versesReadToday, streak }
+      const newSessions = [...prev.sessions]
+      if (newSessions.length > 0) {
+        newSessions[newSessions.length - 1] = {
+          ...newSessions[newSessions.length - 1],
+          verses: newSessions[newSessions.length - 1].verses + addedVerses
+        }
+      }
+
+      return { ...prev, versesReadToday: newVersesReadToday, streak, sessions: newSessions }
     })
   }
 
@@ -269,9 +310,10 @@ function App() {
   return (
     <>
       <Routes>
-        {!isOnboarded ? (
+        {!isLoggedIn ? (
           <>
-            <Route path="*" element={<OnboardingPage onComplete={completeOnboarding} />} />
+            <Route path="/signup" element={<SignupPage onSignup={handleLogin} />} />
+            <Route path="*" element={<LoginPage onLogin={handleLogin} />} />
           </>
         ) : (
           <>
@@ -301,6 +343,21 @@ function App() {
               }
             />
             <Route
+              path="/surah/:id"
+              element={
+                <SurahPage
+                  state={state}
+                  onBookmarkVerse={bookmarkVerse}
+                  onReflectVerse={openReflection}
+                  onPlayVerse={togglePlayVerse}
+                />
+              }
+            />
+            <Route path="/play/:surahId/:verseId" element={<PlaybackPage />} />
+            <Route path="/settings" element={<SettingsPage state={state} onLogout={handleLogout} />} />
+            <Route path="/settings/display" element={<DisplayPage theme={theme} onUpdateTheme={(t) => { setTheme(t); localStorage.setItem('thabit_theme', t) }} />} />
+            <Route path="/goals" element={<GoalsPage state={state} onUpdateGoal={updateGoal} />} />
+            <Route
               path="/momentum"
               element={
                 <MomentumPage
@@ -309,10 +366,21 @@ function App() {
                   onGenerateReflectionQuestion={generateReflectionQuestion}
                   onPostReflection={postReflection}
                   onRateHeart={rateHeart}
+                  onUpdateRamadanVerses={updateRamadanVerses}
                 />
               }
             />
-            <Route path="/journal" element={<JournalPage journals={state.journals} />} />
+            <Route
+              path="/journal"
+              element={
+                <JournalPage
+                  state={state}
+                  reflectionQuestion={reflectionQuestion}
+                  onGenerateReflectionQuestion={generateReflectionQuestion}
+                  onPostReflection={postReflection}
+                />
+              }
+            />
             <Route path="/return" element={<ReturnPage returnMessage={returnMessage} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </>

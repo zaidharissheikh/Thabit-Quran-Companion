@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;600&family=Manrope:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 @import 'tailwindcss';
 
@@ -52,6 +52,10 @@
   --font-body: 'Plus Jakarta Sans', sans-serif;
   --font-label: 'Plus Jakarta Sans', sans-serif;
   --font-arabic: 'Amiri', serif;
+  --font-manrope: 'Manrope', sans-serif;
+  --font-playfair: 'Playfair Display', serif;
+  --font-inter: 'Inter', sans-serif;
+  --font-cormorant: 'Cormorant Garamond', serif;
 }
 
 body {
@@ -95,13 +99,130 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0l10 30h30L55 50l10 30-25-20-25 20 10-30L0 30h30z' fill='%23755b00' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
 }
 
+.geometric-pattern-dark {
+  background-image: radial-gradient(circle at 2px 2px, rgba(148, 211, 193, 0.05) 1px, transparent 0);
+  background-size: 40px 40px;
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, #c8ae6d 0%, #a28a47 50%, #c8ae6d 100%);
+}
+
+.gold-gradient-btn {
+  background: linear-gradient(135deg, #c6a34f 0%, #a68436 100%);
+}
+
+.metallic-border {
+  border: 1px solid transparent;
+  background-image: linear-gradient(#00322b, #00322b), linear-gradient(135deg, #c6a34f, #574500);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.gold-text-glow {
+  text-shadow: 0 0 12px rgba(198, 163, 79, 0.4);
+}
+
+.medallion-glow {
+  box-shadow: 0 0 50px rgba(197, 160, 89, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.bg-pattern-dark {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l5 15 15 5-15 5-5 15-5-15-15-5 15-5z' fill='%23c5a059' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+.gold-rimmed {
+  border: 1px solid transparent;
+  background-image: linear-gradient(#fcfaf2, #fcfaf2), linear-gradient(to bottom right, #D4AF37, #FFD700, #B8860B);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.geometric-bg-reader {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l15 30-15 30-15-30z' fill='%23D4AF37' fill-opacity='0.03'/%3E%3C/svg%3E");
+}
+
+.royal-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l2.5 12.5L45 15l-12.5 2.5L30 30l-2.5-12.5L15 15l12.5-2.5z' fill='%23e9c349' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+.cream-card {
+  background-color: #f9f6f0;
+  border: 1px solid rgba(183, 151, 87, 0.3);
+  box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(to right, #ffe088, #e9c349, #cda72f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ayah-medallion {
+  background: radial-gradient(circle at center, #ffe088 0%, #e9c349 70%, #af8d11 100%);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255,255,255,0.4);
+}
+
+.royal-bg {
+  background-color: #0a2e28;
+  background-image: radial-gradient(circle at 2px 2px, rgba(233, 195, 73, 0.08) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
 .geo-dot {
   background-image: radial-gradient(circle at 2px 2px, rgba(201, 168, 76, 0.06) 1px, transparent 0);
   background-size: 24px 24px;
 }
 
+.subtle-pattern {
+  background-image: radial-gradient(#af8d11 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+  opacity: 0.05;
+}
+
+.brushed-gold {
+  background: linear-gradient(145deg, #e9c349 0%, #cda72f 100%);
+}
+
 .streak-glow {
   box-shadow: 0 0 22px rgba(117, 91, 0, 0.28), inset 0 0 14px rgba(230, 195, 100, 0.45);
+}
+
+.emerald-pattern {
+  background-color: #022c22;
+  background-image: radial-gradient(circle at 2px 2px, rgba(148, 211, 193, 0.05) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+.gold-rim-cream {
+  border: 1px solid transparent;
+  background-image: linear-gradient(#F5F2EA, #F5F2EA), 
+                    linear-gradient(135deg, #e9c349 0%, #ffe088 50%, #af8d11 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+}
+
+.custom-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 2px;
+  background: #E5E2DB;
+  border-radius: 2px;
+  outline: none;
+}
+
+.custom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #e9c349;
+  border: 2px solid #F5F2EA;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(233, 195, 73, 0.6);
 }
 
 .soft-glass {

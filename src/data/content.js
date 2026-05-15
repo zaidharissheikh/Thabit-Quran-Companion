@@ -70,3 +70,12 @@ export const EMPTY_JOURNAL_MARKUP = {
   title: 'No reflections yet.',
   subtitle: 'Post one from Momentum.',
 }
+
+export const SURAHS = [
+  { num: 1, name: 'Al-Fatihah', ar: 'الفاتحة', meaning: 'The Opening', verses: 7, type: 'Makki' },
+  { num: 2, name: 'Al-Baqarah', ar: 'البقرة', meaning: 'The Cow', verses: 286, type: 'Madni' },
+  { num: 36, name: 'Ya-Sin', ar: 'يس', meaning: 'Ya Sin', verses: 83, type: 'Makki' },
+  { num: 67, name: 'Al-Mulk', ar: 'الملك', meaning: 'The Sovereignty', verses: 30, type: 'Makki' },
+  { num: 18, name: 'Al-Kahf', ar: 'الكهف', meaning: 'The Cave', verses: 110, type: 'Makki' },
+  { num: 55, name: 'Ar-Rahman', ar: 'الرحمن', meaning: 'The Beneficent', verses: 78, type: 'Madni' },
+]

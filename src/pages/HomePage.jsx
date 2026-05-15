@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
-import HeartRating from '../components/HeartRating'
 import { VERSES } from '../data/content'
 import LoadingDots from '../components/LoadingDots'
 
@@ -26,88 +25,117 @@ export default function HomePage({
   const isTodayVerseBookmarked = state.bookmarks.some((bookmark) => bookmark.ref === verse.ref)
 
   return (
-    <div className="geo-dot min-h-screen bg-[#0D2B1F]">
-      <header className="fixed top-0 z-50 flex h-20 w-full max-w-[430px] items-center justify-between bg-gradient-to-b from-[#0D2B1F] via-[#0D2B1F]/95 to-transparent px-6">
-        <div className="flex items-center">
-          <span className="font-serif text-2xl font-bold text-[#C9A84C]">ثابت</span>
+    <div className="font-inter noscroll min-h-screen bg-[#062c21] text-[#f3e5ab]">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#062c21]/90 backdrop-blur-xl px-6 py-5 flex justify-between items-center border-b border-[#c5a059]/20 max-w-[430px] mx-auto">
+        <div className="flex items-center gap-2">
+          <span className="text-3xl font-arabic text-[#c5a059]">ثابت</span>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onShowReturn}
-            className="material-symbols-outlined text-[#C9A84C]/60 transition hover:text-[#C9A84C]"
-          >
-            nights_stay
-          </button>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#C9A84C]/30 bg-[#1A4A33] text-sm font-bold text-[#C9A84C]">
+        <div className="flex items-center gap-4">
+          {/* <button type="button" onClick={onShowReturn} className="p-2 text-[#e9d19b] opacity-80">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+            </svg>
+          </button> */}
+          <Link to="/settings" className="w-10 h-10 rounded-full border border-[#c5a059] flex items-center justify-center text-[#c5a059] font-semibold bg-[#0a3d2e] shadow-inner hover:opacity-80 transition-opacity">
             {state.name[0].toUpperCase()}
-          </div>
+          </Link>
         </div>
       </header>
 
-      <main className="noscroll mx-auto max-h-[100dvh] max-w-lg space-y-5 overflow-y-auto px-5 pb-32 pt-24">
-        <p className="afu text-xs uppercase tracking-widest text-[#7FA890]">
-          {greeting}, {state.name} - السلام عليكم
-        </p>
+      <main className="pt-28 pb-32 px-6 bg-pattern-dark min-h-screen max-w-[430px] mx-auto">
+        {/* Greeting */}
+        <section className="afu mb-8">
+          <h2 className="text-[10px] uppercase tracking-[0.3em] text-[#c5a059]/70 font-bold mb-1">
+            Essence of Mindfulness
+          </h2>
+          <h1 className="font-playfair text-2xl text-[#e9d19b]">
+            {greeting}, {state.name}{' '}
+            <span className="font-arabic text-lg opacity-60 ml-1">السلام عليكم</span>
+          </h1>
+        </section>
 
-        <section className="afu flex flex-col items-center py-4">
-          <div className="group relative cursor-pointer" onClick={onMarkRead}>
-            <div className="streak-glow flex h-32 w-32 flex-col items-center justify-center rounded-full border-4 border-[#C9A84C]/50 bg-gradient-to-br from-[#ffe08f] to-[#755b00] transition-all duration-500 group-hover:scale-105">
-              <span className="material-symbols-outlined fill-icon mt-1 text-4xl text-[#241a00]">local_fire_department</span>
-              <span className="leading-none text-3xl font-bold text-[#241a00]">{state.streak}</span>
+        {/* Streak Medallion */}
+        <section className="afu2 flex flex-col items-center justify-center mb-12 py-4">
+          <div className="relative flex flex-col items-center cursor-pointer" onClick={onMarkRead}>
+            {/* Medallion Frame */}
+            <div className="relative w-52 h-52 flex items-center justify-center">
+              {/* Outer Decorative Ring */}
+              <div className="absolute inset-0 rounded-full border border-[#c5a059]/30 animate-pulse" />
+              <div className="absolute inset-4 rounded-full border-2 border-[#c5a059]/50" />
+              {/* Main Medallion */}
+              <div className="w-40 h-40 rounded-full gold-gradient flex flex-col items-center justify-center medallion-glow border-2 border-[#e9d19b]/30 relative overflow-hidden">
+                <svg className="h-8 w-8 text-[#062c21] mb-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path clipRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-1.309-1.344-2.158-.188-.44-.36-.893-.541-1.339z" fillRule="evenodd" />
+                </svg>
+                <span className="text-6xl font-playfair font-extrabold text-[#062c21] leading-none">{state.streak}</span>
+              </div>
+              {/* Medallion Label */}
+              <div className="absolute -bottom-2 bg-[#062c21] border border-[#c5a059] px-6 py-1.5 rounded-sm shadow-xl">
+                <span className="text-[#c5a059] font-bold text-[10px] tracking-[0.25em] uppercase">Day Streak</span>
+              </div>
             </div>
-            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#C9A84C]/20 bg-white/10 px-4 py-1 backdrop-blur-md">
-              <span className="text-xs uppercase tracking-widest text-[#C9A84C]">Day Streak</span>
+
+            {/* Progress Bar */}
+            <div className="mt-14 w-full max-w-xs text-center">
+              <div className="flex justify-between text-[10px] uppercase tracking-wider text-[#c5a059]/60 mb-2 font-bold">
+                <span>Daily Devotion</span>
+                <span className="text-[#e9d19b]">{state.versesReadToday} / {state.goal} Verses</span>
+              </div>
+              <div className="w-full h-1.5 bg-[#0a3d2e] rounded-full overflow-hidden border border-[#c5a059]/10">
+                <div
+                  className="h-full gold-gradient shadow-[0_0_10px_rgba(197,160,89,0.4)] transition-all duration-700"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="text-sm text-[#e9d19b]/80 mt-5 italic font-playfair">
+                {state.streak > 0
+                  ? `MashaAllah — ${state.streak} days consistent 🌿`
+                  : '"Consistency is the key to spiritual growth."'}
+              </p>
             </div>
-          </div>
-          <div className="mt-10 w-full px-2">
-            <div className="mb-2 flex justify-between text-[10px] text-[#7FA890]">
-              <span>Today's goal</span>
-              <span>
-                {state.versesReadToday} / {state.goal} verses
-              </span>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#8A6E2F] to-[#C9A84C] transition-all duration-700"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <p className="mt-2 text-center text-[11px] text-[#7FA890]">
-              {state.streak > 0 ? `MashaAllah - ${state.streak} days consistent! 🌿` : "Tap the flame to mark today's reading ✨"}
-            </p>
           </div>
         </section>
 
-        <section className="afu2 relative">
-          <div className="absolute inset-0 scale-[1.02] rotate-1 rounded-[1.5rem] bg-[#C9A84C]/5" />
-          <div className="islamic-pattern soft-glass relative overflow-hidden rounded-[1.5rem] border border-[#C9A84C]/20 p-7 shadow-xl">
-            <div className="absolute right-0 top-0 h-28 w-28 opacity-10">
-              <svg className="h-full w-full fill-[#755b00]" viewBox="0 0 100 100">
-                <path d="M50 0L61 39L100 50L61 61L50 100L39 61L0 50L39 39Z" />
-              </svg>
-            </div>
-            <div className="flex flex-col items-center space-y-5 text-center">
-              <div>
-                <span className="text-[10px] uppercase tracking-[.25em] text-secondary">Today's Verse</span>
-                <h2 className="mt-1 font-serif text-xl font-bold text-primary">{verse.ref}</h2>
-              </div>
-              <p className="font-arabic text-3xl leading-[2] text-on-surface" dir="rtl">
+        {/* Today's Verse */}
+        <section className="afu3 mb-8">
+          <div className="bg-[#fdfaf3] rounded-3xl p-10 text-[#062c21] relative overflow-hidden shadow-2xl border-b-4 border-[#c5a059]/30">
+            <div className="relative z-10 text-center">
+              <span className="text-[9px] uppercase tracking-[0.4em] text-[#8e6e33] font-bold mb-4 block">
+                The Living Word
+              </span>
+              <h3 className="font-playfair text-2xl font-bold text-[#062c21] mb-8 italic">{verse.ref}</h3>
+              <div className="font-arabic text-4xl mb-8 leading-loose text-center text-[#062c21]" dir="rtl">
                 {verse.ar}
+              </div>
+              <div className="w-12 h-0.5 bg-[#c5a059]/30 mx-auto mb-8" />
+              <p className="italic text-lg text-[#062c21]/80 mb-10 leading-relaxed font-playfair px-2">
+                {verse.en}
               </p>
-              <p className="font-serif text-base italic leading-relaxed text-on-surface-variant/80">{verse.en}</p>
-              <div className="flex gap-6 pt-2">
+
+              {/* Action Buttons */}
+              <div className="flex justify-center gap-10">
                 <button
                   type="button"
                   onClick={() => onBookmarkTodayVerse(verse)}
-                  className="flex items-center gap-1.5 text-sm text-secondary transition hover:text-primary"
+                  className="flex flex-col items-center gap-2 group"
                 >
-                  <span className={`material-symbols-outlined text-lg ${isTodayVerseBookmarked ? 'fill-icon' : ''}`}>bookmark</span>
-                  {isTodayVerseBookmarked ? 'Saved' : 'Save'}
+                  <div className="p-2 border border-[#c5a059]/20 rounded-full group-hover:bg-[#c5a059]/10 transition-colors">
+                    <svg className={`h-5 w-5 text-[#8e6e33] ${isTodayVerseBookmarked ? 'fill-[#8e6e33]' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                    </svg>
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-[#8e6e33]">
+                    {isTodayVerseBookmarked ? 'Saved' : 'Save'}
+                  </span>
                 </button>
-                <Link to="/reader" className="flex items-center gap-1.5 text-sm text-secondary transition hover:text-primary">
-                  <span className="material-symbols-outlined text-lg">menu_book</span>
-                  Read
+                <Link to="/reader" className="flex flex-col items-center gap-2 group">
+                  <div className="p-2 border border-[#c5a059]/20 rounded-full group-hover:bg-[#c5a059]/10 transition-colors">
+                    <svg className="h-5 w-5 text-[#8e6e33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                    </svg>
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-[#8e6e33]">Read</span>
                 </Link>
                 <button
                   type="button"
@@ -117,17 +145,22 @@ export default function HomePage({
                       prompt: `The user just read: "${verse.ar}" meaning ${verse.en} from ${verse.surah}. Write a 2-3 sentence warm personal reflection connecting this to modern daily life.`,
                     })
                   }
-                  className="flex items-center gap-1.5 text-sm text-secondary transition hover:text-primary"
+                  className="flex flex-col items-center gap-2 group"
                 >
-                  <span className="material-symbols-outlined text-lg">auto_awesome</span>
-                  Reflect
+                  <div className="p-2 border border-[#c5a059]/20 rounded-full group-hover:bg-[#c5a059]/10 transition-colors">
+                    <svg className="h-5 w-5 text-[#8e6e33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                    </svg>
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-[#8e6e33]">Reflect</span>
                 </button>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="afu3">
+        {/* Reminder / AI Nudge */}
+        <section className="afu4 mb-8">
           <button
             type="button"
             onClick={() =>
@@ -136,47 +169,25 @@ export default function HomePage({
                 prompt: `The user just read: "${verse.ar}" meaning ${verse.en} from ${verse.surah}. Write a 2-3 sentence warm personal reflection connecting this to modern daily life.`,
               })
             }
-            className="nudge-pulse flex w-full items-start gap-4 rounded-2xl border border-[#C9A84C]/10 bg-white/5 p-5 text-left transition-all duration-500 hover:bg-white/8"
+            className="w-full bg-[#0a3d2e]/40 border border-[#c5a059]/20 rounded-2xl p-6 flex items-start gap-4 backdrop-blur-sm text-left"
           >
-            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary-container shadow-md">
-              <span className="material-symbols-outlined fill-icon text-on-primary-container">auto_awesome</span>
+            <div className="gold-gradient rounded-full p-2.5 shadow-lg ring-4 ring-[#0a3d2e] flex-shrink-0">
+              <svg className="h-5 w-5 text-[#062c21]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+              </svg>
             </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="mb-1 text-sm font-bold tracking-wide text-[#ffe08f]">Today's Reminder</h3>
-              <p className="text-sm leading-relaxed text-[#FFF9EF]/70">{nudge || <LoadingDots />}</p>
-            </div>
-            <span className="material-symbols-outlined self-center text-[#C9A84C]/50">chevron_right</span>
-          </button>
-        </section>
-
-        <section className="afu4 grid grid-cols-2 gap-3">
-          <Link
-            to="/momentum"
-            className="flex h-36 cursor-pointer flex-col justify-between rounded-3xl border border-outline-variant/10 bg-surface-container-low p-5 transition-all duration-300 hover:bg-surface-container-high"
-          >
-            <span className="material-symbols-outlined text-secondary">query_stats</span>
-            <div>
-              <p className="text-sm font-bold text-on-surface">Momentum</p>
-              <p className="mt-0.5 text-xs text-on-surface-variant">{state.sessions.length} active habits</p>
-            </div>
-          </Link>
-          <Link
-            to="/journal"
-            className="flex h-36 cursor-pointer flex-col justify-between rounded-3xl border border-primary/20 bg-primary/10 p-5 transition-all duration-300 hover:bg-primary/15"
-          >
-            <span className="material-symbols-outlined text-[#C9A84C]">auto_stories</span>
-            <div>
-              <p className="text-sm font-bold text-[#C9A84C]">Journal</p>
-              <p className="mt-0.5 text-xs text-[#C9A84C]/60">
-                {state.journals.length} reflection{state.journals.length === 1 ? '' : 's'}
+            <div className="flex-1 min-w-0">
+              <h4 className="font-playfair text-lg text-[#e9d19b] mb-1 italic">Royal Counsel</h4>
+              <p className="text-sm text-[#e9d19b]/70 leading-relaxed font-light">
+                {nudge || <LoadingDots />}
               </p>
             </div>
-          </Link>
-        </section>
-
-        <section className="afu4 space-y-5 rounded-3xl bg-surface-container-low p-6 text-center">
-          <h3 className="text-sm font-medium tracking-wide text-on-surface-variant">How does your heart feel now?</h3>
-          <HeartRating value={state.heartRating} onChange={onRateHeart} />
+            <div className="self-center p-2 text-[#c5a059]">
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+              </svg>
+            </div>
+          </button>
         </section>
       </main>
 

@@ -1,119 +1,122 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
-import { FATIHA } from '../data/content'
+import { SURAHS } from '../data/content'
+
+const FILTERS = ['All', 'Favorites', 'Makki', 'Madni']
 
 export default function ReaderPage({ state, onBookmarkVerse, onReflectVerse, onPlayVerse }) {
-  const [audioOpen, setAudioOpen] = useState(false)
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
+  const [activeFilter, setActiveFilter] = useState('All')
+
+  const bookmarkedNums = new Set(state.bookmarks.filter((b) => b.num).map((b) => b.num))
+
+  const filtered = SURAHS.filter((s) => {
+    if (search && !s.name.toLowerCase().includes(search.toLowerCase()) && !s.ar.includes(search)) return false
+    if (activeFilter === 'Favorites') return bookmarkedNums.has(s.num)
+    if (activeFilter === 'Makki') return s.type === 'Makki'
+    if (activeFilter === 'Madni') return s.type === 'Madni'
+    return true
+  })
 
   return (
-    <div className="min-h-screen bg-surface pattern-bg">
-      <header className="fixed top-0 z-50 flex h-20 w-full max-w-[430px] items-center justify-between border-b border-outline-variant/20 bg-[#FFF9EF]/92 px-6 backdrop-blur-md">
-        <Link to="/" className="material-symbols-outlined text-primary transition hover:opacity-70">
-          arrow_back
-        </Link>
-        <h1 className="font-serif text-xl font-bold text-primary">ثابت</h1>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setAudioOpen((open) => !open)}
-            className="material-symbols-outlined text-primary transition hover:opacity-70"
-          >
-            headphones
+    <div className="min-h-screen bg-[#002B24] text-[#e5e2db] font-manrope geometric-bg-reader">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#002B24] border-b border-[#D4AF37]/30 max-w-[430px] mx-auto">
+        <div className="flex justify-between items-center w-full px-6 py-4">
+          <button type="button" className="material-symbols-outlined text-[#FFD700] hover:bg-[#003D33] transition-colors p-2 rounded-full active:scale-95">
+            menu
           </button>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-outline-variant/20 bg-surface-container-high text-sm font-bold text-primary">
-            {state.name[0].toUpperCase()}
-          </div>
+          <button type="button" className="material-symbols-outlined text-[#FFD700] hover:bg-[#003D33] transition-colors p-2 rounded-full active:scale-95">
+            search
+          </button>
         </div>
       </header>
 
-      <main className="noscroll mx-auto max-h-[100dvh] max-w-2xl overflow-y-auto px-6 pb-40 pt-24">
-        <section className="mb-16 text-center">
-          <span className="mb-2 block text-[10px] font-medium uppercase tracking-[.2em] text-secondary">The Opening</span>
-          <h2 className="font-serif text-5xl font-bold tracking-tight text-primary">Al-Fatiha</h2>
-          <div className="mt-6 flex items-center justify-center gap-6">
-            <div className="h-px w-12 bg-outline-variant/30" />
-            <span className="material-symbols-outlined text-4xl text-primary/30">settings_input_component</span>
-            <div className="h-px w-12 bg-outline-variant/30" />
+      <main className="pt-24 pb-32 max-w-[430px] mx-auto px-4">
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="relative">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#D4AF37]">search</span>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-[#003D33]/40 border-b-2 border-[#D4AF37]/50 focus:border-[#FFD700] text-[#E5E2DB] pl-12 pr-4 py-4 font-headline placeholder-[#A0A0A0]/60 transition-all outline-none rounded-xl"
+              placeholder="Search Surah, Juz, or Ayah..."
+            />
           </div>
-        </section>
+        </div>
 
-        <div className="space-y-16">
-          {FATIHA.map((verse) => {
-            const bookmarked = state.bookmarks.some((bookmark) => bookmark.num === verse.num)
+        {/* Filter Chips */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-6 noscroll">
+          {FILTERS.map((filter) => (
+            <button
+              key={filter}
+              type="button"
+              onClick={() => setActiveFilter(filter)}
+              className={`px-5 py-2 rounded-full font-manrope text-sm font-semibold tracking-[0.05em] transition-colors whitespace-nowrap ${activeFilter === filter
+                ? 'bg-[#FFD700] text-[#062c21] shadow-lg shadow-black/20'
+                : 'border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10'
+                }`}
+            >
+              {filter}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="flex items-center gap-2 px-5 py-2 rounded-full border border-[#D4AF37]/40 text-[#D4AF37] font-manrope text-sm font-semibold tracking-[0.05em] hover:bg-[#D4AF37]/10 transition-colors whitespace-nowrap"
+          >
+            Topics
+            <span className="material-symbols-outlined text-sm">expand_more</span>
+          </button>
+        </div>
 
+        {/* Surah Cards */}
+        <div className="grid grid-cols-1 gap-4">
+          {filtered.map((surah) => {
+            const isBookmarked = bookmarkedNums.has(surah.num)
             return (
-              <article key={verse.num} className="group flex flex-col items-center text-center">
-                <div className="relative mb-6 w-full border-b border-outline-variant/15 pb-8">
-                  <div className="absolute -right-1 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-primary/20 bg-surface-container-lowest text-xs font-medium text-primary shadow-sm">
-                    {verse.num}
+              <div
+                key={surah.num}
+                onClick={() => navigate(`/surah/${surah.num}`)}
+                className="gold-rimmed rounded-xl p-5 flex items-center justify-between group hover:shadow-xl transition-all cursor-pointer"
+              >
+                <div className="flex items-center gap-4">
+                  {/* Number Diamond */}
+                  <div className="relative flex items-center justify-center w-12 h-12">
+                    <div className="absolute inset-0 bg-[#D4AF37] opacity-10 rotate-45 rounded-sm" />
+                    <span className="font-headline font-bold text-[#062c21] text-lg z-10">{surah.num}</span>
                   </div>
-                  <p className="arabic-text mb-5 pr-10 text-4xl leading-relaxed text-on-surface" dir="rtl">
-                    {verse.ar}
-                  </p>
-                  <p className="mb-5 text-base font-light italic leading-relaxed text-on-surface-variant/80">{verse.en}</p>
-                  <div className="flex justify-center gap-5 transition-all duration-500 md:opacity-0 md:group-hover:opacity-100">
-                    <button
-                      type="button"
-                      onClick={() => onBookmarkVerse(verse)}
-                      className="flex items-center gap-1.5 text-sm text-primary/50 transition hover:text-primary"
-                    >
-                      <span className={`material-symbols-outlined text-lg ${bookmarked ? 'fill-icon text-primary' : ''}`}>bookmark</span>
-                      {bookmarked ? 'Saved' : 'Bookmark'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onReflectVerse({
-                          ref: `Al-Fatiha verse ${verse.num}`,
-                          prompt: `User read: "${verse.ar}" meaning "${verse.en}". Write a warm 2-sentence reflection to apply today.`,
-                        })
-                      }
-                      className="flex items-center gap-1.5 text-sm text-primary/50 transition hover:text-primary"
-                    >
-                      <span className="material-symbols-outlined text-lg">auto_awesome</span>
-                      Reflect
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAudioOpen(true)
-                        onPlayVerse(verse.num)
-                      }}
-                      className="flex items-center gap-1.5 text-sm text-primary/50 transition hover:text-primary"
-                    >
-                      <span className="material-symbols-outlined text-lg">play_circle</span>
-                      Listen
-                    </button>
+                  <div>
+                    <h3 className="font-headline text-[#062c21] leading-tight text-lg font-semibold">{surah.name}</h3>
+                    <p className="text-[#0a3d2e]/60 font-manrope text-xs uppercase tracking-widest mt-0.5 font-semibold">
+                      {surah.meaning} • {surah.verses} Verses
+                    </p>
                   </div>
                 </div>
-              </article>
+                <div className="flex flex-col items-end gap-2">
+                  <span className="font-arabic text-[#062c21] text-2xl" dir="rtl">{surah.ar}</span>
+                  <span
+                    className={`material-symbols-outlined text-xl ${isBookmarked ? 'fill-icon text-[#D4AF37]' : 'text-[#0a3d2e]/30'
+                      }`}
+                  >
+                    bookmark_heart
+                  </span>
+                </div>
+              </div>
             )
           })}
         </div>
-      </main>
 
-      <div className={`${audioOpen ? '' : 'hidden'} fixed bottom-[72px] left-0 right-0 z-40 mx-auto max-w-[430px] px-4`}>
-        <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-inverse-surface/95 p-4 shadow-2xl backdrop-blur-xl">
-          <button
-            type="button"
-            onClick={onPlayVerse}
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary-fixed text-on-primary-fixed"
-          >
-            <span className="material-symbols-outlined fill-icon text-lg">{state.audioPlaying ? 'pause' : 'play_arrow'}</span>
-          </button>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-inverse-on-surface">Mishary Rashid Alafasy</p>
-            <p className="text-[10px] text-inverse-on-surface/50">Al-Fatiha</p>
+        {/* Decorative Divider */}
+        <div className="mt-12 flex justify-center">
+          <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-[#D4AF37]/40 to-transparent relative">
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rotate-45 border border-[#D4AF37] bg-[#002B24]" />
           </div>
-          <div className="h-1 flex-1 rounded-full bg-white/20">
-            <div className="h-full rounded-full bg-primary-fixed-dim transition-all" style={{ width: `${state.audioProgress}%` }} />
-          </div>
-          <button type="button" onClick={() => setAudioOpen(false)} className="material-symbols-outlined text-sm text-white/40">
-            close
-          </button>
         </div>
-      </div>
+      </main>
 
       <BottomNav active="/reader" />
     </div>
