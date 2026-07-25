@@ -7,9 +7,9 @@ export default function SettingsPage({ state, onLogout }) {
   const userEmail = `${state.name.toLowerCase().replace(/\s+/g, '.')}@email.com`
 
   return (
-    <div className="bg-emerald-950 font-manrope text-[#e5e2db] selection:bg-[#e9c349] selection:text-[#3c2f00] min-h-screen">
+    <div className="bg-emerald-950 font-manrope text-[#e5e2db] selection:bg-[#e9c349] selection:text-[#3c2f00] min-h-screen md:pl-[256px] overflow-x-hidden">
       {/* TopAppBar */}
-      <header className="fixed top-0 w-full z-50 flex items-center px-6 h-16 bg-emerald-950 border-b border-amber-500/30 max-w-[430px] mx-auto">
+      <header className="fixed md:hidden top-0 w-full z-50 flex items-center px-6 h-16 bg-emerald-950 border-b border-amber-500/30 max-w-[430px] mx-auto">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center space-x-4">
             <button 
@@ -24,7 +24,7 @@ export default function SettingsPage({ state, onLogout }) {
         </div>
       </header>
 
-      <main className="pt-24 pb-28 px-6 max-w-[430px] mx-auto space-y-8 relative">
+      <main className="pt-24 pb-28 px-6 max-w-[430px] mx-auto space-y-8 relative md:pt-16 md:px-12 md:max-w-3xl md:mx-auto">
         <div className="fixed inset-0 subtle-pattern pointer-events-none"></div>
         
         {/* Profile Card (Modern/Muted Approach) */}

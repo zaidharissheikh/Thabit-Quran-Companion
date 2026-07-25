@@ -8,9 +8,9 @@ export default function GoalsPage({ state, onUpdateGoal }) {
   const [quranGoal, setQuranGoal] = useState(state.goal || 10)
 
   return (
-    <div className="bg-[#002b24] text-[#e5e2db] font-manrope selection:bg-[#ebc349] selection:text-[#3d2f00] min-h-screen pb-32">
+    <div className="bg-[#002b24] text-[#e5e2db] font-manrope selection:bg-[#ebc349] selection:text-[#3d2f00] min-h-screen pb-32 md:pl-[256px] overflow-x-hidden">
       {/* Top AppBar Component */}
-      <header className="fixed top-0 z-50 w-full bg-[#002b24] border-b border-white/10 max-w-[430px] mx-auto left-0 right-0">
+      <header className="fixed md:hidden top-0 z-50 w-full bg-[#002b24] border-b border-white/10 max-w-[430px] mx-auto left-0 right-0">
         <div className="relative flex items-center justify-center w-full px-6 py-2 h-14">
           <button
             onClick={() => navigate(-1)}
@@ -22,7 +22,7 @@ export default function GoalsPage({ state, onUpdateGoal }) {
         </div>
       </header>
 
-      <main className="pt-24 px-6 max-w-[430px] mx-auto space-y-8">
+      <main className="pt-24 px-6 max-w-[430px] mx-auto space-y-8 md:pt-16 md:px-12 md:max-w-2xl md:mx-auto">
 
         {/* Quran Goal Card */}
         <div className="bg-[#fdfaf3] text-[#131410] rounded-xl p-8 flex flex-col justify-between min-h-[340px] shadow-2xl relative overflow-hidden">

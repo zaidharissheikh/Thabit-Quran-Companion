@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import DesktopSidebar from './components/DesktopSidebar'
 import AiReflectionSheet from './components/AiReflectionSheet'
 import Toast from './components/Toast'
 import { VERSES } from './data/content'
@@ -15,7 +16,7 @@ import DisplayPage from './pages/DisplayPage'
 import SignupPage from './pages/SignupPage'
 import SurahPage from './pages/SurahPage'
 import ReturnPage from './pages/ReturnPage'
-import { askClaude } from './utils/ai'
+import { askGemini } from './utils/ai'
 
 const STORAGE_KEY = 'thabit_v3'
 
@@ -24,6 +25,7 @@ const initialState = {
   goal: 10,
   streak: 3,
   versesReadToday: 4,
+  lastReadDate: new Date().toISOString().split('T')[0],
   heartRating: 3,
   ramadanVerses: 18,
   sessions: [
@@ -39,6 +41,8 @@ const initialState = {
   journals: [],
   audioPlaying: false,
   audioProgress: 0,
+  dailyNudge: { date: null, text: '' },
+  dailyReflection: { date: null, text: '' },
 }
 
 function getPersistedState() {
@@ -114,47 +118,56 @@ function App() {
     toastTimer.current = window.setTimeout(() => setToast(''), 2600)
   }, [])
 
-  const generateNudge = useCallback(async () => {
-    const text = await askClaude(
-      `You are Thabit, a warm Islamic companion. User ${state.name} has a ${state.streak}-day Quran reading streak. Write a short heartfelt 2-sentence daily reminder. Warm, not guilt-tripping. No greetings.`,
+  const generateNudge = useCallback(async (force = false) => {
+    const today = new Date().toISOString().split('T')[0]
+    if (!force && state.dailyNudge?.date === today && state.dailyNudge?.text) {
+      setNudge(state.dailyNudge.text)
+      return
+    }
+    const text = await askGemini(
+      `You are Thabit, a warm Islamic companion. User ${state.name} has a ${state.streak}-day Quran reading streak. Write a short heartfelt 1 to 1.5-sentence daily reminder. Warm, not guilt-tripping. No greetings.`,
       state,
       140,
     )
     setNudge(text)
-  }, [state])
+    setState(prev => ({ ...prev, dailyNudge: { date: today, text } }))
+  }, [state.name, state.streak, state.dailyNudge?.date, state.dailyNudge?.text])
 
-  const generateReflectionQuestion = useCallback(async () => {
+  const generateReflectionQuestion = useCallback(async (force = false) => {
+    const today = new Date().toISOString().split('T')[0]
+    if (!force && state.dailyReflection?.date === today && state.dailyReflection?.text) {
+      setReflectionQuestion(state.dailyReflection.text)
+      return
+    }
     const total = state.sessions.reduce((sum, session) => sum + session.verses, 0)
     const avgHeart = (
       state.sessions.reduce((sum, session) => sum + (session.heart || 3), 0) / Math.max(state.sessions.length, 1)
     ).toFixed(1)
-    const question = await askClaude(
+    const question = await askGemini(
       `A Muslim tracked spiritual state: avg heart ${avgHeart}/5, total verses ${total}. Write one gentle reflection question (under 2 sentences) to deepen Quran connection. Meaningful, spiritual.`,
       state,
       100,
     )
     setReflectionQuestion(question)
-  }, [state])
+    setState(prev => ({ ...prev, dailyReflection: { date: today, text: question } }))
+  }, [state.sessions, state.dailyReflection?.date, state.dailyReflection?.text])
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      generateNudge()
-      generateReflectionQuestion()
-    }, 0)
-
-    return () => clearTimeout(timer)
-  }, [generateNudge, generateReflectionQuestion])
+    generateNudge()
+    generateReflectionQuestion()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function openReflection({ ref, prompt }) {
     setSheet({ open: true, ref, body: '', loading: true })
-    const body = await askClaude(prompt, state, 200)
+    const body = await askGemini(prompt, state, 200)
     setSheet({ open: true, ref, body, loading: false })
   }
 
   async function showReturnPage() {
     navigate('/return')
     setReturnMessage('')
-    const text = await askClaude(
+    const text = await askGemini(
       `Write a 2-sentence compassionate welcome-back message for a Muslim named ${state.name} who missed their Quran streak. Reference Allah's mercy. Warm, hopeful, non-guilt-tripping.`,
       state,
       150,
@@ -189,10 +202,29 @@ function App() {
 
   function markRead() {
     setState((prev) => {
-      const addedVerses = 5
-      const newVersesReadToday = prev.versesReadToday + addedVerses
-      const justReachedGoal = prev.versesReadToday < prev.goal && newVersesReadToday >= prev.goal
-      const streak = justReachedGoal ? prev.streak + 1 : prev.streak
+      const today = new Date().toISOString().split('T')[0]
+      let currentVersesToday = prev.versesReadToday
+      let currentStreak = prev.streak
+      
+      // Reset if it's a new day
+      if (prev.lastReadDate && prev.lastReadDate !== today) {
+        currentVersesToday = 0
+        
+        const yesterday = new Date()
+        yesterday.setDate(yesterday.getDate() - 1)
+        const yesterdayStr = yesterday.toISOString().split('T')[0]
+        
+        if (prev.lastReadDate !== yesterdayStr) {
+          currentStreak = 0 // Streak broken
+        }
+      }
+
+      // Add enough to reach the goal, or just 1 if goal is already met
+      const addedVerses = currentVersesToday < prev.goal ? (prev.goal - currentVersesToday) : 1
+      const newVersesReadToday = currentVersesToday + addedVerses
+      
+      const justReachedGoal = currentVersesToday < prev.goal && newVersesReadToday >= prev.goal
+      const streak = justReachedGoal ? currentStreak + 1 : currentStreak
 
       if (justReachedGoal) {
         showToast('🔥 MashaAllah! Streak updated!')
@@ -202,13 +234,27 @@ function App() {
 
       const newSessions = [...prev.sessions]
       if (newSessions.length > 0) {
-        newSessions[newSessions.length - 1] = {
-          ...newSessions[newSessions.length - 1],
-          verses: newSessions[newSessions.length - 1].verses + addedVerses
+        const dateLabel = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        const lastSession = newSessions[newSessions.length - 1]
+        
+        if (lastSession.date === dateLabel) {
+          newSessions[newSessions.length - 1] = {
+            ...lastSession,
+            verses: lastSession.verses + addedVerses
+          }
+        } else {
+          newSessions.push({ date: dateLabel, verses: addedVerses, heart: prev.heartRating })
+          if (newSessions.length > 14) newSessions.shift() // Keep history reasonable
         }
       }
 
-      return { ...prev, versesReadToday: newVersesReadToday, streak, sessions: newSessions }
+      return { 
+        ...prev, 
+        versesReadToday: newVersesReadToday, 
+        streak, 
+        sessions: newSessions,
+        lastReadDate: today
+      }
     })
   }
 
@@ -308,9 +354,11 @@ function App() {
   }
 
   return (
-    <>
-      <Routes>
-        {!isLoggedIn ? (
+    <div className="flex w-full min-h-screen relative">
+      {isLoggedIn && <DesktopSidebar />}
+      <div className="flex-1 w-full relative">
+        <Routes>
+          {!isLoggedIn ? (
           <>
             <Route path="/signup" element={<SignupPage onSignup={handleLogin} />} />
             <Route path="*" element={<LoginPage onLogin={handleLogin} />} />
@@ -395,8 +443,9 @@ function App() {
         onClose={() => setSheet((prev) => ({ ...prev, open: false }))}
       />
 
-      <Toast message={toast} />
-    </>
+        <Toast message={toast} />
+      </div>
+    </div>
   )
 }
 

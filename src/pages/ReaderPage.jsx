@@ -5,7 +5,7 @@ import { SURAHS } from '../data/content'
 
 const FILTERS = ['All', 'Favorites', 'Makki', 'Madni']
 
-export default function ReaderPage({ state, onBookmarkVerse, onReflectVerse, onPlayVerse }) {
+export default function ReaderPage({ state }) {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState('All')
@@ -21,9 +21,9 @@ export default function ReaderPage({ state, onBookmarkVerse, onReflectVerse, onP
   })
 
   return (
-    <div className="min-h-screen bg-[#002B24] text-[#e5e2db] font-manrope geometric-bg-reader">
+    <div className="min-h-screen bg-[#002B24] text-[#e5e2db] font-manrope geometric-bg-reader md:pl-[256px] overflow-x-hidden">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#002B24] border-b border-[#D4AF37]/30 max-w-[430px] mx-auto">
+      <header className="fixed md:hidden top-0 left-0 right-0 z-50 bg-[#002B24] border-b border-[#D4AF37]/30 max-w-[430px] mx-auto">
         <div className="flex justify-between items-center w-full px-6 py-4">
           <button type="button" className="material-symbols-outlined text-[#FFD700] hover:bg-[#003D33] transition-colors p-2 rounded-full active:scale-95">
             menu
@@ -34,7 +34,7 @@ export default function ReaderPage({ state, onBookmarkVerse, onReflectVerse, onP
         </div>
       </header>
 
-      <main className="pt-24 pb-32 max-w-[430px] mx-auto px-4">
+      <main className="pt-24 pb-32 max-w-[430px] mx-auto px-4 md:pt-16 md:px-12 md:max-w-7xl md:mx-0">
         {/* Search Bar */}
         <div className="mb-8">
           <div className="relative">
@@ -64,17 +64,17 @@ export default function ReaderPage({ state, onBookmarkVerse, onReflectVerse, onP
               {filter}
             </button>
           ))}
-          <button
+          {/* <button
             type="button"
             className="flex items-center gap-2 px-5 py-2 rounded-full border border-[#D4AF37]/40 text-[#D4AF37] font-manrope text-sm font-semibold tracking-[0.05em] hover:bg-[#D4AF37]/10 transition-colors whitespace-nowrap"
           >
             Topics
             <span className="material-symbols-outlined text-sm">expand_more</span>
-          </button>
+          </button> */}
         </div>
 
         {/* Surah Cards */}
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filtered.map((surah) => {
             const isBookmarked = bookmarkedNums.has(surah.num)
             return (

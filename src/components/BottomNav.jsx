@@ -47,9 +47,9 @@ const NAV_ITEMS = [
   },
 ]
 
-export default function BottomNav({ active, dark = false }) {
+export default function BottomNav({ active }) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#062c21]/95 backdrop-blur-2xl border-t border-[#c5a059]/20 px-8 pb-8 pt-5 max-w-[430px] mx-auto">
+    <nav className="fixed md:hidden bottom-0 left-0 right-0 z-50 bg-[#062c21]/95 backdrop-blur-2xl border-t border-[#c5a059]/20 px-8 pb-8 pt-5 max-w-[430px] mx-auto">
       <div className="flex justify-between items-center">
         {NAV_ITEMS.map((item) => {
           const isActive = active === item.to

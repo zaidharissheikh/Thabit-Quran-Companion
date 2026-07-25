@@ -6,8 +6,8 @@ export default function DisplayPage({ theme, onUpdateTheme }) {
   const [fontSize, setFontSize] = useState(3)
 
   return (
-    <div className="emerald-pattern min-h-screen text-[#e5e2db] font-manrope selection:bg-[#e9c349]/30 pb-32">
-      <header className="fixed top-0 left-0 right-0 max-w-[430px] mx-auto z-50 h-16 flex items-center justify-between px-6 border-b" style={{ backgroundColor: 'transparent', borderColor: 'rgba(233, 195, 73, 0.15)' }}>
+    <div className="emerald-pattern min-h-screen text-[#e5e2db] font-manrope selection:bg-[#e9c349]/30 pb-32 md:pl-[256px] overflow-x-hidden">
+      <header className="fixed md:hidden top-0 left-0 right-0 max-w-[430px] mx-auto z-50 h-16 flex items-center justify-between px-6 border-b" style={{ backgroundColor: 'transparent', borderColor: 'rgba(233, 195, 73, 0.15)' }}>
         <button 
           onClick={() => navigate(-1)}
           aria-label="Go back" 
@@ -19,7 +19,7 @@ export default function DisplayPage({ theme, onUpdateTheme }) {
         <div className="w-10"></div>
       </header>
 
-      <main className="pt-24 px-6 max-w-[430px] mx-auto space-y-10">
+      <main className="pt-24 px-6 max-w-[430px] mx-auto space-y-10 md:pt-16 md:px-12 md:max-w-2xl md:mx-auto">
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[#e9c349] text-[20px]">palette</span>

@@ -1,28 +1,28 @@
-export async function askClaude(prompt, state, max = 180) {
-  const apiKey = import.meta.env.VITE_CLAUDE_API_KEY
+export async function askGemini(prompt, state, max = 180) {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
 
   if (!apiKey || apiKey.includes('YOUR_')) {
     return fallback(prompt, state)
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: max,
-        messages: [{ role: 'user', content: prompt }],
+        contents: [{
+          parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+          maxOutputTokens: max,
+        }
       }),
     })
 
     const data = await response.json()
-    return data?.content?.[0]?.text || fallback(prompt, state)
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || fallback(prompt, state)
   } catch {
     return fallback(prompt, state)
   }

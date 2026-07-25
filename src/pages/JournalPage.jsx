@@ -8,30 +8,32 @@ export default function JournalPage({ state, reflectionQuestion, onGenerateRefle
   const journals = state.journals || []
 
   return (
-    <div className="min-h-screen text-[#e5e2db] font-manrope selection:bg-amber-500/30 pb-24" style={{ backgroundColor: '#0d2119' }}>
+    <div className="min-h-screen text-[#e5e2db] font-manrope selection:bg-amber-500/30 pb-24 md:pl-[256px] overflow-x-hidden" style={{ backgroundColor: '#0d2119' }}>
       {/* TopAppBar */}
-      <header className="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-teal-950 border-b border-amber-500/20 max-w-[430px] mx-auto">
+      <header className="fixed md:hidden top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-teal-950 border-b border-amber-500/20 max-w-[430px] mx-auto">
         <h1 className="font-serif uppercase font-medium text-[#e9c349]/80 text-sm tracking-[0.2em]">Reflections</h1>
         <Link to="/settings" className="w-8 h-8 rounded-full border border-amber-400 bg-teal-900 flex items-center justify-center text-[#e9c349] font-bold hover:opacity-80 transition-opacity">
           {state.name[0].toUpperCase()}
         </Link>
       </header>
 
-      <main className="pt-24 max-w-[430px] mx-auto px-6 space-y-10">
+      <main className="pt-24 max-w-[430px] mx-auto px-6 space-y-10 md:space-y-0 md:pt-16 md:px-12 md:max-w-7xl md:mx-0 md:grid md:grid-cols-12 md:gap-12 md:items-start flex flex-col">
         {/* Header Section */}
-        <section className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 ayah-medallion flex items-center justify-center rounded-full text-[#3c2f00]">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>auto_stories</span>
+        <section className="text-center md:text-left md:col-span-12 md:flex md:items-end md:gap-6 md:mb-4">
+          <div className="flex justify-center md:justify-start mb-4 md:mb-0">
+            <div className="w-12 h-12 md:w-16 md:h-16 ayah-medallion flex items-center justify-center rounded-full text-[#3c2f00]">
+              <span className="material-symbols-outlined md:text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>auto_stories</span>
             </div>
           </div>
-          <h2 className="font-headline text-3xl text-[#e9c349] mb-2 font-semibold">Sacred Journal</h2>
-          <p className="font-manrope text-[#bfc9c4] opacity-80 text-sm">Capture your spiritual journey and personal insights.</p>
+          <div>
+            <h2 className="font-headline text-3xl md:text-5xl text-[#e9c349] mb-2 font-semibold">Sacred Journal</h2>
+            <p className="font-manrope text-[#bfc9c4] opacity-80 text-sm md:text-lg">Capture your spiritual journey and personal insights.</p>
+          </div>
         </section>
 
         {/* Weekly Reflection Prompt */}
-        <section className="mb-10">
-          <div className="rounded-2xl p-6 shadow-2xl relative overflow-hidden" style={{ backgroundColor: '#f9f7f2' }}>
+        <section className="mb-10 md:mb-0 md:col-span-5 md:sticky md:top-12">
+          <div className="rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden transition-transform duration-700 hover:scale-[1.01]" style={{ backgroundColor: '#f9f7f2' }}>
             {/* Background Pattern Detail */}
             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
               <span className="material-symbols-outlined text-8xl text-[#004d40]">menu_book</span>
@@ -78,9 +80,11 @@ export default function JournalPage({ state, reflectionQuestion, onGenerateRefle
           </div>
         </section>
 
-        {/* Past Entries Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h4 className="font-manrope font-semibold text-[#e9c349] tracking-widest uppercase text-xs">Past Reflections</h4>
+        {/* Past Entries */}
+        <div className="md:col-span-7 flex flex-col gap-6 w-full">
+          {/* Past Entries Header */}
+          <div className="flex items-center justify-between mb-6">
+            <h4 className="font-manrope font-semibold text-[#e9c349] tracking-widest uppercase text-xs md:text-sm">Past Reflections</h4>
           <div className="h-[1px] flex-grow ml-4 bg-[#e9c349]/20"></div>
         </div>
 
@@ -106,11 +110,12 @@ export default function JournalPage({ state, reflectionQuestion, onGenerateRefle
           )}
         </div>
 
-        {/* Geometric Divider Detail */}
-        <div className="my-10 flex items-center justify-center gap-4 opacity-30 pb-4">
-          <div className="h-[1px] w-12 bg-[#e9c349]"></div>
-          <span className="material-symbols-outlined text-[#e9c349] text-xs">auto_awesome</span>
-          <div className="h-[1px] w-12 bg-[#e9c349]"></div>
+          {/* Geometric Divider Detail */}
+          <div className="my-10 flex items-center justify-center gap-4 opacity-30 pb-4 md:hidden">
+            <div className="h-[1px] w-12 bg-[#e9c349]"></div>
+            <span className="material-symbols-outlined text-[#e9c349] text-xs">auto_awesome</span>
+            <div className="h-[1px] w-12 bg-[#e9c349]"></div>
+          </div>
         </div>
       </main>
 

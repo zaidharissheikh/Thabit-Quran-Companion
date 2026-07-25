@@ -1,7 +1,7 @@
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { FATIHA, SURAHS } from '../data/content'
 
-export default function SurahPage({ state, onBookmarkVerse, onReflectVerse, onPlayVerse }) {
+export default function SurahPage({ state, onBookmarkVerse, onReflectVerse }) {
   const { id } = useParams()
   const navigate = useNavigate()
   const surahNum = Number(id)
@@ -11,9 +11,9 @@ export default function SurahPage({ state, onBookmarkVerse, onReflectVerse, onPl
   const verses = surahNum === 1 ? FATIHA : []
 
   return (
-    <div className="min-h-screen bg-emerald-950 font-manrope text-[#e5e2db] royal-pattern pb-24">
+    <div className="min-h-screen bg-emerald-950 font-manrope text-[#e5e2db] royal-pattern pb-24 md:pl-[256px] overflow-x-hidden">
       {/* Header */}
-      <header className="fixed top-0 w-full z-50 flex items-center justify-between px-4 h-16 bg-emerald-950/95 max-w-[430px] mx-auto">
+      <header className="fixed md:hidden top-0 w-full z-50 flex items-center justify-between px-4 h-16 bg-emerald-950/95 max-w-[430px] mx-auto">
         <Link
           to="/reader"
           className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-emerald-900/50 transition-colors"
@@ -30,7 +30,7 @@ export default function SurahPage({ state, onBookmarkVerse, onReflectVerse, onPl
         </button>
       </header>
 
-      <main className="pt-24 px-6 max-w-[430px] mx-auto space-y-8">
+      <main className="pt-24 px-6 max-w-[430px] mx-auto space-y-8 md:pt-16 md:px-12 md:max-w-5xl md:mx-auto">
         {/* Surah Title */}
         <div className="text-center space-y-6">
           <div className="inline-block relative py-8">
