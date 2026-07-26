@@ -10,20 +10,21 @@ export default function ReaderPage({ state }) {
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState('All')
 
-  const bookmarkedNums = new Set(state.bookmarks.filter((b) => b.num).map((b) => b.num))
+  const bookmarkedSurahIds = new Set(
+    (state.bookmarks || []).map((b) => b.surahId).filter(Boolean),
+  )
 
   const filtered = SURAHS.filter((s) => {
     if (search && !s.name.toLowerCase().includes(search.toLowerCase()) && !s.ar.includes(search)) return false
-    if (activeFilter === 'Favorites') return bookmarkedNums.has(s.num)
+    if (activeFilter === 'Favorites') return bookmarkedSurahIds.has(s.num)
     if (activeFilter === 'Makki') return s.type === 'Makki'
     if (activeFilter === 'Madni') return s.type === 'Madni'
     return true
   })
 
   return (
-    <div className="min-h-screen bg-[#002B24] text-[#e5e2db] font-manrope geometric-bg-reader md:pl-[256px] overflow-x-hidden">
-      {/* Header */}
-      <header className="fixed md:hidden top-0 left-0 right-0 z-50 bg-[#002B24] border-b border-[#D4AF37]/30 max-w-[430px] mx-auto">
+    <div className="min-h-screen bg-[var(--app-bg)] text-[var(--app-text)] font-manrope geometric-bg-reader md:pl-[256px] overflow-x-hidden app-shell">
+      <header className="fixed md:hidden top-0 left-0 right-0 z-50 bg-[var(--app-nav-bg)] border-b border-[var(--app-border)] max-w-[430px] mx-auto">
         <div className="flex justify-between items-center w-full px-6 py-4">
           <button type="button" className="material-symbols-outlined text-[#FFD700] hover:bg-[#003D33] transition-colors p-2 rounded-full active:scale-95">
             menu
@@ -38,12 +39,12 @@ export default function ReaderPage({ state }) {
         {/* Search Bar */}
         <div className="mb-8">
           <div className="relative">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#D4AF37]">search</span>
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[var(--app-accent)]">search</span>
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#003D33]/40 border-b-2 border-[#D4AF37]/50 focus:border-[#FFD700] text-[#E5E2DB] pl-12 pr-4 py-4 font-headline placeholder-[#A0A0A0]/60 transition-all outline-none rounded-xl"
+              className="w-full bg-[var(--app-surface)] border-b-2 border-[var(--app-border)] focus:border-[var(--app-accent)] text-[var(--app-text)] pl-12 pr-4 py-4 font-headline placeholder:text-[var(--app-text-muted)] transition-all outline-none rounded-xl"
               placeholder="Search Surah, Juz, or Ayah..."
             />
           </div>
@@ -76,7 +77,7 @@ export default function ReaderPage({ state }) {
         {/* Surah Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filtered.map((surah) => {
-            const isBookmarked = bookmarkedNums.has(surah.num)
+            const isBookmarked = bookmarkedSurahIds.has(surah.num)
             return (
               <div
                 key={surah.num}

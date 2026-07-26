@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import DesktopSidebar from './components/DesktopSidebar'
+import { resolveAvatarId } from './assets/avatars'
 import AiReflectionSheet from './components/AiReflectionSheet'
 import Toast from './components/Toast'
+import LoadingDots from './components/LoadingDots'
 import { VERSES } from './data/content'
 import HomePage from './pages/HomePage'
 import JournalPage from './pages/JournalPage'
@@ -15,61 +17,78 @@ import GoalsPage from './pages/GoalsPage'
 import DisplayPage from './pages/DisplayPage'
 import SignupPage from './pages/SignupPage'
 import SurahPage from './pages/SurahPage'
+import BookmarksPage from './pages/BookmarksPage'
 import ReturnPage from './pages/ReturnPage'
-import { askGemini } from './utils/ai'
+import { askAi } from './utils/ai'
+import {
+  ApiError,
+  authApi,
+  bookmarksApi,
+  notesApi,
+  progressApi,
+} from './lib/api'
+import {
+  findBookmark,
+  normalizeBookmark,
+  parseRefIds,
+  payloadFromSurahVerse,
+  payloadFromTodayVerse,
+} from './lib/bookmarks'
+import { createDailyAiGate } from './lib/dailyAiGate'
+import {
+  applyAbsoluteVerseCount,
+  computeStreakFromSessions,
+  localDateKey,
+} from './lib/localDay'
+import {
+  claimVerseReadToday,
+  getReadCountForDay,
+  hasReadVerseToday,
+  sessionsFromReadLogs,
+} from './lib/verseRead'
 
-const STORAGE_KEY = 'thabit_v3'
-
-const initialState = {
-  name: 'Akhi',
+const emptyProgress = {
   goal: 10,
-  streak: 3,
-  versesReadToday: 4,
+  streak: 0,
+  versesReadToday: 0,
   lastReadDate: new Date().toISOString().split('T')[0],
   heartRating: 3,
-  ramadanVerses: 18,
-  sessions: [
-    { date: 'Apr 11', verses: 12, heart: 4 },
-    { date: 'Apr 12', verses: 8, heart: 3 },
-    { date: 'Apr 13', verses: 15, heart: 5 },
-    { date: 'Apr 14', verses: 6, heart: 2 },
-    { date: 'Apr 15', verses: 10, heart: 4 },
-    { date: 'Apr 16', verses: 14, heart: 5 },
-    { date: 'Apr 17', verses: 4, heart: 3 },
-  ],
-  bookmarks: [],
-  journals: [],
-  audioPlaying: false,
-  audioProgress: 0,
+  ramadanVerses: 0,
+  sessions: [],
   dailyNudge: { date: null, text: '' },
   dailyReflection: { date: null, text: '' },
-}
-
-function getPersistedState() {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) {
-    return { state: initialState }
-  }
-
-  try {
-    const parsed = JSON.parse(raw)
-    return {
-      state: { ...initialState, ...parsed },
-    }
-  } catch {
-    return { state: initialState }
-  }
 }
 
 function App() {
   const navigate = useNavigate()
   const audioTimer = useRef(null)
   const toastTimer = useRef(null)
-  const persisted = useMemo(() => getPersistedState(), [])
+  /** Invalidates in-flight loadUserData when remounting / logging out. */
+  const dataLoadIdRef = useRef(0)
+  const dailyAiGateRef = useRef(createDailyAiGate())
 
-  const [state, setState] = useState(persisted.state)
-  const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(localStorage.getItem('thabit_logged_in')))
-  const [theme, setTheme] = useState(() => localStorage.getItem('thabit_theme') || 'system')
+  const [authChecking, setAuthChecking] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [user, setUser] = useState(null)
+  const [dataLoading, setDataLoading] = useState(false)
+  const [progress, setProgress] = useState(emptyProgress)
+  const [bookmarks, setBookmarks] = useState([])
+  const [notes, setNotes] = useState([])
+  const [notesTotal, setNotesTotal] = useState(0)
+  const [audioPlaying, setAudioPlaying] = useState(false)
+  const [audioProgress, setAudioProgress] = useState(0)
+  const [theme, setTheme] = useState(() => {
+    const stored = localStorage.getItem('thabit_theme')
+    if (stored === 'light' || stored === 'dark') return stored
+    return 'dark'
+  })
+  const [fontSize, setFontSize] = useState(() => {
+    const n = Number(localStorage.getItem('thabit_font_size') || 3)
+    return Number.isFinite(n) && n >= 1 && n <= 5 ? n : 3
+  })
+  const [avatarId, setAvatarId] = useState(() =>
+    resolveAvatarId(localStorage.getItem('thabit_avatar') || 'pfp1'),
+  )
   const [nudge, setNudge] = useState('')
   const [reflectionQuestion, setReflectionQuestion] = useState('')
   const [returnMessage, setReturnMessage] = useState('')
@@ -78,252 +97,589 @@ function App() {
 
   const todayVerse = useMemo(() => VERSES[new Date().getDay() % VERSES.length], [])
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  }, [state])
-
-  useEffect(() => {
-    const root = window.document.documentElement
-    if (theme === 'system') {
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      if (systemPrefersDark) {
-        root.classList.add('dark')
-      } else {
-        root.classList.remove('dark')
-      }
-    } else if (theme === 'dark') {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
-    }
-    localStorage.setItem('thabit_theme', theme)
-  }, [theme])
-
-  useEffect(() => {
-    return () => {
-      if (audioTimer.current) {
-        clearInterval(audioTimer.current)
-      }
-      if (toastTimer.current) {
-        clearTimeout(toastTimer.current)
-      }
-    }
-  }, [])
+  const state = useMemo(
+    () => ({
+      name: user?.name || 'Friend',
+      ...progress,
+      bookmarks,
+      journals: notes,
+      notesTotal,
+      audioPlaying,
+      audioProgress,
+    }),
+    [user, progress, bookmarks, notes, notesTotal, audioPlaying, audioProgress],
+  )
 
   const showToast = useCallback((message) => {
     setToast(message)
-    if (toastTimer.current) {
-      clearTimeout(toastTimer.current)
-    }
+    if (toastTimer.current) clearTimeout(toastTimer.current)
     toastTimer.current = window.setTimeout(() => setToast(''), 2600)
   }, [])
 
-  const generateNudge = useCallback(async (force = false) => {
-    const today = new Date().toISOString().split('T')[0]
-    if (!force && state.dailyNudge?.date === today && state.dailyNudge?.text) {
-      setNudge(state.dailyNudge.text)
-      return
-    }
-    const text = await askGemini(
-      `You are Thabit, a warm Islamic companion. User ${state.name} has a ${state.streak}-day Quran reading streak. Write a short heartfelt 1 to 1.5-sentence daily reminder. Warm, not guilt-tripping. No greetings.`,
-      state,
-      140,
-    )
-    setNudge(text)
-    setState(prev => ({ ...prev, dailyNudge: { date: today, text } }))
-  }, [state.name, state.streak, state.dailyNudge?.date, state.dailyNudge?.text])
+  const showApiError = useCallback(
+    (err, fallback = 'Something went wrong') => {
+      if (err instanceof ApiError) {
+        if (err.isRateLimited) {
+          showToast('Too many requests — try again shortly')
+          return
+        }
+        showToast(err.message || fallback)
+        return
+      }
+      showToast(fallback)
+    },
+    [showToast],
+  )
 
-  const generateReflectionQuestion = useCallback(async (force = false) => {
-    const today = new Date().toISOString().split('T')[0]
-    if (!force && state.dailyReflection?.date === today && state.dailyReflection?.text) {
-      setReflectionQuestion(state.dailyReflection.text)
-      return
+  const loadUserData = useCallback(async () => {
+    const loadId = ++dataLoadIdRef.current
+    setDataLoading(true)
+    try {
+      const [progressRes, bookmarksRes, notesRes] = await Promise.all([
+        progressApi.get(),
+        bookmarksApi.list(1, 100),
+        notesApi.list(1, 50),
+      ])
+      if (loadId !== dataLoadIdRef.current) return
+
+      const p = progressRes.progress || emptyProgress
+      const dailyNudge = p.dailyNudge || { date: null, text: '' }
+      const dailyReflection = p.dailyReflection || { date: null, text: '' }
+      // Unique ayah reads (local log) are the source of truth — not the daily goal
+      // and not legacy "fill remaining goal" session dumps.
+      const sessions = sessionsFromReadLogs(p.sessions || [])
+      const todayKey = localDateKey()
+      const versesReadToday = getReadCountForDay(todayKey)
+      const streak = computeStreakFromSessions(sessions)
+      const lastReadDate =
+        versesReadToday > 0
+          ? todayKey
+          : sessions.length
+            ? sessions[sessions.length - 1].date
+            : p.lastReadDate || null
+
+      setProgress({
+        goal: p.goal ?? 10,
+        streak,
+        versesReadToday,
+        lastReadDate,
+        heartRating: p.heartRating ?? 3,
+        ramadanVerses: p.ramadanVerses ?? 0,
+        sessions,
+        dailyNudge,
+        dailyReflection,
+      })
+
+      const shouldPersist =
+        streak !== (p.streak ?? 0) ||
+        versesReadToday !== (p.versesReadToday ?? 0) ||
+        lastReadDate !== (p.lastReadDate || null) ||
+        JSON.stringify(sessions) !== JSON.stringify(p.sessions || [])
+
+      if (shouldPersist) {
+        try {
+          await progressApi.patch({
+            streak,
+            versesReadToday,
+            sessions,
+            lastReadDate,
+          })
+        } catch {
+          /* keep local synced view */
+        }
+      }
+
+      const gate = dailyAiGateRef.current
+      if (gate.syncFromCache('nudge', dailyNudge)) {
+        setNudge(dailyNudge.text)
+      }
+      if (gate.syncFromCache('reflection', dailyReflection)) {
+        setReflectionQuestion(dailyReflection.text)
+      }
+
+      setBookmarks((bookmarksRes.bookmarks || []).map(normalizeBookmark))
+      const noteList = notesRes.notes || []
+      setNotes(
+        noteList.map((n) => ({
+          id: n.id,
+          text: n.text,
+          verse: n.verseLabel || n.verseRef || '',
+          verseLabel: n.verseLabel,
+          verseRef: n.verseRef,
+          date: n.createdAt
+            ? new Date(n.createdAt).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+              })
+            : '',
+          createdAt: n.createdAt,
+        })),
+      )
+      setNotesTotal(notesRes.total ?? noteList.length)
+    } catch (err) {
+      if (loadId !== dataLoadIdRef.current) return
+      showApiError(err, 'Could not load your data')
+      throw err
+    } finally {
+      if (loadId === dataLoadIdRef.current) {
+        setDataLoading(false)
+      }
     }
-    const total = state.sessions.reduce((sum, session) => sum + session.verses, 0)
-    const avgHeart = (
-      state.sessions.reduce((sum, session) => sum + (session.heart || 3), 0) / Math.max(state.sessions.length, 1)
-    ).toFixed(1)
-    const question = await askGemini(
-      `A Muslim tracked spiritual state: avg heart ${avgHeart}/5, total verses ${total}. Write one gentle reflection question (under 2 sentences) to deepen Quran connection. Meaningful, spiritual.`,
-      state,
-      100,
-    )
-    setReflectionQuestion(question)
-    setState(prev => ({ ...prev, dailyReflection: { date: today, text: question } }))
-  }, [state.sessions, state.dailyReflection?.date, state.dailyReflection?.text])
+  }, [showApiError])
 
   useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      setAuthChecking(true)
+      try {
+        const { user: me } = await authApi.me()
+        if (cancelled) return
+        setUser(me)
+        setIsLoggedIn(true)
+        await loadUserData()
+      } catch (err) {
+        if (cancelled) return
+        if (err instanceof ApiError && err.isUnauthorized) {
+          setUser(null)
+          setIsLoggedIn(false)
+        } else {
+          showApiError(err, 'Could not check session')
+          setIsLoggedIn(false)
+        }
+      } finally {
+        if (!cancelled) setAuthChecking(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+      // Invalidate any in-flight loadUserData so it cannot apply state / flip dataLoading.
+      dataLoadIdRef.current += 1
+    }
+  }, [loadUserData, showApiError])
+
+  useEffect(() => {
+    const root = window.document.documentElement
+    const resolved = theme === 'light' ? 'light' : 'dark'
+    root.setAttribute('data-theme', resolved)
+    root.classList.toggle('dark', resolved === 'dark')
+    localStorage.setItem('thabit_theme', resolved)
+  }, [theme])
+
+  useEffect(() => {
+    const root = window.document.documentElement
+    root.setAttribute('data-font-size', String(fontSize))
+    localStorage.setItem('thabit_font_size', String(fontSize))
+  }, [fontSize])
+
+  useEffect(() => {
+    localStorage.setItem('thabit_avatar', avatarId)
+  }, [avatarId])
+
+  // Re-check streak / daily counters when the local calendar day changes (midnight).
+  useEffect(() => {
+    if (!isLoggedIn) return undefined
+
+    const tick = () => {
+      setProgress((prev) => {
+        const todayKey = localDateKey()
+        const sessions = sessionsFromReadLogs(prev.sessions)
+        const versesReadToday = getReadCountForDay(todayKey)
+        const streak = computeStreakFromSessions(sessions)
+        const lastReadDate =
+          versesReadToday > 0
+            ? todayKey
+            : sessions.length
+              ? sessions[sessions.length - 1].date
+              : prev.lastReadDate || null
+        const unchanged =
+          versesReadToday === (prev.versesReadToday ?? 0) &&
+          streak === (prev.streak ?? 0) &&
+          lastReadDate === (prev.lastReadDate || null) &&
+          JSON.stringify(sessions) === JSON.stringify(prev.sessions || [])
+        if (unchanged) return prev
+        const patch = { sessions, versesReadToday, streak, lastReadDate }
+        progressApi.patch(patch).catch(() => {})
+        return { ...prev, ...patch }
+      })
+    }
+
+    const id = window.setInterval(tick, 60_000)
+    window.addEventListener('focus', tick)
+    return () => {
+      window.clearInterval(id)
+      window.removeEventListener('focus', tick)
+    }
+  }, [isLoggedIn])
+
+  useEffect(() => {
+    return () => {
+      if (audioTimer.current) clearInterval(audioTimer.current)
+      if (toastTimer.current) clearTimeout(toastTimer.current)
+    }
+  }, [])
+
+  const persistProgress = useCallback(
+    async (patch, optimistic) => {
+      if (optimistic) setProgress((prev) => ({ ...prev, ...optimistic }))
+      try {
+        const res = await progressApi.patch(patch)
+        const p = res.progress
+        setProgress({
+          goal: p.goal,
+          streak: p.streak,
+          versesReadToday: p.versesReadToday,
+          lastReadDate: p.lastReadDate,
+          heartRating: p.heartRating,
+          ramadanVerses: p.ramadanVerses,
+          sessions: p.sessions || [],
+          dailyNudge: p.dailyNudge || { date: null, text: '' },
+          dailyReflection: p.dailyReflection || { date: null, text: '' },
+        })
+        return p
+      } catch (err) {
+        showApiError(err, 'Could not save progress')
+        await loadUserData().catch(() => {})
+        throw err
+      }
+    },
+    [loadUserData, showApiError],
+  )
+
+  const generateNudge = useCallback(
+    async (force = false) => {
+      const today = new Date().toISOString().split('T')[0]
+      const hasCachedToday =
+        progress.dailyNudge?.date === today && Boolean(progress.dailyNudge?.text)
+
+      await dailyAiGateRef.current.run('nudge', {
+        force,
+        hasCachedToday,
+        onUseCache: () => setNudge(progress.dailyNudge.text),
+        execute: async () => {
+          const text = await askAi(
+            `You are Thabit, a warm Islamic companion. User ${user?.name || 'Friend'} has a ${progress.streak}-day Quran reading streak. Write a short heartfelt 1 to 1.5-sentence daily reminder. Warm, not guilt-tripping. No greetings.`,
+            {
+              name: user?.name,
+              streak: progress.streak,
+              versesReadToday: progress.versesReadToday,
+              heartRating: progress.heartRating,
+            },
+            140,
+          )
+          setNudge(text)
+          try {
+            await persistProgress(
+              { dailyNudge: { date: today, text } },
+              { dailyNudge: { date: today, text } },
+            )
+          } catch {
+            /* toast already shown */
+          }
+        },
+      })
+    },
+    [progress, user, persistProgress],
+  )
+
+  const generateReflectionQuestion = useCallback(
+    async (force = false) => {
+      const today = new Date().toISOString().split('T')[0]
+      const hasCachedToday =
+        progress.dailyReflection?.date === today &&
+        Boolean(progress.dailyReflection?.text)
+
+      await dailyAiGateRef.current.run('reflection', {
+        force,
+        hasCachedToday,
+        onUseCache: () => setReflectionQuestion(progress.dailyReflection.text),
+        execute: async () => {
+          const sessions = progress.sessions || []
+          const total = sessions.reduce((sum, session) => sum + session.verses, 0)
+          const avgHeart = (
+            sessions.reduce((sum, session) => sum + (session.heart || 3), 0) /
+            Math.max(sessions.length, 1)
+          ).toFixed(1)
+          const question = await askAi(
+            `A Muslim tracked spiritual state: avg heart ${avgHeart}/5, total verses ${total}. Write one gentle reflection question (under 2 sentences) to deepen Quran connection. Meaningful, spiritual.`,
+            {
+              name: user?.name,
+              streak: progress.streak,
+              versesReadToday: progress.versesReadToday,
+              heartRating: progress.heartRating,
+            },
+            100,
+          )
+          setReflectionQuestion(question)
+          try {
+            await persistProgress(
+              { dailyReflection: { date: today, text: question } },
+              { dailyReflection: { date: today, text: question } },
+            )
+          } catch {
+            /* toast already shown */
+          }
+        },
+      })
+    },
+    [progress, user, persistProgress],
+  )
+
+  useEffect(() => {
+    if (!isLoggedIn || dataLoading || authChecking) return
     generateNudge()
     generateReflectionQuestion()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isLoggedIn, dataLoading, authChecking])
 
   async function openReflection({ ref, prompt }) {
     setSheet({ open: true, ref, body: '', loading: true })
-    const body = await askGemini(prompt, state, 200)
+    const body = await askAi(
+      prompt,
+      {
+        name: user?.name,
+        streak: progress.streak,
+        versesReadToday: progress.versesReadToday,
+        heartRating: progress.heartRating,
+      },
+      200,
+    )
     setSheet({ open: true, ref, body, loading: false })
   }
 
   async function showReturnPage() {
     navigate('/return')
     setReturnMessage('')
-    const text = await askGemini(
-      `Write a 2-sentence compassionate welcome-back message for a Muslim named ${state.name} who missed their Quran streak. Reference Allah's mercy. Warm, hopeful, non-guilt-tripping.`,
-      state,
+    const text = await askAi(
+      `Write a 2-sentence compassionate welcome-back message for a Muslim named ${user?.name || 'Friend'} who missed their Quran streak. Reference Allah's mercy. Warm, hopeful, non-guilt-tripping.`,
+      {
+        name: user?.name,
+        streak: progress.streak,
+        versesReadToday: progress.versesReadToday,
+        heartRating: progress.heartRating,
+      },
       150,
     )
     setReturnMessage(text)
   }
 
-  function updateGoal(newGoal) {
-    setState((prev) => ({ ...prev, goal: Number(newGoal) }))
-    showToast(`Goal updated to ${newGoal} verses 🎯`)
-  }
-
-  function updateRamadanVerses(newVerses) {
-    setState((prev) => ({ ...prev, ramadanVerses: Number(newVerses) }))
-    showToast(`Ramadan baseline updated to ${newVerses} verses`)
-  }
-
-  function handleLogin({ email, name }) {
-    if (name) {
-      setState((prev) => ({ ...prev, name }))
+  async function updateGoal(newGoal) {
+    const goal = Number(newGoal)
+    try {
+      await persistProgress({ goal }, { goal })
+      showToast(`Goal updated to ${newGoal} verses`)
+    } catch {
+      /* handled */
     }
-    localStorage.setItem('thabit_logged_in', email)
-    setIsLoggedIn(true)
-    navigate('/')
   }
 
-  function handleLogout() {
-    localStorage.removeItem('thabit_logged_in')
+  async function updateRamadanVerses(newVerses) {
+    const ramadanVerses = Number(newVerses)
+    try {
+      await persistProgress({ ramadanVerses }, { ramadanVerses })
+      showToast(`Ramadan baseline updated to ${newVerses} verses`)
+    } catch {
+      /* handled */
+    }
+  }
+
+  async function handleLogin({ email, password }) {
+    const res = await authApi.login(email, password)
+    setUser(res.user)
+    setIsLoggedIn(true)
+    await loadUserData()
+    navigate('/')
+    return res.user
+  }
+
+  async function handleSignup({ name, email, password, dateOfBirth }) {
+    const res = await authApi.register(name, email, password, dateOfBirth)
+    setUser(res.user)
+    setIsLoggedIn(true)
+    await loadUserData()
+    navigate('/')
+    return res.user
+  }
+
+  async function handleLogout() {
+    try {
+      await authApi.logout()
+    } catch (err) {
+      showApiError(err, 'Logout failed')
+    }
+    dataLoadIdRef.current += 1
+    dailyAiGateRef.current.reset()
+    setUser(null)
     setIsLoggedIn(false)
+    setProgress(emptyProgress)
+    setBookmarks([])
+    setNotes([])
+    setNotesTotal(0)
+    setNudge('')
+    setReflectionQuestion('')
     navigate('/login')
   }
 
-  function markRead() {
-    setState((prev) => {
-      const today = new Date().toISOString().split('T')[0]
-      let currentVersesToday = prev.versesReadToday
-      let currentStreak = prev.streak
-      
-      // Reset if it's a new day
-      if (prev.lastReadDate && prev.lastReadDate !== today) {
-        currentVersesToday = 0
-        
-        const yesterday = new Date()
-        yesterday.setDate(yesterday.getDate() - 1)
-        const yesterdayStr = yesterday.toISOString().split('T')[0]
-        
-        if (prev.lastReadDate !== yesterdayStr) {
-          currentStreak = 0 // Streak broken
-        }
+  /**
+   * Count a verse only when the user actually reads it (play finished / mark on surah).
+   * Same ayah is only counted once per local day.
+   */
+  const recordVerseRead = useCallback(
+    async (surahId, ayahNumber) => {
+      if (!claimVerseReadToday(surahId, ayahNumber)) {
+        return
       }
 
-      // Add enough to reach the goal, or just 1 if goal is already met
-      const addedVerses = currentVersesToday < prev.goal ? (prev.goal - currentVersesToday) : 1
-      const newVersesReadToday = currentVersesToday + addedVerses
-      
-      const justReachedGoal = currentVersesToday < prev.goal && newVersesReadToday >= prev.goal
-      const streak = justReachedGoal ? currentStreak + 1 : currentStreak
+      const before = progress.versesReadToday ?? 0
+      const count = getReadCountForDay()
+      const base = {
+        ...progress,
+        sessions: sessionsFromReadLogs(progress.sessions),
+      }
+      const result = applyAbsoluteVerseCount(base, count)
+      const reachedGoal =
+        before < progress.goal && result.versesReadToday >= progress.goal
 
-      if (justReachedGoal) {
-        showToast('🔥 MashaAllah! Streak updated!')
-      } else {
-        showToast(`✓ +${addedVerses} verses logged (${newVersesReadToday}/${prev.goal})`)
+      const patch = {
+        versesReadToday: result.versesReadToday,
+        streak: result.streak,
+        sessions: result.sessions,
+        lastReadDate: result.lastReadDate,
       }
 
-      const newSessions = [...prev.sessions]
-      if (newSessions.length > 0) {
-        const dateLabel = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        const lastSession = newSessions[newSessions.length - 1]
-        
-        if (lastSession.date === dateLabel) {
-          newSessions[newSessions.length - 1] = {
-            ...lastSession,
-            verses: lastSession.verses + addedVerses
-          }
+      try {
+        await persistProgress(patch, patch)
+        if (reachedGoal) {
+          showToast(`MashaAllah! Daily goal met — ${result.streak}-day streak`)
         } else {
-          newSessions.push({ date: dateLabel, verses: addedVerses, heart: prev.heartRating })
-          if (newSessions.length > 14) newSessions.shift() // Keep history reasonable
+          showToast(
+            `Ayah ${surahId}:${ayahNumber} counted (${result.versesReadToday}/${progress.goal})`,
+          )
         }
+      } catch {
+        /* handled — read log already claimed; next load will resync */
       }
+    },
+    [progress, persistProgress, showToast],
+  )
 
-      return { 
-        ...prev, 
-        versesReadToday: newVersesReadToday, 
-        streak, 
-        sessions: newSessions,
-        lastReadDate: today
-      }
-    })
-  }
-
-  function bookmarkTodayVerse(verse) {
-    setState((prev) => {
-      const alreadyBookmarked = prev.bookmarks.some((bookmark) => bookmark.ref === verse.ref)
-
-      if (alreadyBookmarked) {
+  async function bookmarkTodayVerse(verse) {
+    let payload
+    try {
+      payload = payloadFromTodayVerse(verse)
+    } catch (err) {
+      showToast(err.message || 'Could not bookmark verse')
+      return
+    }
+    const existing = findBookmark(bookmarks, payload)
+    if (existing) {
+      try {
+        await bookmarksApi.remove(existing.id)
+        setBookmarks((prev) => prev.filter((b) => b.id !== existing.id))
         showToast('Bookmark removed')
-        return {
-          ...prev,
-          bookmarks: prev.bookmarks.filter((bookmark) => bookmark.ref !== verse.ref),
-        }
+      } catch (err) {
+        showApiError(err, 'Could not remove bookmark')
       }
-
-      showToast('Verse bookmarked 🔖')
-      return { ...prev, bookmarks: [...prev.bookmarks, verse] }
-    })
+      return
+    }
+    try {
+      const res = await bookmarksApi.create(payload)
+      setBookmarks((prev) => [normalizeBookmark(res.bookmark), ...prev])
+      showToast('Verse bookmarked')
+    } catch (err) {
+      if (err instanceof ApiError && err.code === 'BOOKMARK_EXISTS') {
+        showToast('Already bookmarked')
+        return
+      }
+      showApiError(err, 'Could not bookmark')
+    }
   }
 
-  function bookmarkVerse(verse) {
-    setState((prev) => {
-      const alreadyBookmarked = prev.bookmarks.some((bookmark) => bookmark.num === verse.num)
-
-      if (alreadyBookmarked) {
+  async function bookmarkSurahVerse(verse, surah) {
+    const payload = payloadFromSurahVerse(verse, surah)
+    const existing = findBookmark(bookmarks, payload)
+    if (existing) {
+      try {
+        await bookmarksApi.remove(existing.id)
+        setBookmarks((prev) => prev.filter((b) => b.id !== existing.id))
         showToast('Bookmark removed')
-        return {
-          ...prev,
-          bookmarks: prev.bookmarks.filter((bookmark) => bookmark.num !== verse.num),
-        }
+      } catch (err) {
+        showApiError(err, 'Could not remove bookmark')
       }
-
-      showToast('Verse bookmarked 🔖')
-      return { ...prev, bookmarks: [...prev.bookmarks, { ...verse, surah: 'Al-Fatiha' }] }
-    })
+      return
+    }
+    try {
+      const res = await bookmarksApi.create(payload)
+      setBookmarks((prev) => [normalizeBookmark(res.bookmark), ...prev])
+      showToast('Verse bookmarked')
+    } catch (err) {
+      if (err instanceof ApiError && err.code === 'BOOKMARK_EXISTS') {
+        showToast('Already bookmarked')
+        return
+      }
+      showApiError(err, 'Could not bookmark')
+    }
   }
 
-  function rateHeart(heartRating, label) {
-    setState((prev) => ({ ...prev, heartRating }))
-    showToast(`Heart: ${label} 🤍`)
+  async function rateHeart(heartRating, label) {
+    try {
+      await persistProgress({ heartRating }, { heartRating })
+      showToast(`Heart: ${label}`)
+    } catch {
+      /* handled */
+    }
   }
 
-  function postReflection(text) {
+  async function postReflection(text, meta = {}) {
     if (!text.trim()) {
       showToast('Write something first')
       return
     }
 
-    const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    const hasMeta = Object.prototype.hasOwnProperty.call(meta, 'verseLabel')
+      || Object.prototype.hasOwnProperty.call(meta, 'verseRef')
 
-    const entry = {
-      text: text.trim(),
-      date,
-      verse: todayVerse.ref,
+    let verseLabel = null
+    let verseRef = null
+    if (hasMeta) {
+      verseLabel = meta.verseLabel ?? null
+      verseRef = meta.verseRef ?? null
     }
 
-    setState((prev) => ({ ...prev, journals: [entry, ...prev.journals] }))
-    showToast('Reflection posted 🤍')
+    const body = {
+      text: text.trim(),
+      verseLabel,
+      verseRef,
+    }
+    try {
+      const res = await notesApi.create(body)
+      const n = res.note
+      const entry = {
+        id: n.id,
+        text: n.text,
+        verse: n.verseLabel || n.verseRef || '',
+        verseLabel: n.verseLabel,
+        verseRef: n.verseRef,
+        date: n.createdAt
+          ? new Date(n.createdAt).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+            })
+          : '',
+        createdAt: n.createdAt,
+      }
+      setNotes((prev) => [entry, ...prev])
+      setNotesTotal((t) => t + 1)
+      showToast('Saved to journal')
+    } catch (err) {
+      showApiError(err, 'Could not save reflection')
+      throw err
+    }
   }
 
   function togglePlayVerse(verseNum) {
-    if (verseNum) {
-      showToast(`▶ Playing verse ${verseNum}`)
-    }
+    if (verseNum) showToast(`Playing verse ${verseNum}`)
 
-    setState((prev) => {
-      const audioPlaying = !prev.audioPlaying
-      return { ...prev, audioPlaying }
-    })
+    setAudioPlaying((prev) => !prev)
 
     if (audioTimer.current) {
       clearInterval(audioTimer.current)
@@ -331,117 +687,152 @@ function App() {
     }
 
     setTimeout(() => {
-      setState((current) => {
-        if (!current.audioPlaying) {
-          return current
-        }
-
+      setAudioPlaying((playing) => {
+        if (!playing) return playing
         audioTimer.current = setInterval(() => {
-          setState((inner) => {
-            const next = Math.min(100, inner.audioProgress + 0.4)
+          setAudioProgress((inner) => {
+            const next = Math.min(100, inner + 0.4)
             if (next >= 100 && audioTimer.current) {
               clearInterval(audioTimer.current)
               audioTimer.current = null
-              return { ...inner, audioPlaying: false, audioProgress: 0 }
+              setAudioPlaying(false)
+              return 0
             }
-            return { ...inner, audioProgress: next }
+            return next
           })
         }, 200)
-
-        return current
+        return playing
       })
     }, 0)
   }
 
+  if (authChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#002B24] text-[#c8ae6d]">
+        <div className="flex flex-col items-center gap-4">
+          <LoadingDots />
+          <p className="font-manrope text-sm tracking-wide">Checking session…</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex w-full min-h-screen relative">
-      {isLoggedIn && <DesktopSidebar />}
+    <div className="flex w-full min-h-screen relative app-shell">
+      {isLoggedIn && (
+        <DesktopSidebar avatarId={avatarId} userName={user?.name || 'Friend'} />
+      )}
       <div className="flex-1 w-full relative">
+        {isLoggedIn && dataLoading && (
+          <div className="fixed top-0 left-0 right-0 z-[60] flex justify-center pt-3 pointer-events-none">
+            <div className="bg-[var(--app-surface)] text-[var(--app-accent-text)] text-xs font-manrope px-4 py-2 rounded-full border border-[var(--app-border)]">
+              Loading your progress…
+            </div>
+          </div>
+        )}
         <Routes>
           {!isLoggedIn ? (
-          <>
-            <Route path="/signup" element={<SignupPage onSignup={handleLogin} />} />
-            <Route path="*" element={<LoginPage onLogin={handleLogin} />} />
-          </>
-        ) : (
-          <>
-            <Route
-              path="/"
-              element={
-                <HomePage
-                  state={state}
-                  nudge={nudge}
-                  onMarkRead={markRead}
-                  onBookmarkTodayVerse={bookmarkTodayVerse}
-                  onRateHeart={rateHeart}
-                  onVerseReflection={openReflection}
-                  onShowReturn={showReturnPage}
-                />
-              }
-            />
-            <Route
-              path="/reader"
-              element={
-                <ReaderPage
-                  state={state}
-                  onBookmarkVerse={bookmarkVerse}
-                  onReflectVerse={openReflection}
-                  onPlayVerse={togglePlayVerse}
-                />
-              }
-            />
-            <Route
-              path="/surah/:id"
-              element={
-                <SurahPage
-                  state={state}
-                  onBookmarkVerse={bookmarkVerse}
-                  onReflectVerse={openReflection}
-                  onPlayVerse={togglePlayVerse}
-                />
-              }
-            />
-            <Route path="/play/:surahId/:verseId" element={<PlaybackPage />} />
-            <Route path="/settings" element={<SettingsPage state={state} onLogout={handleLogout} />} />
-            <Route path="/settings/display" element={<DisplayPage theme={theme} onUpdateTheme={(t) => { setTheme(t); localStorage.setItem('thabit_theme', t) }} />} />
-            <Route path="/goals" element={<GoalsPage state={state} onUpdateGoal={updateGoal} />} />
-            <Route
-              path="/momentum"
-              element={
-                <MomentumPage
-                  state={state}
-                  reflectionQuestion={reflectionQuestion}
-                  onGenerateReflectionQuestion={generateReflectionQuestion}
-                  onPostReflection={postReflection}
-                  onRateHeart={rateHeart}
-                  onUpdateRamadanVerses={updateRamadanVerses}
-                />
-              }
-            />
-            <Route
-              path="/journal"
-              element={
-                <JournalPage
-                  state={state}
-                  reflectionQuestion={reflectionQuestion}
-                  onGenerateReflectionQuestion={generateReflectionQuestion}
-                  onPostReflection={postReflection}
-                />
-              }
-            />
-            <Route path="/return" element={<ReturnPage returnMessage={returnMessage} />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </>
-        )}
-      </Routes>
+            <>
+              <Route path="/signup" element={<SignupPage onSignup={handleSignup} />} />
+              <Route path="*" element={<LoginPage onLogin={handleLogin} />} />
+            </>
+          ) : (
+            <>
+              <Route
+                path="/"
+                element={
+                  <HomePage
+                    state={state}
+                    nudge={nudge}
+                    avatarId={avatarId}
+                    onBookmarkTodayVerse={bookmarkTodayVerse}
+                    onRateHeart={rateHeart}
+                    onVerseReflection={openReflection}
+                    onShowReturn={showReturnPage}
+                    onPostReflection={postReflection}
+                  />
+                }
+              />
+              <Route path="/reader" element={<ReaderPage state={state} />} />
+              <Route path="/bookmarks" element={<BookmarksPage state={state} />} />
+              <Route
+                path="/surah/:id"
+                element={
+                  <SurahPage
+                    state={state}
+                    onBookmarkVerse={bookmarkSurahVerse}
+                    onReflectVerse={openReflection}
+                    onPostReflection={postReflection}
+                    onVerseRead={recordVerseRead}
+                  />
+                }
+              />
+              <Route
+                path="/play/:surahId/:verseId"
+                element={<PlaybackPage onVerseRead={recordVerseRead} />}
+              />
+              <Route
+                path="/settings"
+                element={
+                  <SettingsPage
+                    state={state}
+                    user={user}
+                    avatarId={avatarId}
+                    onAvatarChange={setAvatarId}
+                    onLogout={handleLogout}
+                  />
+                }
+              />
+              <Route
+                path="/settings/display"
+                element={
+                  <DisplayPage
+                    theme={theme}
+                    fontSize={fontSize}
+                    onUpdateTheme={setTheme}
+                    onUpdateFontSize={setFontSize}
+                  />
+                }
+              />
+              <Route path="/goals" element={<GoalsPage state={state} onUpdateGoal={updateGoal} />} />
+              <Route
+                path="/momentum"
+                element={
+                  <MomentumPage
+                    state={state}
+                    avatarId={avatarId}
+                    onPostReflection={postReflection}
+                    onRateHeart={rateHeart}
+                    onUpdateRamadanVerses={updateRamadanVerses}
+                  />
+                }
+              />
+              <Route
+                path="/journal"
+                element={
+                  <JournalPage
+                    state={state}
+                    avatarId={avatarId}
+                    todayVerse={todayVerse}
+                    reflectionQuestion={reflectionQuestion}
+                    onGenerateReflectionQuestion={generateReflectionQuestion}
+                    onPostReflection={postReflection}
+                  />
+                }
+              />
+              <Route path="/return" element={<ReturnPage returnMessage={returnMessage} />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          )}
+        </Routes>
 
-      <AiReflectionSheet
-        open={sheet.open}
-        verseRef={sheet.ref}
-        body={sheet.body}
-        loading={sheet.loading}
-        onClose={() => setSheet((prev) => ({ ...prev, open: false }))}
-      />
+        <AiReflectionSheet
+          open={sheet.open}
+          verseRef={sheet.ref}
+          body={sheet.body}
+          loading={sheet.loading}
+          onClose={() => setSheet((prev) => ({ ...prev, open: false }))}
+        />
 
         <Toast message={toast} />
       </div>

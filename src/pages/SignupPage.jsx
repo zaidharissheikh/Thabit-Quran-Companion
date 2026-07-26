@@ -1,5 +1,24 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import DateOfBirthPicker from '../components/DateOfBirthPicker'
+import { ApiError } from '../lib/api'
+import {
+  PASSWORD_RULES,
+  getPasswordChecks,
+  passwordErrorMessage,
+  validateConfirmPassword,
+  validateDob,
+  validateEmail,
+  validateName,
+} from '../lib/formValidation'
+
+const EMPTY_TOUCHED = {
+  name: false,
+  email: false,
+  dob: false,
+  password: false,
+  confirmPassword: false,
+}
 
 export default function SignupPage({ onSignup }) {
   const [name, setName] = useState('')
@@ -7,30 +26,97 @@ export default function SignupPage({ onSignup }) {
   const [dob, setDob] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [touched, setTouched] = useState(EMPTY_TOUCHED)
+  const [formError, setFormError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = (e) => {
+  const fieldErrors = useMemo(
+    () => ({
+      name: validateName(name),
+      email: validateEmail(email),
+      dob: validateDob(dob, 11),
+      password: passwordErrorMessage(password),
+      confirmPassword: validateConfirmPassword(password, confirmPassword),
+    }),
+    [name, email, dob, password, confirmPassword],
+  )
+
+  const passwordChecks = useMemo(() => getPasswordChecks(password), [password])
+  const showPasswordRules = touched.password || password.length > 0
+
+  function markTouched(field) {
+    setTouched((prev) => ({ ...prev, [field]: true }))
+  }
+
+  function showError(field) {
+    return touched[field] ? fieldErrors[field] : ''
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (name.trim() && email.trim() && password.trim() && password === confirmPassword) {
-      onSignup({ name: name.trim(), email: email.trim() })
+    setFormError('')
+    setTouched({
+      name: true,
+      email: true,
+      dob: true,
+      password: true,
+      confirmPassword: true,
+    })
+
+    const firstError =
+      fieldErrors.name ||
+      fieldErrors.email ||
+      fieldErrors.dob ||
+      fieldErrors.password ||
+      fieldErrors.confirmPassword
+
+    if (firstError) {
+      setFormError('Please fix the highlighted fields before continuing.')
+      return
+    }
+
+    setSubmitting(true)
+    try {
+      await onSignup({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        dateOfBirth: dob,
+      })
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setFormError(err.message || 'Could not create account')
+      } else {
+        setFormError('Could not create account. Check your connection.')
+      }
+    } finally {
+      setSubmitting(false)
     }
   }
 
+  const inputClass = (hasError) =>
+    `w-full bg-[#001f1b] border rounded-lg py-3 pl-11 pr-11 text-[#e5e2db] transition-all outline-none placeholder:text-[#c6a34f]/30 ${
+      hasError
+        ? 'border-red-400/70 focus:border-red-300'
+        : 'border-[#c6a34f]/30 focus:border-[#c6a34f]'
+    }`
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#00231e] p-6 text-[#e5e2db]">
-      {/* Background Decorations */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute top-10 right-10 w-64 h-64 border border-[#c6a34f]/10 rounded-full rotate-45" />
         <div className="absolute bottom-20 -left-20 w-96 h-96 border border-[#c6a34f]/10 rounded-full" />
       </div>
 
       <div className="relative z-10 w-full max-w-md mx-auto flex flex-col items-center">
-        {/* Logo & Brand */}
         <header className="afu text-center mb-10 space-y-2">
           <div className="w-40 h-40 mx-auto mb-6 flex items-center justify-center overflow-hidden">
             <img
               alt="THAABIT Brand Emblem"
               className="w-full h-full object-contain"
-              src="/favicon.jpg"
+              src="/logo.png"
             />
           </div>
           <h1 className="font-headline text-[40px] leading-[48px] font-bold tracking-wide uppercase text-[#c6a34f] gold-text-glow">
@@ -41,9 +127,7 @@ export default function SignupPage({ onSignup }) {
           </p>
         </header>
 
-        {/* Form Card */}
         <main className="afu2 w-full metallic-border bg-[#00322b] rounded-2xl p-8 shadow-2xl relative overflow-hidden">
-          {/* Decorative Medallion */}
           <div className="absolute -top-6 -left-6 opacity-20">
             <span className="material-symbols-outlined text-[120px] text-[#c6a34f]">flare</span>
           </div>
@@ -53,104 +137,212 @@ export default function SignupPage({ onSignup }) {
               Create Account
             </h2>
 
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              {/* Full Name */}
+            <form className="space-y-5" onSubmit={handleSubmit} noValidate>
               <div className="space-y-2">
-                <label className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1">
+                <label
+                  htmlFor="signup-name"
+                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1"
+                >
                   Full Name
                 </label>
                 <div className="relative">
                   <input
+                    id="signup-name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    onBlur={() => markTouched('name')}
                     placeholder="Enter your full name"
-                    className="w-full bg-[#001f1b] border border-[#c6a34f]/30 rounded-lg py-3 px-11 text-[#e5e2db] focus:border-[#c6a34f] transition-all outline-none placeholder:text-[#c6a34f]/30"
+                    autoComplete="name"
+                    aria-invalid={Boolean(showError('name'))}
+                    className={inputClass(Boolean(showError('name')))}
                   />
-                  <span className="material-symbols-outlined absolute left-3 top-3 text-[#c6a34f]/70">person</span>
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c6a34f]/70">
+                    person
+                  </span>
                 </div>
+                {showError('name') ? (
+                  <p className="text-xs text-red-300/90 font-manrope ml-1" role="alert">
+                    {showError('name')}
+                  </p>
+                ) : null}
               </div>
 
-              {/* Email */}
               <div className="space-y-2">
-                <label className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1">
+                <label
+                  htmlFor="signup-email"
+                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1"
+                >
                   Email
                 </label>
                 <div className="relative">
                   <input
+                    id="signup-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => markTouched('email')}
                     placeholder="example@wisdom.com"
-                    className="w-full bg-[#001f1b] border border-[#c6a34f]/30 rounded-lg py-3 px-11 text-[#e5e2db] focus:border-[#c6a34f] transition-all outline-none placeholder:text-[#c6a34f]/30"
+                    autoComplete="email"
+                    aria-invalid={Boolean(showError('email'))}
+                    className={inputClass(Boolean(showError('email')))}
                   />
-                  <span className="material-symbols-outlined absolute left-3 top-3 text-[#c6a34f]/70">mail</span>
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c6a34f]/70">
+                    mail
+                  </span>
                 </div>
+                {showError('email') ? (
+                  <p className="text-xs text-red-300/90 font-manrope ml-1" role="alert">
+                    {showError('email')}
+                  </p>
+                ) : null}
               </div>
 
-              {/* Date of Birth */}
               <div className="space-y-2">
-                <label className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1">
+                <label
+                  htmlFor="signup-dob"
+                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1"
+                >
                   Date of Birth
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    placeholder="mm/dd/yyyy"
-                    className="w-full bg-[#001f1b] border border-[#c6a34f]/30 rounded-lg py-3 px-11 text-[#e5e2db] focus:border-[#c6a34f] transition-all outline-none placeholder:text-[#c6a34f]/30"
-                  />
-                  <span className="material-symbols-outlined absolute left-3 top-3 text-[#c6a34f]/70">calendar_today</span>
-                </div>
+                <DateOfBirthPicker
+                  id="signup-dob"
+                  value={dob}
+                  minAge={11}
+                  error={showError('dob')}
+                  onChange={(next) => {
+                    setDob(next)
+                    markTouched('dob')
+                  }}
+                />
+                {showError('dob') ? (
+                  <p className="text-xs text-red-300/90 font-manrope ml-1" role="alert">
+                    {showError('dob')}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-[#c6a34f]/55 font-manrope ml-1">
+                    Tap the calendar to choose your birthday (age 11+)
+                  </p>
+                )}
               </div>
 
-              {/* Password */}
               <div className="space-y-2">
-                <label className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1">
+                <label
+                  htmlFor="signup-password"
+                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1"
+                >
                   Password
                 </label>
                 <div className="relative">
                   <input
-                    type="password"
+                    id="signup-password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onBlur={() => markTouched('password')}
                     placeholder="••••••••"
-                    className="w-full bg-[#001f1b] border border-[#c6a34f]/30 rounded-lg py-3 px-11 text-[#e5e2db] focus:border-[#c6a34f] transition-all outline-none placeholder:text-[#c6a34f]/30"
+                    autoComplete="new-password"
+                    aria-invalid={Boolean(showError('password'))}
+                    className={inputClass(Boolean(showError('password')))}
                   />
-                  <span className="material-symbols-outlined absolute left-3 top-3 text-[#c6a34f]/70">lock</span>
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c6a34f]/70">
+                    lock
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-[#c6a34f]/70 hover:text-[#c6a34f] hover:bg-[#c6a34f]/10 transition-colors"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    <span className="material-symbols-outlined text-[22px]">
+                      {showPassword ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
                 </div>
+                {showPasswordRules ? (
+                  <ul className="space-y-1 ml-1 pt-1">
+                    {PASSWORD_RULES.map((rule) => {
+                      const ok = passwordChecks[rule.key]
+                      return (
+                        <li
+                          key={rule.key}
+                          className={`flex items-center gap-1.5 text-[11px] font-manrope ${
+                            ok ? 'text-emerald-300/90' : 'text-[#c6a34f]/55'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[14px]">
+                            {ok ? 'check_circle' : 'radio_button_unchecked'}
+                          </span>
+                          {rule.label}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                ) : null}
+                {showError('password') ? (
+                  <p className="text-xs text-red-300/90 font-manrope ml-1" role="alert">
+                    {showError('password')}
+                  </p>
+                ) : null}
               </div>
 
-              {/* Confirm Password */}
               <div className="space-y-2">
-                <label className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1">
+                <label
+                  htmlFor="signup-confirm"
+                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1"
+                >
                   Confirm Password
                 </label>
                 <div className="relative">
                   <input
-                    type="password"
+                    id="signup-confirm"
+                    type={showConfirm ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    onBlur={() => markTouched('confirmPassword')}
                     placeholder="••••••••"
-                    className="w-full bg-[#001f1b] border border-[#c6a34f]/30 rounded-lg py-3 px-11 text-[#e5e2db] focus:border-[#c6a34f] transition-all outline-none placeholder:text-[#c6a34f]/30"
+                    autoComplete="new-password"
+                    aria-invalid={Boolean(showError('confirmPassword'))}
+                    className={inputClass(Boolean(showError('confirmPassword')))}
                   />
-                  <span className="material-symbols-outlined absolute left-3 top-3 text-[#c6a34f]/70">verified_user</span>
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c6a34f]/70">
+                    verified_user
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-[#c6a34f]/70 hover:text-[#c6a34f] hover:bg-[#c6a34f]/10 transition-colors"
+                    aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
+                  >
+                    <span className="material-symbols-outlined text-[22px]">
+                      {showConfirm ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
                 </div>
+                {showError('confirmPassword') ? (
+                  <p className="text-xs text-red-300/90 font-manrope ml-1" role="alert">
+                    {showError('confirmPassword')}
+                  </p>
+                ) : null}
               </div>
 
-              {/* Register Button */}
+              {formError ? (
+                <p className="font-manrope text-sm text-red-300/90" role="alert">
+                  {formError}
+                </p>
+              ) : null}
+
               <button
                 type="submit"
-                className="w-full gold-gradient-btn text-[#241a00] font-manrope text-sm font-bold tracking-widest uppercase py-4 rounded-full shadow-lg active:scale-[0.98] transition-transform mt-4"
+                disabled={submitting}
+                className="w-full gold-gradient-btn text-[#241a00] font-manrope text-sm font-bold tracking-widest uppercase py-4 rounded-full shadow-lg active:scale-[0.98] transition-transform mt-2 disabled:opacity-60"
               >
-                REGISTER
+                {submitting ? 'Creating…' : 'REGISTER'}
               </button>
             </form>
           </div>
         </main>
 
-        {/* Footer */}
         <footer className="afu3 mt-8 text-center">
           <p className="font-manrope text-base text-[#e5e2db]/60">
             Already part of the journey?{' '}

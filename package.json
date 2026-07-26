@@ -7,16 +7,26 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:indexes": "node scripts/setup-indexes.mjs",
+    "audit:deps": "npm audit --omit=dev"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "@tailwindcss/vite": "^4.2.2",
+    "argon2": "^0.44.0",
+    "cookie": "^1.0.2",
+    "dotenv": "^17.4.2",
     "gsap": "^3.15.0",
+    "jose": "^6.0.11",
+    "mongodb": "^6.16.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.14.1",
-    "tailwindcss": "^4.2.2"
+    "tailwindcss": "^4.2.2",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
@@ -27,6 +37,10 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
-    "vite": "^8.0.4"
+    "mongodb-memory-server": "^11.2.0",
+    "node-mocks-http": "^1.18.1",
+    "playwright": "^1.62.0",
+    "vite": "^8.0.4",
+    "vitest": "^3.2.4"
   }
 }

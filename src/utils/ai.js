@@ -1,42 +1,44 @@
-export async function askGemini(prompt, state, max = 180) {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
+import { ApiError, aiApi } from '../lib/api';
 
-  if (!apiKey || apiKey.includes('YOUR_')) {
-    return fallback(prompt, state)
-  }
-
+/**
+ * Server-side AI reflection via POST /api/ai/reflect.
+ * @param {string} prompt
+ * @param {{ name?: string, streak?: number, versesReadToday?: number, heartRating?: number }} context
+ * @param {number} [maxTokens]
+ * @returns {Promise<string>}
+ */
+export async function askAi(prompt, context = {}, maxTokens = 180) {
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const data = await aiApi.reflect({
+      prompt,
+      context: {
+        name: context.name,
+        streak: context.streak,
+        versesReadToday: context.versesReadToday,
+        heartRating: context.heartRating,
       },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: prompt }]
-        }],
-        generationConfig: {
-          maxOutputTokens: max,
-        }
-      }),
-    })
-
-    const data = await response.json()
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text || fallback(prompt, state)
-  } catch {
-    return fallback(prompt, state)
+      maxTokens,
+    });
+    return data?.text || fallback(prompt, context);
+  } catch (err) {
+    if (err instanceof ApiError && err.isRateLimited) {
+      return 'Please try again in a little while — the reflection helper is resting.';
+    }
+    return fallback(prompt, context);
   }
 }
 
-function fallback(prompt, state) {
-  if (prompt.includes('streak')) {
-    return `${state.name}, consistency is a form of worship. Just one verse today keeps the light alive. 🌟`
+function fallback(prompt, context) {
+  const name = context?.name || 'Friend';
+  const lower = prompt.toLowerCase();
+  if (lower.includes('streak')) {
+    return `${name}, consistency is a form of worship. Just one verse today keeps the light alive.`;
   }
-  if (prompt.includes('reflection question')) {
-    return 'What is one thing from your reading today that you want to carry into tomorrow?'
+  if (lower.includes('reflection question')) {
+    return 'What is one thing from your reading today that you want to carry into tomorrow?';
   }
-  if (prompt.includes('missed') || prompt.includes('welcome back')) {
-    return `Dear ${state.name} - the Prophet ﷺ taught that the most beloved deeds are the most consistent, even if small. One verse today is enough. Allah sees every effort.`
+  if (lower.includes('missed') || lower.includes('welcome back')) {
+    return `Dear ${name} — the most beloved deeds are the most consistent, even if small. One verse today is enough.`;
   }
-  return 'Every verse you read is a conversation with Allah. Make time for that today.'
+  return 'Every verse you read is a conversation with Allah. Make time for that today.';
 }

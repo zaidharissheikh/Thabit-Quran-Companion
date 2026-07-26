@@ -68,7 +68,7 @@ export const HEART_OPTIONS = [
 export const EMPTY_JOURNAL_MARKUP = {
   icon: 'auto_stories',
   title: 'No reflections yet.',
-  subtitle: 'Post one from Momentum.',
+  subtitle: 'Write one from Journal, Home, or any verse.',
 }
 
 export const SURAHS = [

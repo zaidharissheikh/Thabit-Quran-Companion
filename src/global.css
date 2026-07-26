@@ -1,0 +1,219 @@
+/**
+ * Thabit global theme + ayah typography tokens.
+ * Theme: html[data-theme="light"|"dark"]
+ * Ayah size: html[data-font-size="1"…"5"] → only .ayah-arabic / .ayah-translation
+ */
+
+:root,
+html[data-theme='dark'] {
+  --app-bg: #062c21;
+  --app-bg-soft: #083327;
+  --app-surface: #0a3d2e;
+  --app-text: #f3e5ab;
+  --app-text-muted: rgba(233, 209, 155, 0.72);
+  --app-accent: #c5a059;
+  --app-accent-text: #e9d19b;
+  --app-card-bg: #fdfaf3;
+  --app-card-text: #004d40;
+  --app-border: rgba(197, 160, 89, 0.28);
+  --app-nav-bg: rgba(6, 44, 33, 0.96);
+  --app-danger: #ffb4ab;
+  --app-sidebar-text: rgba(233, 209, 155, 0.55);
+  --app-sidebar-active: #c5a059;
+  --app-streak-panel: #083327;
+  --app-panel-muted: rgba(28, 28, 24, 0.4);
+
+  --font-body: 'Manrope', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Playfair Display', 'Noto Serif', serif;
+  --font-arabic: 'Amiri', serif;
+
+  --ayah-arabic-size: 2.25rem;
+  --ayah-translation-size: 1.125rem;
+  --ayah-arabic-weight: 500;
+  --ayah-translation-weight: 500;
+
+  color-scheme: dark;
+}
+
+html[data-theme='light'] {
+  --app-bg: #fdfaf3;
+  --app-bg-soft: #f5f2ea;
+  --app-surface: #ffffff;
+  --app-text: #062c21;
+  --app-text-muted: rgba(6, 44, 33, 0.62);
+  --app-accent: #8e6e33;
+  --app-accent-text: #584400;
+  --app-card-bg: #ffffff;
+  --app-card-text: #062c21;
+  --app-border: rgba(6, 44, 33, 0.12);
+  --app-nav-bg: rgba(253, 250, 243, 0.97);
+  --app-danger: #ba1a1a;
+  --app-sidebar-text: rgba(6, 44, 33, 0.45);
+  --app-sidebar-active: #8e6e33;
+  --app-streak-panel: #ffffff;
+  --app-panel-muted: rgba(6, 44, 33, 0.06);
+
+  color-scheme: light;
+}
+
+/* Display → Typography slider: ayah Arabic + translation only */
+html[data-font-size='1'] {
+  --ayah-arabic-size: 1.65rem;
+  --ayah-translation-size: 0.95rem;
+  --ayah-arabic-weight: 400;
+  --ayah-translation-weight: 400;
+}
+html[data-font-size='2'] {
+  --ayah-arabic-size: 1.9rem;
+  --ayah-translation-size: 1.05rem;
+  --ayah-arabic-weight: 450;
+  --ayah-translation-weight: 450;
+}
+html[data-font-size='3'] {
+  --ayah-arabic-size: 2.25rem;
+  --ayah-translation-size: 1.125rem;
+  --ayah-arabic-weight: 500;
+  --ayah-translation-weight: 500;
+}
+html[data-font-size='4'] {
+  --ayah-arabic-size: 2.65rem;
+  --ayah-translation-size: 1.3rem;
+  --ayah-arabic-weight: 600;
+  --ayah-translation-weight: 550;
+}
+html[data-font-size='5'] {
+  --ayah-arabic-size: 3.1rem;
+  --ayah-translation-size: 1.45rem;
+  --ayah-arabic-weight: 700;
+  --ayah-translation-weight: 600;
+}
+
+.ayah-arabic {
+  font-family: var(--font-arabic) !important;
+  font-size: var(--ayah-arabic-size) !important;
+  font-weight: var(--ayah-arabic-weight) !important;
+  line-height: 1.85 !important;
+}
+
+.ayah-translation {
+  font-family: var(--font-display) !important;
+  font-size: var(--ayah-translation-size) !important;
+  font-weight: var(--ayah-translation-weight) !important;
+  line-height: 1.65 !important;
+  font-style: italic;
+}
+
+.ayah-translation.ayah-translation--plain {
+  font-style: normal !important;
+  font-family: var(--font-body) !important;
+}
+
+/* Home Living Word: keep settings scale, but cap so the page fits the viewport */
+.home-ayah.ayah-arabic {
+  font-size: min(var(--ayah-arabic-size), clamp(1.15rem, 2.4vh + 0.75rem, 1.85rem)) !important;
+  line-height: 1.55 !important;
+}
+
+.home-ayah-translation.ayah-translation {
+  font-size: min(var(--ayah-translation-size), clamp(0.85rem, 1.2vh + 0.65rem, 1.05rem)) !important;
+  line-height: 1.45 !important;
+}
+
+html {
+  font-family: var(--font-body);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-family: var(--font-body);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+#root {
+  min-height: 100dvh;
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+.app-shell {
+  background: var(--app-bg) !important;
+  color: var(--app-text) !important;
+}
+
+.app-surface {
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+}
+
+.app-card-theme {
+  background: var(--app-card-bg) !important;
+  color: var(--app-card-text) !important;
+  border-color: var(--app-border) !important;
+}
+
+.app-streak-panel {
+  background: var(--app-streak-panel) !important;
+}
+
+.app-panel-muted {
+  background: var(--app-panel-muted) !important;
+}
+
+/* Light theme: force common dark utility shells */
+html[data-theme='light'] .bg-\[\#062c21\],
+html[data-theme='light'] .bg-\[\#002B24\],
+html[data-theme='light'] .bg-\[\#002b24\],
+html[data-theme='light'] .bg-\[\#002A24\],
+html[data-theme='light'] .bg-\[\#082620\],
+html[data-theme='light'] .bg-\[\#0d2119\],
+html[data-theme='light'] .bg-emerald-950,
+html[data-theme='light'] .bg-\[\#0a2e28\] {
+  background-color: var(--app-bg) !important;
+}
+
+html[data-theme='light'] .md\:bg-\[\#083327\],
+html[data-theme='light'] .md\:\!bg-\[\#083327\] {
+  background-color: var(--app-streak-panel) !important;
+}
+
+html[data-theme='light'] .text-\[\#e9d19b\],
+html[data-theme='light'] .text-\[\#f3e5ab\],
+html[data-theme='light'] .text-\[\#e5e2db\],
+html[data-theme='light'] .text-\[\#ffe088\],
+html[data-theme='light'] .text-\[\#ffe08b\],
+html[data-theme='light'] .text-\[\#E9D7A5\],
+html[data-theme='light'] .text-\[\#FDFBF7\],
+html[data-theme='light'] .text-\[\#FFD700\],
+html[data-theme='light'] .text-\[\#bfc9c4\] {
+  color: var(--app-text) !important;
+}
+
+html[data-theme='light'] .text-\[\#c5a059\],
+html[data-theme='light'] .text-\[\#ebc349\],
+html[data-theme='light'] .text-\[\#e9c349\],
+html[data-theme='light'] .text-\[\#D4AF37\],
+html[data-theme='light'] .text-\[\#cda72f\] {
+  color: var(--app-accent) !important;
+}
+
+html[data-theme='light'] .cream-card,
+html[data-theme='light'] .gold-rimmed {
+  background: var(--app-card-bg) !important;
+  color: var(--app-card-text) !important;
+  box-shadow: 0 8px 24px rgba(6, 44, 33, 0.08);
+}
+
+html[data-theme='light'] .royal-bg,
+html[data-theme='light'] .bg-pattern-dark,
+html[data-theme='light'] .royal-pattern,
+html[data-theme='light'] .emerald-pattern,
+html[data-theme='light'] .geometric-bg-reader {
+  background-color: var(--app-bg) !important;
+}
+
+html[data-theme='light'] .bg-\[\#1c1c18\]\/40 {
+  background-color: var(--app-panel-muted) !important;
+}
