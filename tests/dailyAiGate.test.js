@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { localDateKey } from '../src/lib/localDay.js';
 import { createDailyAiGate } from '../src/lib/dailyAiGate.js';
 
 describe('dailyAiGate', () => {
@@ -36,7 +37,7 @@ describe('dailyAiGate', () => {
 
   it('skips after syncFromCache for today', async () => {
     const gate = createDailyAiGate();
-    const today = new Date().toISOString().split('T')[0];
+    const today = localDateKey();
     gate.syncFromCache('reflection', { date: today, text: 'cached question' });
 
     const execute = vi.fn(async () => {});

@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import DesktopSidebar from './components/DesktopSidebar'
 import { resolveAvatarId } from './assets/avatars'
@@ -54,7 +54,7 @@ const emptyProgress = {
   goal: 10,
   streak: 0,
   versesReadToday: 0,
-  lastReadDate: new Date().toISOString().split('T')[0],
+  lastReadDate: localDateKey(),
   heartRating: 3,
   ramadanVerses: 0,
   sessions: [],
@@ -425,7 +425,7 @@ function App() {
 
   const generateNudge = useCallback(
     async (force = false) => {
-      const today = new Date().toISOString().split('T')[0]
+      const today = localDateKey()
       const hasCachedToday =
         progress.dailyNudge?.date === today && Boolean(progress.dailyNudge?.text)
 
@@ -461,7 +461,7 @@ function App() {
 
   const generateReflectionQuestion = useCallback(
     async (force = false) => {
-      const today = new Date().toISOString().split('T')[0]
+      const today = localDateKey()
       const hasCachedToday =
         progress.dailyReflection?.date === today &&
         Boolean(progress.dailyReflection?.text)
@@ -742,7 +742,7 @@ function App() {
 
   async function rateHeart(heartRating, label) {
     try {
-      const today = new Date().toISOString().split('T')[0]
+      const today = localDateKey()
       const newMoodHistory = { ...progress.moodHistory, [today]: heartRating }
       await persistProgress(
         { heartRating, moodHistory: newMoodHistory },

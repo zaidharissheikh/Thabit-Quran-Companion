@@ -1,4 +1,6 @@
-﻿/**
+import { localDateKey } from './localDay.js';
+
+/**
  * Session-scoped gate so concurrent generateNudge / generateReflectionQuestion
  * calls cannot both slip past an empty day-cache (production race + StrictMode).
  */
@@ -20,7 +22,7 @@ export function createDailyAiGate() {
      * @param {{ date?: string | null, text?: string }} cached
      */
     syncFromCache(kind, cached) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = localDateKey();
       if (cached?.date === today && cached?.text) {
         doneForDate[kind] = today;
         return true;
@@ -39,7 +41,7 @@ export function createDailyAiGate() {
      * @returns {Promise<'ran' | 'skipped-cache' | 'skipped-done' | 'skipped-inflight'>}
      */
     async run(kind, { force = false, hasCachedToday, onUseCache, execute }) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = localDateKey();
 
       if (!force) {
         if (doneForDate[kind] === today) {
