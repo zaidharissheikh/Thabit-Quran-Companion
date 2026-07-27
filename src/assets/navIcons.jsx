@@ -1,4 +1,4 @@
-/** Font Awesome solid icons for main navigation */
+﻿/** Font Awesome solid icons for main navigation */
 
 export const SIDEBAR_NAV_ITEMS = [
   { to: '/', label: 'Home', fa: 'fa-house' },

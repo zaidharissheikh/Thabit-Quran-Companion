@@ -15,11 +15,12 @@ export default createHandler({
 
     const { id } = parseOrThrow(chapterIdSchema, { id: req.query?.id });
     const query = parseOrThrow(versesQuerySchema, req.query || {});
+    // Sahih International (20) works on Quran Foundation; 131 often returns no text.
     const translationId =
       query.translations ||
-      Number(process.env.QURAN_TRANSLATION_ID || 131);
+      Number(process.env.QURAN_TRANSLATION_ID || 20);
 
-    const cacheKey = `quran:verses:${id}:t${translationId}:p${query.page}:pp${query.per_page}`;
+    const cacheKey = `quran:verses:v2:${id}:t${translationId}:p${query.page}:pp${query.per_page}`;
 
     const cached = await cacheGet(cacheKey);
     if (cached) {
@@ -27,10 +28,12 @@ export default createHandler({
       return;
     }
 
+    // QF omits Arabic/translations unless fields=text_uthmani is requested.
     const data = await quranFetch(`/content/api/v4/verses/by_chapter/${id}`, {
       language: 'en',
       words: 'false',
       translations: translationId,
+      fields: 'text_uthmani',
       page: query.page,
       per_page: query.per_page,
     });

@@ -1,8 +1,10 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import HeartRating from '../components/HeartRating'
 import { AvatarBadge } from '../assets/avatars'
+import { MOOD_STICKERS } from '../assets/moodStickers'
+import { HEART_OPTIONS } from '../data/content'
 
 import { localDateKey } from '../lib/localDay'
 import moodVerses from '../data/moodVerses.json'
@@ -38,7 +40,17 @@ export default function MomentumPage({
     String(state.ramadanVerses ?? 0),
   )
   const [detail, setDetail] = useState(null)
+  const [verseIdx, setVerseIdx] = useState(0)
   const navigate = useNavigate()
+
+  // Reset verse index whenever mood changes
+  const prevRating = useRef(state.heartRating)
+  useEffect(() => {
+    if (prevRating.current !== state.heartRating) {
+      setVerseIdx(0)
+      prevRating.current = state.heartRating
+    }
+  }, [state.heartRating])
 
   const weekDays = useMemo(() => buildWeekDays(state.sessions), [state.sessions])
   const maxDay = Math.max(...weekDays.map((d) => d.verses), 1)
@@ -57,13 +69,17 @@ export default function MomentumPage({
   const reflectionsCount = state.notesTotal ?? state.journals?.length ?? 0
   const ramadanVerses = state.ramadanVerses ?? 0
 
-  const recommendedVerse = useMemo(() => {
-    const ratingStr = state.heartRating ? String(state.heartRating) : '5'
-    const verses = moodVerses[ratingStr]
-    if (!verses || verses.length === 0) return null
-    const randomIndex = Math.floor(Math.random() * verses.length)
-    return verses[randomIndex]
+  const currentMoodOption = HEART_OPTIONS.find((o) => o.value === state.heartRating) || null
+
+  const versePool = useMemo(() => {
+    const ratingStr = state.heartRating ? String(state.heartRating) : null
+    if (!ratingStr) return []
+    return moodVerses[ratingStr] || []
   }, [state.heartRating])
+
+  const recommendedVerse = versePool.length > 0
+    ? versePool[verseIdx % versePool.length]
+    : null
 
   const weekSummary =
     totalVersesThisWeek === 0
@@ -98,8 +114,10 @@ export default function MomentumPage({
         </Link>
       </header>
 
-      <main className="pt-24 max-w-[430px] mx-auto px-6 space-y-10 md:space-y-0 md:pt-16 md:px-12 md:max-w-none md:mx-auto md:grid md:grid-cols-2 md:gap-8 flex flex-col">
-        {/* This week — simple bars */}
+      <main className="pt-20 max-w-[430px] mx-auto px-5 space-y-5 md:space-y-0 md:pt-16 md:px-12 md:max-w-none md:mx-auto md:grid md:grid-cols-2 md:gap-8 flex flex-col"
+        style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}
+      >
+        {/* This week - simple bars */}
         <section className="cream-card rounded-xl p-6 md:col-span-2">
           <div className="flex justify-between items-start gap-4 mb-2">
             <div>
@@ -207,7 +225,7 @@ export default function MomentumPage({
           </div>
           <p className="font-manrope text-sm text-[#004D40] opacity-80 leading-relaxed italic text-center px-4">
             {ramadanVerses === 0 && avgVerses === 0
-              ? 'Set your Ramadan pace (tap the number), then log reading — both sides will grow with you.'
+              ? 'Set your Ramadan pace (tap the number), then log reading - both sides will grow with you.'
               : '"Every verse today is a step toward the person you were in Ramadan."'}
           </p>
         </section>
@@ -219,9 +237,7 @@ export default function MomentumPage({
             onClick={() => openDetail('verses')}
             className="cream-card rounded-lg p-4 flex flex-col items-center text-center hover:shadow-md transition-shadow"
           >
-            <span className="material-symbols-outlined text-[#D4AF37] mb-2 text-3xl">
-              menu_book
-            </span>
+            <i className="fa-solid fa-book-quran text-[#D4AF37] mb-2 text-3xl" aria-hidden />
             <p className="font-headline text-2xl text-[#004D40] font-semibold">
               {totalVersesAllTime}
             </p>
@@ -238,9 +254,7 @@ export default function MomentumPage({
             onClick={() => openDetail('streak')}
             className="cream-card rounded-lg p-4 flex flex-col items-center text-center hover:shadow-md transition-shadow"
           >
-            <span className="material-symbols-outlined text-[#D4AF37] mb-2 text-3xl">
-              local_fire_department
-            </span>
+            <i className="fa-solid fa-fire text-[#D4AF37] mb-2 text-3xl" aria-hidden />
             <p className="font-headline text-2xl text-[#004D40] font-semibold">{state.streak}</p>
             <p className="font-manrope text-[11px] font-bold uppercase tracking-tighter text-[#004D40]">
               Day Streak
@@ -255,9 +269,7 @@ export default function MomentumPage({
             onClick={() => navigate('/bookmarks')}
             className="cream-card rounded-lg p-4 flex flex-col items-center text-center hover:shadow-md transition-shadow"
           >
-            <span className="material-symbols-outlined text-[#D4AF37] mb-2 text-3xl">
-              library_books
-            </span>
+            <i className="fa-solid fa-bookmark text-[#D4AF37] mb-2 text-3xl" aria-hidden />
             <p className="font-headline text-2xl text-[#004D40] font-semibold">
               {bookmarkedSurahCount}
             </p>
@@ -274,9 +286,7 @@ export default function MomentumPage({
             onClick={() => navigate('/journal')}
             className="cream-card rounded-lg p-4 flex flex-col items-center text-center hover:shadow-md transition-shadow"
           >
-            <span className="material-symbols-outlined text-[#D4AF37] mb-2 text-3xl">
-              history_edu
-            </span>
+            <i className="fa-solid fa-marker text-[#D4AF37] mb-2 text-3xl" aria-hidden />
             <p className="font-headline text-2xl text-[#004D40] font-semibold">
               {reflectionsCount}
             </p>
@@ -289,8 +299,8 @@ export default function MomentumPage({
           </button>
         </section>
 
-        {/* Heart + quick free note */}
-        <section className="cream-card rounded-xl p-6 md:row-span-2 h-full">
+        {/* Heart + Mood Calendar - full width */}
+        <section className="cream-card rounded-xl p-6 md:col-span-2">
           <h3 className="font-manrope text-sm font-semibold uppercase tracking-[0.1em] mb-4 text-[#004D40] text-center">
             How does your heart feel now?
           </h3>
@@ -300,12 +310,51 @@ export default function MomentumPage({
           <MoodCalendar moodHistory={state.moodHistory} />
         </section>
 
-        <section className="pb-8">
+        <section className="pb-8 md:col-span-2">
           <h4 className="font-headline text-sm uppercase tracking-[0.25em] mb-4 flex items-center gap-2 text-[#FDFBF7]">
             Recommended for You
           </h4>
-          {recommendedVerse && (
-            <div className="cream-card rounded-xl p-6 flex flex-col items-center gap-6 overflow-hidden transition-all shadow-lg">
+
+          {/* Empty state - no mood set */}
+          {!state.heartRating && (
+            <div className="cream-card rounded-xl p-6 flex flex-col items-center gap-3 text-center">
+              <div className="flex gap-2">
+                {HEART_OPTIONS.map((o) => (
+                  <img
+                    key={o.value}
+                    src={MOOD_STICKERS[o.stickerKey]}
+                    alt={o.label}
+                    className="w-8 h-8 object-contain grayscale opacity-40"
+                    draggable={false}
+                  />
+                ))}
+              </div>
+              <p className="font-manrope text-sm text-[#004D40]/70 leading-relaxed">
+                Rate how your heart feels above to receive a personalised āyah.
+              </p>
+              <span className="material-symbols-outlined text-[#D4AF37] animate-bounce text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                arrow_upward
+              </span>
+            </div>
+          )}
+
+          {/* Verse card */}
+          {recommendedVerse && currentMoodOption && (
+            <div className="cream-card rounded-xl p-6 flex flex-col items-center gap-5 overflow-hidden shadow-lg">
+              {/* Mood chip */}
+              <div className="flex items-center gap-2 self-start bg-[#004D40]/8 rounded-full px-3 py-1.5">
+                <img
+                  src={MOOD_STICKERS[currentMoodOption.stickerKey]}
+                  alt={currentMoodOption.label}
+                  className="w-5 h-5 object-contain"
+                  draggable={false}
+                />
+                <span className="font-manrope text-[11px] font-bold uppercase tracking-wider text-[#004D40]/70">
+                  For your{' '}
+                  <span className="text-[#8e6e33]">{currentMoodOption.label}</span>{' '}heart
+                </span>
+              </div>
+
               <div className="relative w-full text-center">
                 <p className="font-headline text-[#D4AF37] font-semibold mb-4 text-lg">
                   {recommendedVerse.ref}
@@ -321,13 +370,25 @@ export default function MomentumPage({
                   {recommendedVerse.en}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => navigate(`/surah/${recommendedVerse.surahNum}`)}
-                className="bg-gradient-to-br from-[#FFF0BE] via-[#E9C349] to-[#D4AF37] px-6 py-3 rounded-full font-manrope text-sm uppercase tracking-widest transition-all shadow-md hover:shadow-lg font-bold text-[#004D40] w-full"
-              >
-                Read Context
-              </button>
+
+              <div className="flex gap-3 w-full">
+                <button
+                  type="button"
+                  onClick={() => setVerseIdx((i) => i + 1)}
+                  className="flex items-center justify-center gap-1.5 border border-[#D4AF37]/50 text-[#8e6e33] rounded-full px-4 py-2.5 font-manrope text-xs font-bold uppercase tracking-wider hover:bg-[#D4AF37]/10 transition-colors shrink-0"
+                  title="Show another verse"
+                >
+                  <span className="material-symbols-outlined text-[16px]">refresh</span>
+                  New verse
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/surah/${recommendedVerse.surahNum}#ayah-${recommendedVerse.ayahNum}`)}
+                  className="flex-1 bg-gradient-to-br from-[#FFF0BE] via-[#E9C349] to-[#D4AF37] px-4 py-2.5 rounded-full font-manrope text-xs uppercase tracking-widest transition-all shadow-md hover:shadow-lg font-bold text-[#004D40]"
+                >
+                  Read Context
+                </button>
+              </div>
             </div>
           )}
         </section>
@@ -366,7 +427,7 @@ export default function MomentumPage({
                 <h3 className="font-headline text-2xl font-semibold mb-2">Day streak</h3>
                 <p className="text-sm text-[#004d40]/70 mb-5 font-manrope">
                   Your streak grows when you log reading on consecutive days. Miss a day and it
-                  resets — start again gently.
+                  resets - start again gently.
                 </p>
                 <p className="font-headline text-5xl text-[#D4AF37] font-bold mb-2">
                   {state.streak}
@@ -375,8 +436,8 @@ export default function MomentumPage({
                   {state.streak === 0
                     ? "No streak yet. Mark today's reading on Home to begin."
                     : state.streak === 1
-                      ? 'One day so far — come back tomorrow to make it two.'
-                      : `${state.streak} days in a row. MashaAllah — keep showing up.`}
+                      ? 'One day so far - come back tomorrow to make it two.'
+                      : `${state.streak} days in a row. MashaAllah - keep showing up.`}
                 </p>
               </>
             )}

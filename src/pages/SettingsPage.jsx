@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AVATAR_OPTIONS, AvatarBadge, resolveAvatarId } from '../assets/avatars'
 import {
@@ -23,7 +23,7 @@ export default function SettingsPage({
   const activeAvatar = resolveAvatarId(avatarId)
 
   function showComingSoon(feature) {
-    setSoonToast(`${feature} — feature coming soon`)
+    setSoonToast(`${feature} - feature coming soon`)
     window.setTimeout(() => setSoonToast(''), 2200)
   }
 

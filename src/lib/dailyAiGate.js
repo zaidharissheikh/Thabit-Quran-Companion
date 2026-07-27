@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Session-scoped gate so concurrent generateNudge / generateReflectionQuestion
  * calls cannot both slip past an empty day-cache (production race + StrictMode).
  */

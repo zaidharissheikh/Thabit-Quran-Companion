@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Thabit global theme + ayah typography tokens.
  * Theme: html[data-theme="light"|"dark"]
  * Ayah size: html[data-font-size="1"…"5"] → only .ayah-arabic / .ayah-translation
@@ -108,15 +108,14 @@ html[data-font-size='5'] {
   font-family: var(--font-body) !important;
 }
 
-/* Home Living Word: keep settings scale, but cap so the page fits the viewport */
 .home-ayah.ayah-arabic {
-  font-size: min(var(--ayah-arabic-size), clamp(1.15rem, 2.4vh + 0.75rem, 1.85rem)) !important;
-  line-height: 1.55 !important;
+  font-size: min(var(--ayah-arabic-size), clamp(1.4rem, 2.8vw + 0.8rem, 2.4rem)) !important;
+  line-height: 1.75 !important;
 }
 
 .home-ayah-translation.ayah-translation {
-  font-size: min(var(--ayah-translation-size), clamp(0.85rem, 1.2vh + 0.65rem, 1.05rem)) !important;
-  line-height: 1.45 !important;
+  font-size: min(var(--ayah-translation-size), clamp(0.95rem, 1.3vw + 0.7rem, 1.2rem)) !important;
+  line-height: 1.55 !important;
 }
 
 html {

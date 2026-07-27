@@ -1,9 +1,9 @@
-import { getCollection } from './db.js';
+﻿import { getCollection } from './db.js';
 import { AppError } from './errors.js';
 
 /**
  * Atomic fixed-window rate limit via findOneAndUpdate + aggregation pipeline.
- * Uses $inc / conditional reset — never read-then-write.
+ * Uses $inc / conditional reset - never read-then-write.
  *
  * @param {string} key
  * @param {number} limit

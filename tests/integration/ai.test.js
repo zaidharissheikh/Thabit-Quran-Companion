@@ -157,7 +157,7 @@ describe('integration: ai', () => {
     expect(b1.json.source).not.toBe('cache');
 
     // generateReflection invoked for A miss, A hit (still enters fn, cache inside),
-    // and B miss — assert Gemini fetch only twice (A + B), not shared.
+    // and B miss - assert Gemini fetch only twice (A + B), not shared.
     const geminiCalls = vi.mocked(fetch).mock.calls.filter(([url]) =>
       String(url).includes('generativelanguage.googleapis.com'),
     );

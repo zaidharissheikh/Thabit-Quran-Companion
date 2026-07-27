@@ -1,4 +1,4 @@
-import chaptersHandler from './_lib/quran/chapters.js';
+﻿import chaptersHandler from './_lib/quran/chapters.js';
 import chapterIdHandler from './_lib/quran/chapters/[id].js';
 import chapterVersesHandler from './_lib/quran/chapters/[id]/verses.js';
 

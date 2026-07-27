@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+﻿import { createHash } from 'node:crypto';
 import { aiCacheTtl, cacheGet, cacheSet } from './cache.js';
 import { AppError, log } from './errors.js';
 
@@ -148,7 +148,7 @@ function localFallback(prompt, context) {
     return 'What is one thing from your reading today that you want to carry into tomorrow?';
   }
   if (lower.includes('missed') || lower.includes('welcome back')) {
-    return `Dear ${name} — the most beloved deeds are the most consistent, even if small. One verse today is enough.`;
+    return `Dear ${name} - the most beloved deeds are the most consistent, even if small. One verse today is enough.`;
   }
   return 'Every verse you read is a conversation with Allah. Make time for that today.';
 }

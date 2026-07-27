@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongodb';
+﻿import { ObjectId } from 'mongodb';
 import { requireAuth } from '../_lib/auth.js';
 import { getCollection } from '../_lib/db.js';
 import { createHandler, sendJson } from '../_lib/handler.js';
@@ -21,6 +21,8 @@ function serializeProgress(doc, name) {
     dailyNudge: doc.dailyNudge || { date: null, text: '' },
     dailyReflection: doc.dailyReflection || { date: null, text: '' },
     moodHistory: doc.moodHistory || {},
+    readLogs: doc.readLogs || {},
+    preferences: doc.preferences || {},
     updatedAt: doc.updatedAt || null,
   };
 }
@@ -65,18 +67,25 @@ export default createHandler({
     }
 
     const body = parseOrThrow(progressUpdateSchema, await readJsonBody(req));
-    await ensureProgress(progress, userId, name);
+    const existing = await ensureProgress(progress, userId, name);
 
     const now = new Date();
+    const { preferences: prefsPatch, ...rest } = body;
+    const $set = {
+      ...rest,
+      name,
+      updatedAt: now,
+    };
+    if (prefsPatch) {
+      $set.preferences = {
+        ...(existing.preferences || {}),
+        ...prefsPatch,
+      };
+    }
+
     const doc = await progress.findOneAndUpdate(
       { userId },
-      {
-        $set: {
-          ...body,
-          name,
-          updatedAt: now,
-        },
-      },
+      { $set },
       { returnDocument: 'after' },
     );
 

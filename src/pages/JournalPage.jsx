@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import LoadingDots from '../components/LoadingDots'
@@ -10,7 +10,7 @@ const MODES = [
   {
     id: 'free',
     label: 'Anything',
-    hint: 'A thought, dua, or feeling — not tied to a specific ayah.',
+    hint: 'A thought, dua, or feeling - not tied to a specific ayah.',
   },
   {
     id: 'today',

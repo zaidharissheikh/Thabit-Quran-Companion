@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+﻿import { createHash, randomBytes } from 'node:crypto';
 import { parse as parseCookie, serialize as serializeCookie } from 'cookie';
 import * as jose from 'jose';
 import { ObjectId } from 'mongodb';
@@ -183,7 +183,7 @@ export async function verifyAccessToken(req) {
 
 /**
  * Auth middleware: Origin/Referer allowlist + JWT verification.
- * Always derives identity from the verified token — never from the body.
+ * Always derives identity from the verified token - never from the body.
  * @param {import('http').IncomingMessage} req
  */
 export async function requireAuth(req) {
@@ -192,7 +192,7 @@ export async function requireAuth(req) {
 }
 
 /**
- * For auth routes that set cookies (login/register/refresh) — still require Origin.
+ * For auth routes that set cookies (login/register/refresh) - still require Origin.
  * @param {import('http').IncomingMessage} req
  */
 export function requireOrigin(req) {

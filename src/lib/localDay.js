@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Local calendar helpers for streak / daily progress (browser timezone).
  * Day boundary: local midnight.
  */

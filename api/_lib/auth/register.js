@@ -1,4 +1,4 @@
-import { requireOrigin, createRefreshToken, setAuthCookies, signAccessToken } from '../auth.js';
+﻿import { requireOrigin, createRefreshToken, setAuthCookies, signAccessToken } from '../auth.js';
 import { getCollection } from '../db.js';
 import { AppError } from '../errors.js';
 import { createHandler, sendJson } from '../handler.js';

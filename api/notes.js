@@ -1,4 +1,4 @@
-import indexHandler from './_lib/notes/index.js';
+﻿import indexHandler from './_lib/notes/index.js';
 import idHandler from './_lib/notes/[id].js';
 
 export default async function notesRouter(req, res) {

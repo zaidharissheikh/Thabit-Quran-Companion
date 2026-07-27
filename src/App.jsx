@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import DesktopSidebar from './components/DesktopSidebar'
 import { resolveAvatarId } from './assets/avatars'
@@ -42,9 +42,11 @@ import {
 } from './lib/localDay'
 import {
   claimVerseReadToday,
-  getReadCountForDay,
-  hasReadVerseToday,
-  sessionsFromReadLogs,
+  collectLocalReadLogs,
+  getReadVerseKeysForDay,
+  hydrateLocalReadLogs,
+  mergeReadLogs,
+  mergeSessionsWithReadLogs,
 } from './lib/verseRead'
 import { sendStreakReminder } from './lib/notifications'
 
@@ -57,6 +59,8 @@ const emptyProgress = {
   ramadanVerses: 0,
   sessions: [],
   moodHistory: {},
+  readLogs: {},
+  preferences: {},
   dailyNudge: { date: null, text: '' },
   dailyReflection: { date: null, text: '' },
 }
@@ -68,6 +72,8 @@ function App() {
   /** Invalidates in-flight loadUserData when remounting / logging out. */
   const dataLoadIdRef = useRef(0)
   const dailyAiGateRef = useRef(createDailyAiGate())
+  const favoritePersistTimer = useRef(null)
+  const favoriteIdsRef = useRef([])
 
   const [authChecking, setAuthChecking] = useState(true)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -122,7 +128,7 @@ function App() {
     (err, fallback = 'Something went wrong') => {
       if (err instanceof ApiError) {
         if (err.isRateLimited) {
-          showToast('Too many requests — try again shortly')
+          showToast('Too many requests - try again shortly')
           return
         }
         showToast(err.message || fallback)
@@ -147,11 +153,15 @@ function App() {
       const p = progressRes.progress || emptyProgress
       const dailyNudge = p.dailyNudge || { date: null, text: '' }
       const dailyReflection = p.dailyReflection || { date: null, text: '' }
-      // Unique ayah reads (local log) are the source of truth — not the daily goal
-      // and not legacy "fill remaining goal" session dumps.
-      const sessions = sessionsFromReadLogs(p.sessions || [])
+
+      // Mongo readLogs are the source of truth; localStorage is a cache.
+      hydrateLocalReadLogs(p.readLogs || {})
+      const readLogs = mergeReadLogs(p.readLogs || {}, collectLocalReadLogs())
+      hydrateLocalReadLogs(readLogs)
+
       const todayKey = localDateKey()
-      const versesReadToday = getReadCountForDay(todayKey)
+      const sessions = mergeSessionsWithReadLogs(p.sessions || [], readLogs)
+      const versesReadToday = (readLogs[todayKey] || []).length
       const streak = computeStreakFromSessions(sessions)
       const lastReadDate =
         versesReadToday > 0
@@ -159,6 +169,14 @@ function App() {
           : sessions.length
             ? sessions[sessions.length - 1].date
             : p.lastReadDate || null
+
+      const prefs = p.preferences || {}
+      if (prefs.avatarId) setAvatarId(resolveAvatarId(prefs.avatarId))
+      if (prefs.theme === 'light' || prefs.theme === 'dark') setTheme(prefs.theme)
+      if (prefs.fontSize >= 1 && prefs.fontSize <= 5) setFontSize(prefs.fontSize)
+      favoriteIdsRef.current = Array.isArray(prefs.favoriteSurahIds)
+        ? prefs.favoriteSurahIds.map(Number)
+        : []
 
       setProgress({
         goal: p.goal ?? 10,
@@ -168,6 +186,8 @@ function App() {
         heartRating: p.heartRating ?? 3,
         ramadanVerses: p.ramadanVerses ?? 0,
         sessions,
+        readLogs,
+        preferences: prefs,
         dailyNudge,
         dailyReflection,
         moodHistory: p.moodHistory || {},
@@ -177,7 +197,8 @@ function App() {
         streak !== (p.streak ?? 0) ||
         versesReadToday !== (p.versesReadToday ?? 0) ||
         lastReadDate !== (p.lastReadDate || null) ||
-        JSON.stringify(sessions) !== JSON.stringify(p.sessions || [])
+        JSON.stringify(sessions) !== JSON.stringify(p.sessions || []) ||
+        JSON.stringify(readLogs) !== JSON.stringify(p.readLogs || {})
 
       if (shouldPersist) {
         try {
@@ -186,6 +207,7 @@ function App() {
             versesReadToday,
             sessions,
             lastReadDate,
+            readLogs,
           })
         } catch {
           /* keep local synced view */
@@ -278,6 +300,52 @@ function App() {
     localStorage.setItem('thabit_avatar', avatarId)
   }, [avatarId])
 
+  // Persist display preferences to Mongo so they follow the account across devices.
+  useEffect(() => {
+    if (!isLoggedIn || dataLoading || authChecking) return undefined
+    const prev = progress.preferences || {}
+    const prefs = {
+      avatarId,
+      theme,
+      fontSize,
+      favoriteSurahIds: Array.isArray(prev.favoriteSurahIds)
+        ? prev.favoriteSurahIds
+        : [],
+    }
+    if (
+      prev.avatarId === prefs.avatarId &&
+      prev.theme === prefs.theme &&
+      prev.fontSize === prefs.fontSize
+    ) {
+      return undefined
+    }
+    const t = window.setTimeout(() => {
+      progressApi
+        .patch({ preferences: prefs })
+        .then((res) => {
+          if (res?.progress?.preferences) {
+            setProgress((p) => ({
+              ...p,
+              preferences: {
+                ...(p.preferences || {}),
+                ...res.progress.preferences,
+              },
+            }))
+          }
+        })
+        .catch(() => {})
+    }, 400)
+    return () => window.clearTimeout(t)
+  }, [
+    isLoggedIn,
+    dataLoading,
+    authChecking,
+    avatarId,
+    theme,
+    fontSize,
+    progress.preferences,
+  ])
+
   // Re-check streak / daily counters when the local calendar day changes (midnight).
   useEffect(() => {
     if (!isLoggedIn) return undefined
@@ -285,8 +353,10 @@ function App() {
     const tick = () => {
       setProgress((prev) => {
         const todayKey = localDateKey()
-        const sessions = sessionsFromReadLogs(prev.sessions)
-        const versesReadToday = getReadCountForDay(todayKey)
+        const readLogs = mergeReadLogs(prev.readLogs || {}, collectLocalReadLogs())
+        hydrateLocalReadLogs(readLogs)
+        const sessions = mergeSessionsWithReadLogs(prev.sessions || [], readLogs)
+        const versesReadToday = (readLogs[todayKey] || []).length
         const streak = computeStreakFromSessions(sessions)
         const lastReadDate =
           versesReadToday > 0
@@ -298,9 +368,10 @@ function App() {
           versesReadToday === (prev.versesReadToday ?? 0) &&
           streak === (prev.streak ?? 0) &&
           lastReadDate === (prev.lastReadDate || null) &&
-          JSON.stringify(sessions) === JSON.stringify(prev.sessions || [])
+          JSON.stringify(sessions) === JSON.stringify(prev.sessions || []) &&
+          JSON.stringify(readLogs) === JSON.stringify(prev.readLogs || {})
         if (unchanged) return prev
-        const patch = { sessions, versesReadToday, streak, lastReadDate }
+        const patch = { sessions, versesReadToday, streak, lastReadDate, readLogs }
         progressApi.patch(patch).catch(() => {})
         return { ...prev, ...patch }
       })
@@ -335,10 +406,13 @@ function App() {
           heartRating: p.heartRating,
           ramadanVerses: p.ramadanVerses,
           sessions: p.sessions || [],
+          readLogs: p.readLogs || {},
+          preferences: p.preferences || {},
           dailyNudge: p.dailyNudge || { date: null, text: '' },
           dailyReflection: p.dailyReflection || { date: null, text: '' },
           moodHistory: p.moodHistory || {},
         })
+        if (p.readLogs) hydrateLocalReadLogs(p.readLogs)
         return p
       } catch (err) {
         showApiError(err, 'Could not save progress')
@@ -534,10 +608,16 @@ function App() {
       }
 
       const before = progress.versesReadToday ?? 0
-      const count = getReadCountForDay()
+      const todayKey = localDateKey()
+      const todayKeys = getReadVerseKeysForDay(todayKey)
+      const readLogs = mergeReadLogs(progress.readLogs || {}, {
+        [todayKey]: todayKeys,
+      })
+      const count = todayKeys.length
       const base = {
         ...progress,
-        sessions: sessionsFromReadLogs(progress.sessions),
+        sessions: mergeSessionsWithReadLogs(progress.sessions || [], readLogs),
+        readLogs,
       }
       const result = applyAbsoluteVerseCount(base, count)
       const reachedGoal =
@@ -548,19 +628,20 @@ function App() {
         streak: result.streak,
         sessions: result.sessions,
         lastReadDate: result.lastReadDate,
+        readLogs,
       }
 
       try {
         await persistProgress(patch, patch)
         if (reachedGoal) {
-          showToast(`MashaAllah! Daily goal met — ${result.streak}-day streak`)
+          showToast(`MashaAllah! Daily goal met - ${result.streak}-day streak`)
         } else {
           showToast(
             `Ayah ${surahId}:${ayahNumber} counted (${result.versesReadToday}/${progress.goal})`,
           )
         }
       } catch {
-        /* handled — read log already claimed; next load will resync */
+        /* handled - read log already claimed; next load will resync */
       }
     },
     [progress, persistProgress, showToast],
@@ -623,6 +704,41 @@ function App() {
       showApiError(err, 'Could not bookmark')
     }
   }
+
+  const toggleFavoriteSurah = useCallback(
+    (surahNum) => {
+      const n = Number(surahNum)
+      if (!Number.isFinite(n) || n < 1 || n > 114) return
+
+      const prev = Array.isArray(favoriteIdsRef.current)
+        ? favoriteIdsRef.current
+        : []
+      const set = new Set(prev.map(Number))
+      const adding = !set.has(n)
+      if (adding) set.add(n)
+      else set.delete(n)
+      const favoriteSurahIds = [...set].sort((a, b) => a - b)
+      favoriteIdsRef.current = favoriteSurahIds
+
+      setProgress((p) => ({
+        ...p,
+        preferences: { ...(p.preferences || {}), favoriteSurahIds },
+      }))
+      showToast(adding ? 'Added to favorites' : 'Removed from favorites')
+
+      if (favoritePersistTimer.current) {
+        window.clearTimeout(favoritePersistTimer.current)
+      }
+      favoritePersistTimer.current = window.setTimeout(() => {
+        progressApi
+          .patch({ preferences: { favoriteSurahIds: favoriteIdsRef.current } })
+          .catch(() => {
+            showToast('Could not sync favorites')
+          })
+      }, 450)
+    },
+    [showToast],
+  )
 
   async function rateHeart(heartRating, label) {
     try {
@@ -781,7 +897,15 @@ function App() {
                   />
                 }
               />
-              <Route path="/reader" element={<ReaderPage state={state} />} />
+              <Route
+                path="/reader"
+                element={
+                  <ReaderPage
+                    state={state}
+                    onToggleFavoriteSurah={toggleFavoriteSurah}
+                  />
+                }
+              />
               <Route path="/bookmarks" element={<BookmarksPage state={state} />} />
               <Route
                 path="/surah/:id"

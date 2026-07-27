@@ -57,18 +57,18 @@ Set these in the Vercel project settings (Production + Preview as noted).
 | `QF_PROD_CLIENT_ID` | Yes (production) | Used when `VERCEL_ENV=production` |
 | `QF_PROD_CLIENT_SECRET` | Yes (production) | Server only |
 | `AI_API_KEY` | Recommended | Gemini key (server-side) |
-| `AI_MODEL` | No | Default `gemini-3.1-flash-lite` |
-| `QURAN_TRANSLATION_ID` | No | Default `131` |
+| `QF_ENV` | No | Set `production` to force Quran.com production credentials locally |
+| `QURAN_TRANSLATION_ID` | No | Default `20` (Sahih International) |
 
 **QF environment selection:** local and Vercel Preview always use the **prelive** credential set. Vercel Production (`VERCEL_ENV=production`) uses the **prod** credential set. Optional override: `QF_ENV=production`.
 
 ## Auth model
 
-- Passwords: **argon2id**
-- Access JWT (~15m) in `thabit_access` cookie — `httpOnly`, `Secure` (prod), `SameSite=Strict`, `Path=/`
-- Refresh token (~7d) in `thabit_refresh` cookie — `Path=/api/auth`, hashed (SHA-256) in Mongo
+- Passwords: **argon2id** (`@node-rs/argon2` for cross-platform Vercel compatibility)
+- Access JWT (~15m) in `thabit_access` cookie (`httpOnly`, `Secure` in prod, `SameSite=Strict`, `Path=/`)
+- Refresh token (~7d) in `thabit_refresh` cookie (`Path=/api/auth`, hashed with SHA-256 in Mongo)
 - Protected routes: verify JWT **and** allowlisted `Origin` / `Referer`
-- Client must call APIs with `credentials: 'include'` — **never** store tokens in `localStorage`
+- Client must call APIs with `credentials: 'include'` - **never** store tokens in `localStorage`
 
 ## Endpoints
 
@@ -80,7 +80,7 @@ Error shape (all failures):
 
 ### Health (extra utility)
 
-- `GET /api/health` — config readiness flags (no secrets)
+- `GET /api/health` - config readiness flags (no secrets)
 
 ### Auth
 
@@ -96,7 +96,7 @@ Error shape (all failures):
 
 | Method | Path | Auth |
 |--------|------|------|
-| GET | `/api/progress` | Yes — seeds defaults on first read |
+| GET | `/api/progress` | Yes - seeds defaults on first read |
 | PUT / PATCH | `/api/progress` | Yes |
 
 ### Bookmarks
@@ -148,9 +148,7 @@ api/
 scripts/setup-indexes.mjs
 tests/
 BACKEND.md
+FRONTEND.md
+README.md
 vercel.json
 ```
-
-## Frontend wiring (next step, not done here)
-
-Replace `localStorage` auth/progress and `VITE_GEMINI_API_KEY` calls with `fetch('/api/...', { credentials: 'include' })`. Remove any client-side AI keys from the Vite bundle.

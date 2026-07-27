@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 
 /**
  * Simple modal for writing a journal entry (free or verse-linked).

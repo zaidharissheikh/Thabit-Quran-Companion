@@ -1,4 +1,4 @@
-import registerHandler from '../../api/auth/register.js';
+import registerHandler from '../../api/_lib/auth/register.js';
 import {
   ALLOWED_ORIGIN,
   invoke,

@@ -1,4 +1,4 @@
-import { cacheGet, cacheSet, quranCacheTtl } from '../cache.js';
+﻿import { cacheGet, cacheSet, quranCacheTtl } from '../cache.js';
 import { createHandler, sendJson } from '../handler.js';
 import { quranFetch } from '../quranClient.js';
 import { rateLimitQuranIp } from '../rateLimit.js';

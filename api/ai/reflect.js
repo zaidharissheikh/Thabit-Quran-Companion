@@ -1,4 +1,4 @@
-import { requireAuth } from '../_lib/auth.js';
+﻿import { requireAuth } from '../_lib/auth.js';
 import { generateReflection } from '../_lib/aiClient.js';
 import { createHandler, sendJson } from '../_lib/handler.js';
 import { rateLimitAiUser } from '../_lib/rateLimit.js';

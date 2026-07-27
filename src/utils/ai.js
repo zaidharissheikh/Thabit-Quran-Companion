@@ -1,4 +1,4 @@
-import { ApiError, aiApi } from '../lib/api';
+﻿import { ApiError, aiApi } from '../lib/api';
 
 /**
  * Server-side AI reflection via POST /api/ai/reflect.
@@ -22,7 +22,7 @@ export async function askAi(prompt, context = {}, maxTokens = 180) {
     return data?.text || fallback(prompt, context);
   } catch (err) {
     if (err instanceof ApiError && err.isRateLimited) {
-      return 'Please try again in a little while — the reflection helper is resting.';
+      return 'Please try again in a little while - the reflection helper is resting.';
     }
     return fallback(prompt, context);
   }
@@ -38,7 +38,7 @@ function fallback(prompt, context) {
     return 'What is one thing from your reading today that you want to carry into tomorrow?';
   }
   if (lower.includes('missed') || lower.includes('welcome back')) {
-    return `Dear ${name} — the most beloved deeds are the most consistent, even if small. One verse today is enough.`;
+    return `Dear ${name} - the most beloved deeds are the most consistent, even if small. One verse today is enough.`;
   }
   return 'Every verse you read is a conversation with Allah. Make time for that today.';
 }

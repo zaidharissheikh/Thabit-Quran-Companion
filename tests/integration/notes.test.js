@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import noteIdHandler from '../../api/notes/[id].js';
-import notesHandler from '../../api/notes/index.js';
+import noteIdHandler from '../../api/_lib/notes/[id].js';
+import notesHandler from '../../api/_lib/notes/index.js';
 import {
   ALLOWED_ORIGIN,
   invoke,
@@ -83,9 +83,9 @@ describe('integration: notes', () => {
     expect(missing.status).toBe(404);
   });
 
-  it('scopes by owner — foreign IDs return 404 (not 403)', async () => {
-    const userA = await registerUser({ name: 'A' });
-    const userB = await registerUser({ name: 'B' });
+  it('scopes by owner - foreign IDs return 404 (not 403)', async () => {
+    const userA = await registerUser({ name: 'User A' });
+    const userB = await registerUser({ name: 'User B' });
 
     const created = await invoke(notesHandler, {
       method: 'POST',

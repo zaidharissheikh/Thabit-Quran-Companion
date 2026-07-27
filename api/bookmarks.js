@@ -1,4 +1,4 @@
-import indexHandler from './_lib/bookmarks/index.js';
+﻿import indexHandler from './_lib/bookmarks/index.js';
 import idHandler from './_lib/bookmarks/[id].js';
 
 export default async function bookmarksRouter(req, res) {

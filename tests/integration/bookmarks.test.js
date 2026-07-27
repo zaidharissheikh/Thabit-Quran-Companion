@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import bookmarkIdHandler from '../../api/bookmarks/[id].js';
-import bookmarksHandler from '../../api/bookmarks/index.js';
+import bookmarkIdHandler from '../../api/_lib/bookmarks/[id].js';
+import bookmarksHandler from '../../api/_lib/bookmarks/index.js';
 import {
   ALLOWED_ORIGIN,
   invoke,
@@ -87,9 +87,9 @@ describe('integration: bookmarks', () => {
     expect(missing.status).toBe(404);
   });
 
-  it('scopes by owner — foreign IDs return 404 (not 403)', async () => {
-    const userA = await registerUser({ name: 'A' });
-    const userB = await registerUser({ name: 'B' });
+  it('scopes by owner - foreign IDs return 404 (not 403)', async () => {
+    const userA = await registerUser({ name: 'User A' });
+    const userB = await registerUser({ name: 'User B' });
 
     const created = await invoke(bookmarksHandler, {
       method: 'POST',

@@ -1,4 +1,4 @@
-import { AppError } from './errors.js';
+﻿import { AppError } from './errors.js';
 
 /**
  * @returns {string[]}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError } from '../lib/api'
 import { validateEmail, validateLoginPassword } from '../lib/formValidation'
@@ -232,7 +232,7 @@ export default function LoginPage({ onLogin }) {
               Coming soon
             </h3>
             <p className="font-manrope text-sm text-[#e5e2db]/75 leading-relaxed mb-6">
-              Password reset is not implemented yet. This feature is coming soon —
+              Password reset is not implemented yet. This feature is coming soon -
               please sign in with your current password, or create a new account if
               you need access.
             </p>

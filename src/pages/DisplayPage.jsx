@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+﻿import { useNavigate } from 'react-router-dom'
 
 export default function DisplayPage({ theme, fontSize, onUpdateTheme, onUpdateFontSize }) {
   const navigate = useNavigate()
@@ -105,7 +105,7 @@ export default function DisplayPage({ theme, fontSize, onUpdateTheme, onUpdateFo
               </div>
               <p className="text-[11px] text-[var(--app-card-text)]/55 font-manrope">
                 Only changes ayah Arabic and translation on Home (Living Word), Surah reading, and
-                Play — not menus or other pages.
+                Play - not menus or other pages.
               </p>
             </div>
 

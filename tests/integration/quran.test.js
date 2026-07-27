@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import chaptersHandler from '../../api/quran/chapters.js';
-import chapterHandler from '../../api/quran/chapters/[id].js';
+import chaptersHandler from '../../api/_lib/quran/chapters.js';
+import chapterHandler from '../../api/_lib/quran/chapters/[id].js';
 import { clearQfTokenCache, qfTokenFetcher, quranFetch } from '../../api/_lib/quranClient.js';
 import { invoke } from '../helpers/http.js';
 
@@ -109,7 +109,7 @@ describe('integration: quran', () => {
     expect(blocked.json.error.code).toBe('RATE_LIMITED');
   });
 
-  it('caches OAuth token — fetchQfToken only once across content requests', async () => {
+  it('caches OAuth token - fetchQfToken only once across content requests', async () => {
     // Use real quranFetch path (unwrap mock) for this token-cache assertion.
     const { quranFetch: realFetch } = await vi.importActual('../../api/_lib/quranClient.js');
     vi.mocked(quranFetch).mockImplementation(realFetch);

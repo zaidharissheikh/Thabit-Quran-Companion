@@ -1,4 +1,4 @@
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+﻿const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const SPECIAL_RE = /[^A-Za-z0-9]/
 
 /** Password: 8–20 chars, upper, lower, digit, special */

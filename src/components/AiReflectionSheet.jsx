@@ -1,4 +1,4 @@
-import LoadingDots from './LoadingDots'
+﻿import LoadingDots from './LoadingDots'
 
 export default function AiReflectionSheet({ open, verseRef, body, loading, onClose }) {
   return (

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+﻿import { z } from 'zod';
 
 export const createBookmarkSchema = z.object({
   surahId: z.coerce.number().int().min(1).max(114),

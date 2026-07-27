@@ -1,4 +1,4 @@
-import loginHandler from './_lib/auth/login.js';
+﻿import loginHandler from './_lib/auth/login.js';
 import registerHandler from './_lib/auth/register.js';
 import logoutHandler from './_lib/auth/logout.js';
 import meHandler from './_lib/auth/me.js';

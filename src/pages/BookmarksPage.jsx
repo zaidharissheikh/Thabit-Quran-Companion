@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+﻿import { Link, useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { SURAHS } from '../data/content'
 

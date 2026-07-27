@@ -10,7 +10,7 @@ describe('integration: progress', () => {
   it('first GET auto-seeds defaults without a prior PUT', async () => {
     const session = await registerUser({ name: 'Seeded' });
 
-    // Register already inserts progress — delete it to simulate first read.
+    // Register already inserts progress - delete it to simulate first read.
     const { getCollection } = await import('../../api/_lib/db.js');
     const progress = await getCollection('progress');
     await progress.deleteMany({});
@@ -114,7 +114,7 @@ describe('integration: progress', () => {
     expect(bGet.json.progress.goal).toBe(22);
     expect(bGet.json.progress.streak).toBe(1);
 
-    // Body cannot retarget another user — userId is ignored/not in schema.
+    // Body cannot retarget another user - userId is ignored/not in schema.
     const sneaky = await invoke(progressHandler, {
       method: 'PUT',
       headers: { origin: ALLOWED_ORIGIN },

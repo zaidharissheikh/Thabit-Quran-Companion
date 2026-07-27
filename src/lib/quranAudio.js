@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Public ayah audio (Mishary Alafasy) via EveryAyah CDN.
  * @param {number} surahId
  * @param {number} ayahNumber

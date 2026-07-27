@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Derive stable surahId + ayahNumber for API bookmarks.
  */
 

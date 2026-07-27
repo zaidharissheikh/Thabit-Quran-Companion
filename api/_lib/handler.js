@@ -1,4 +1,4 @@
-import { applyCors, applySecurityHeaders, sendJson } from './cors.js';
+﻿import { applyCors, applySecurityHeaders, sendJson } from './cors.js';
 import { handleError, AppError } from './errors.js';
 
 /**

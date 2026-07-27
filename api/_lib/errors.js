@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Operational vs unexpected errors + consistent JSON error responses.
  */
 

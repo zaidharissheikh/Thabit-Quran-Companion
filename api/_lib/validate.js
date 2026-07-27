@@ -1,4 +1,4 @@
-import { ZodError } from 'zod';
+﻿import { ZodError } from 'zod';
 import { AppError } from './errors.js';
 
 /**
@@ -48,7 +48,7 @@ export async function readJsonBody(req, maxBytes = 64_000) {
     }
   }
 
-  // Vercel Node exposes a prototype getter for `body` that can throw — try once.
+  // Vercel Node exposes a prototype getter for `body` that can throw - try once.
   try {
     const protoBody = req.body;
     if (protoBody !== undefined && protoBody !== null) {

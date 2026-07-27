@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Single client for all /api/* calls (credentials + refresh-once on 401).
  */
 
@@ -160,4 +160,13 @@ export const aiApi = {
       method: 'POST',
       json: { prompt, context, maxTokens },
     }),
+};
+
+export const quranApi = {
+  chapters: () => apiRequest('/api/quran/chapters'),
+  chapter: (id) => apiRequest(`/api/quran/chapters/${id}`),
+  verses: (id, { page = 1, per_page = 50 } = {}) =>
+    apiRequest(
+      `/api/quran/chapters/${id}/verses?page=${page}&per_page=${per_page}`,
+    ),
 };

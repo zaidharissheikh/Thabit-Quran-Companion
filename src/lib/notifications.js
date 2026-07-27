@@ -1,4 +1,4 @@
-import { localDateKey } from './localDay'
+﻿import { localDateKey } from './localDay'
 
 export async function requestNotificationPermission() {
   if (!('Notification' in window)) {

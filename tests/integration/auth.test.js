@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import loginHandler from '../../api/auth/login.js';
-import logoutHandler from '../../api/auth/logout.js';
-import meHandler from '../../api/auth/me.js';
-import refreshHandler from '../../api/auth/refresh.js';
-import registerHandler from '../../api/auth/register.js';
+import loginHandler from '../../api/_lib/auth/login.js';
+import logoutHandler from '../../api/_lib/auth/logout.js';
+import meHandler from '../../api/_lib/auth/me.js';
+import refreshHandler from '../../api/_lib/auth/refresh.js';
+import registerHandler from '../../api/_lib/auth/register.js';
 import {
   ALLOWED_ORIGIN,
   FORBIDDEN_ORIGIN,

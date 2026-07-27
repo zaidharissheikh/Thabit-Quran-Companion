@@ -28,7 +28,7 @@ function applyTestEnv() {
 
   if (!fs.existsSync(STATE_PATH)) {
     throw new Error(
-      'Missing tests/.mongo-test-state.json — globalSetup did not start MongoMemoryServer',
+      'Missing tests/.mongo-test-state.json - globalSetup did not start MongoMemoryServer',
     );
   }
 

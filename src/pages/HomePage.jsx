@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+﻿import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import JournalComposeModal from '../components/JournalComposeModal'
@@ -7,6 +7,7 @@ import LoadingDots from '../components/LoadingDots'
 import { parseRefIds } from '../lib/bookmarks'
 import { greetingForNow } from '../lib/localDay'
 import { AvatarBadge } from '../assets/avatars'
+import { getRoyalCounsel } from '../lib/royalCounsel'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 
@@ -23,6 +24,8 @@ export default function HomePage({
   const [journalOpen, setJournalOpen] = useState(false)
   const verse = useMemo(() => VERSES[new Date().getDay() % VERSES.length], [])
   const greeting = useMemo(() => greetingForNow(), [])
+  // Changes every 3 hours - stable per render within the same window
+  const counsel = useMemo(() => getRoyalCounsel(3), [])
 
   const progress = Math.min(100, Math.round((state.versesReadToday / state.goal) * 100))
   const isTodayVerseBookmarked = state.bookmarks.some((bookmark) => {
@@ -101,9 +104,10 @@ export default function HomePage({
                 <div className="absolute inset-0 rounded-full border border-[var(--app-accent)]/30 animate-pulse" />
                 <div className="absolute inset-3 rounded-full border-2 border-[var(--app-accent)]/50" />
                 <div className="w-[6.5rem] h-[6.5rem] md:w-[78%] md:h-[78%] rounded-full gold-gradient flex flex-col items-center justify-center medallion-glow border-2 border-[#e9d19b]/30 relative overflow-hidden">
-                  <svg className="h-5 w-5 md:h-6 md:w-6 text-[#062c21] mb-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path clipRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-1.309-1.344-2.158-.188-.44-.36-.893-.541-1.339z" fillRule="evenodd" />
-                  </svg>
+                  <i
+                    className="fa-solid fa-fire text-[#062c21] mb-1 text-3xl md:text-4xl"
+                    aria-hidden
+                  />
                   <span
                     className="font-playfair font-extrabold text-[#062c21] leading-none"
                     style={{ fontSize: 'clamp(1.75rem, 4vh, 2.75rem)' }}
@@ -140,7 +144,7 @@ export default function HomePage({
                 </div>
                 <p className="text-xs md:text-sm text-[var(--app-text-muted)] mt-3 italic font-playfair">
                   {state.streak > 0
-                    ? `MashaAllah — ${state.streak} day${state.streak === 1 ? '' : 's'} consistent`
+                    ? `MashaAllah - ${state.streak} day${state.streak === 1 ? '' : 's'} consistent`
                     : '"Consistency is the key to spiritual growth."'}
                 </p>
                 <p className="mt-2 text-[10px] md:text-[11px] text-[var(--app-text-muted)] font-manrope leading-snug">
@@ -151,48 +155,56 @@ export default function HomePage({
           </section>
 
           <section className="afu3 md:col-span-8 md:row-span-1 bento-card group md:min-h-0 md:h-full">
-            <div className="bg-[#fdfaf3] rounded-2xl md:rounded-3xl px-5 py-5 md:px-7 md:py-5 text-[#062c21] relative overflow-hidden shadow-2xl border-b-4 border-[#c5a059]/30 h-full flex flex-col justify-center transition-transform duration-700 ease-out md:group-hover:scale-[1.01]">
+            <div className="bg-[#fdfaf3] rounded-2xl md:rounded-3xl px-6 py-6 md:px-10 md:py-8 text-[#062c21] relative overflow-hidden shadow-2xl border-b-4 border-[#c5a059]/30 h-full flex flex-col justify-between transition-transform duration-700 ease-out md:group-hover:scale-[1.01]">
               <div className="absolute inset-0 royal-pattern opacity-40" />
-              <div className="relative z-10 text-center flex flex-col justify-center h-full min-h-0">
-                <span className="text-[9px] md:text-[10px] uppercase tracking-[0.35em] text-[#8e6e33] font-bold mb-2 md:mb-3 block">
-                  The Living Word
-                </span>
-                <h3 className="font-playfair text-lg md:text-xl font-bold text-[#062c21] mb-3 md:mb-4 italic">
+              <div className="relative z-10 text-center flex flex-col justify-center h-full min-h-0 py-2">
+                <div className="flex flex-col items-center mb-2 md:mb-3">
+                  <span className="text-[10px] md:text-[11px] uppercase tracking-[0.38em] text-[#8e6e33] font-bold block">
+                    The Living Word
+                  </span>
+                </div>
+                <h3 className="font-playfair text-xl md:text-2xl font-bold text-[#062c21] mb-3 md:mb-5 italic">
                   {verse.ref}
                 </h3>
                 <div
-                  className="ayah-arabic home-ayah mb-3 md:mb-4 text-center text-[#062c21] leading-relaxed"
+                  className="ayah-arabic home-ayah mb-4 md:mb-6 text-center text-[#062c21] leading-relaxed px-2"
                   dir="rtl"
                 >
                   {verse.ar}
                 </div>
-                <div className="w-10 h-0.5 bg-[#c5a059]/30 mx-auto mb-3 md:mb-4" />
-                <p className="ayah-translation home-ayah-translation text-[#062c21]/80 mb-4 md:mb-5 px-1 md:px-8 md:max-w-3xl md:mx-auto leading-snug">
-                  {verse.en}
+                
+                <div className="flex items-center justify-center gap-3 my-2 md:my-4 opacity-75">
+                  <div className="w-14 md:w-20 h-px bg-gradient-to-r from-transparent to-[#c5a059]" />
+                  <span className="text-[#8e6e33] text-xs font-serif">❖</span>
+                  <div className="w-14 md:w-20 h-px bg-gradient-to-l from-transparent to-[#c5a059]" />
+                </div>
+
+                <p className="ayah-translation home-ayah-translation text-[#062c21]/90 mb-6 md:mb-8 px-2 md:px-10 md:max-w-3xl md:mx-auto leading-relaxed">
+                  &ldquo;{verse.en}&rdquo;
                 </p>
 
-                <div className="flex justify-center gap-6 md:gap-10">
+                <div className="flex justify-center items-center gap-6 md:gap-12 mt-1">
                   <button
                     type="button"
                     onClick={() => onBookmarkTodayVerse(verse)}
-                    className="flex flex-col items-center gap-1.5 group/btn"
+                    className="flex flex-col items-center gap-1.5 group/btn transition-transform hover:scale-105"
                   >
-                    <div className="p-2 md:bg-[#062c21]/5 border border-[#c5a059]/20 rounded-full group-hover/btn:bg-[#c5a059]/10 transition-colors">
+                    <div className="p-2.5 md:p-3 bg-[#062c21]/5 border border-[#c5a059]/30 rounded-full group-hover/btn:bg-[#c5a059]/20 group-hover/btn:border-[#c5a059] shadow-sm transition-all duration-300">
                       <svg className={`h-5 w-5 text-[#8e6e33] ${isTodayVerseBookmarked ? 'fill-[#8e6e33]' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                       </svg>
                     </div>
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-[#8e6e33]">
+                    <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#8e6e33]">
                       {isTodayVerseBookmarked ? 'Saved' : 'Save'}
                     </span>
                   </button>
-                  <Link to="/reader" className="flex flex-col items-center gap-1.5 group/btn">
-                    <div className="p-2 md:bg-[#062c21]/5 border border-[#c5a059]/20 rounded-full group-hover/btn:bg-[#c5a059]/10 transition-colors">
+                  <Link to="/reader" className="flex flex-col items-center gap-1.5 group/btn transition-transform hover:scale-105">
+                    <div className="p-2.5 md:p-3 bg-[#062c21]/5 border border-[#c5a059]/30 rounded-full group-hover/btn:bg-[#c5a059]/20 group-hover/btn:border-[#c5a059] shadow-sm transition-all duration-300">
                       <svg className="h-5 w-5 text-[#8e6e33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                       </svg>
                     </div>
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-[#8e6e33]">Read</span>
+                    <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#8e6e33]">Read</span>
                   </Link>
                   <button
                     type="button"
@@ -202,26 +214,26 @@ export default function HomePage({
                         prompt: `The user just read: "${verse.ar}" meaning ${verse.en} from ${verse.surah}. Write a strictly 1-sentence warm personal reflection (under 20 words) connecting this to daily life.`,
                       })
                     }
-                    className="flex flex-col items-center gap-1.5 group/btn"
+                    className="flex flex-col items-center gap-1.5 group/btn transition-transform hover:scale-105"
                   >
-                    <div className="p-2 md:bg-[#062c21]/5 border border-[#c5a059]/20 rounded-full group-hover/btn:bg-[#c5a059]/10 transition-colors">
+                    <div className="p-2.5 md:p-3 bg-[#062c21]/5 border border-[#c5a059]/30 rounded-full group-hover/btn:bg-[#c5a059]/20 group-hover/btn:border-[#c5a059] shadow-sm transition-all duration-300">
                       <svg className="h-5 w-5 text-[#8e6e33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                       </svg>
                     </div>
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-[#8e6e33]">Reflect</span>
+                    <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#8e6e33]">Reflect</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setJournalOpen(true)}
-                    className="flex flex-col items-center gap-1.5 group/btn"
+                    className="flex flex-col items-center gap-1.5 group/btn transition-transform hover:scale-105"
                   >
-                    <div className="p-2 md:bg-[#062c21]/5 border border-[#c5a059]/20 rounded-full group-hover/btn:bg-[#c5a059]/10 transition-colors">
+                    <div className="p-2.5 md:p-3 bg-[#062c21]/5 border border-[#c5a059]/30 rounded-full group-hover/btn:bg-[#c5a059]/20 group-hover/btn:border-[#c5a059] shadow-sm transition-all duration-300">
                       <span className="material-symbols-outlined text-[#8e6e33] text-[20px]">
                         edit_note
                       </span>
                     </div>
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-[#8e6e33]">
+                    <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#8e6e33]">
                       Journal
                     </span>
                   </button>
@@ -232,7 +244,7 @@ export default function HomePage({
 
           <JournalComposeModal
             open={journalOpen}
-            title="Journal — ayah of the day"
+            title="Journal - ayah of the day"
             subtitle="Your note will appear in Sacred Journal linked to this verse."
             verseHint={verse.ref}
             onClose={() => setJournalOpen(false)}
@@ -257,7 +269,7 @@ export default function HomePage({
               <div className="flex-1 min-w-0">
                 <h4 className="font-playfair text-base md:text-lg text-[var(--app-accent)] mb-0.5 italic">Royal Counsel</h4>
                 <p className="text-xs md:text-sm text-[var(--app-accent)] opacity-80 leading-snug font-light md:max-w-3xl line-clamp-3">
-                  {nudge || <LoadingDots />}
+                  {counsel}
                 </p>
               </div>
             </div>

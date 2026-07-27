@@ -43,7 +43,7 @@ async function main() {
   await passwordInputs.nth(1).fill(password);
   await page.getByRole('button', { name: /register/i }).click();
 
-  // Land on Home — wait for auto AI calls to settle
+  // Land on Home - wait for auto AI calls to settle
   await page.waitForURL('**/', { timeout: 30_000 }).catch(() => {});
   await page.waitForTimeout(8000);
 

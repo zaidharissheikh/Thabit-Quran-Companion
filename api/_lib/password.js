@@ -1,4 +1,4 @@
-import { hash, verify, Algorithm } from '@node-rs/argon2';
+﻿import { hash, verify, Algorithm } from '@node-rs/argon2';
 import { AppError } from './errors.js';
 
 const ARGON2_OPTIONS = {

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Shared password / auth field rules (must match frontend formValidation.js).
  */
 
