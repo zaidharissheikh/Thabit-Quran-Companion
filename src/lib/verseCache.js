@@ -99,6 +99,17 @@ function refreshChapterInBackground(id) {
 }
 
 /**
+ * @param {{ num: number, ar: string, en: string, key?: string }[] | null | undefined} rows
+ */
+function versesLookComplete(rows) {
+  if (!rows?.length) return false
+  // Prefer entries that include translation when Arabic is present
+  const withAr = rows.filter((v) => v.ar)
+  if (!withAr.length) return false
+  return withAr.some((v) => Boolean(v.en))
+}
+
+/**
  * Load chapter verses: memory → IndexedDB (API mirror) → live API.
  * Always revalidates from Quran.com API when online (background if cache hit).
  * @param {number} chapterId
@@ -110,14 +121,14 @@ export async function loadChapterVerses(chapterId, opts = {}) {
 
   if (!forceRefresh) {
     const mem = getCachedChapterVerses(id)
-    if (mem?.length) {
+    if (versesLookComplete(mem)) {
       refreshChapterInBackground(id)
       return mem
     }
 
     const key = chapterCacheKey(id, DEFAULT_TRANSLATION_ID)
     const stored = await idbGetChapter(key)
-    if (stored && isChapterEntryFresh(stored) && stored.verses?.length) {
+    if (stored && isChapterEntryFresh(stored) && versesLookComplete(stored.verses)) {
       chapterCache.set(id, stored.verses)
       refreshChapterInBackground(id)
       return stored.verses
@@ -128,7 +139,6 @@ export async function loadChapterVerses(chapterId, opts = {}) {
   if (pending) return pending
 
   const promise = (async () => {
-    // Prefer stale IDB over spinner if network fails
     const key = chapterCacheKey(id, DEFAULT_TRANSLATION_ID)
     try {
       const rows = await fetchChapterFromApi(id)

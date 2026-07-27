@@ -76,23 +76,33 @@ export default function SurahPage({
   }, [surahNum])
 
   // Scroll to the ayah anchor (#ayah-N) once verses are rendered
-  // Uses a small delay to allow React to flush the DOM after loading completes
   useEffect(() => {
-    if (loading || verses.length === 0) return
+    if (loading || verses.length === 0) return undefined
     const hash = window.location.hash
-    if (!hash || !hash.startsWith('#ayah-')) return
-    const id = hash.slice(1) // e.g. "ayah-28"
-    const attempt = (retries = 5) => {
+    if (!hash || !hash.startsWith('#ayah-')) return undefined
+    const id = hash.slice(1)
+    let cancelled = false
+    let tries = 0
+
+    const attempt = () => {
+      if (cancelled) return
       const el = document.getElementById(id)
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      } else if (retries > 0) {
-        // Verse element not yet in DOM - retry after next paint
-        requestAnimationFrame(() => attempt(retries - 1))
+        return
+      }
+      tries += 1
+      if (tries < 20) {
+        window.setTimeout(attempt, 50)
       }
     }
-    attempt()
-  }, [loading, verses])
+
+    const t = window.setTimeout(attempt, 30)
+    return () => {
+      cancelled = true
+      window.clearTimeout(t)
+    }
+  }, [loading, verses, surahNum])
 
   function isVerseBookmarked(verse) {
     return state.bookmarks.some(

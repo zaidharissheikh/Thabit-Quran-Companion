@@ -58,7 +58,7 @@ Set these in the Vercel project settings (Production + Preview as noted).
 | `QF_PROD_CLIENT_SECRET` | Yes (production) | Server only |
 | `AI_API_KEY` | Recommended | Gemini key (server-side) |
 | `QF_ENV` | No | Set `production` to force Quran.com production credentials locally |
-| `QURAN_TRANSLATION_ID` | No | Default `20` (Sahih International) |
+| `QURAN_TRANSLATION_ID` | No | Default `20` (Sahih International). Do **not** use `131` on Quran Foundation production — it returns Arabic without English. |
 
 **QF environment selection:** local and Vercel Preview always use the **prelive** credential set. Vercel Production (`VERCEL_ENV=production`) uses the **prod** credential set. Optional override: `QF_ENV=production`.
 

@@ -23,11 +23,15 @@ export default function HomePage({
 }) {
   const [journalOpen, setJournalOpen] = useState(false)
   const verse = useMemo(() => VERSES[new Date().getDay() % VERSES.length], [])
+  const verseIds = useMemo(() => parseRefIds(verse.ref), [verse.ref])
   const greeting = useMemo(() => greetingForNow(), [])
   // Changes every 3 hours - stable per render within the same window
   const counsel = useMemo(() => getRoyalCounsel(3), [])
 
   const progress = Math.min(100, Math.round((state.versesReadToday / state.goal) * 100))
+  const readHref = verseIds
+    ? `/surah/${verseIds.surahId}#ayah-${verseIds.ayahNumber}`
+    : '/reader'
   const isTodayVerseBookmarked = state.bookmarks.some((bookmark) => {
     if (bookmark.ref === verse.ref) return true
     const m = verse.ref.match(/(\d+)\s*:\s*(\d+)/)
@@ -198,7 +202,10 @@ export default function HomePage({
                       {isTodayVerseBookmarked ? 'Saved' : 'Save'}
                     </span>
                   </button>
-                  <Link to="/reader" className="flex flex-col items-center gap-1.5 group/btn transition-transform hover:scale-105">
+                  <Link
+                    to={readHref}
+                    className="flex flex-col items-center gap-1.5 group/btn transition-transform hover:scale-105"
+                  >
                     <div className="p-2.5 md:p-3 bg-[#062c21]/5 border border-[#c5a059]/30 rounded-full group-hover/btn:bg-[#c5a059]/20 group-hover/btn:border-[#c5a059] shadow-sm transition-all duration-300">
                       <svg className="h-5 w-5 text-[#8e6e33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />

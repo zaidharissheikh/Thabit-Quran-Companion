@@ -144,7 +144,7 @@ export default function MomentumPage({
             {weekSummary}
           </p>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-5 text-[11px] font-manrope text-[#004D40]/75">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4 text-[11px] font-manrope text-[#004D40]/75">
             <p>
               <span className="font-semibold text-[#004D40]">Full bar</span>
               {' = '}
@@ -158,16 +158,6 @@ export default function MomentumPage({
           </div>
 
           <div className="relative flex items-end justify-between gap-2 h-44 px-1">
-            {/* Goal reference line at 100% of bar track (top of h-28 track = 42px from top) */}
-            <div
-              className="pointer-events-none absolute left-0 right-0 top-[42px] border-t border-dashed border-[#D4AF37]/60 z-[1]"
-              title={`Daily goal: ${dailyGoal} verses`}
-            >
-              <span className="absolute -top-2.5 right-0 text-[9px] font-bold uppercase tracking-wider text-[#8e6e33] bg-[#fbf9f4] px-1 rounded">
-                Goal {dailyGoal}
-              </span>
-            </div>
-
             {weekDays.map((day) => {
               const metGoal = day.verses >= dailyGoal
               const heightPct =
@@ -175,9 +165,9 @@ export default function MomentumPage({
                   ? 4
                   : Math.min(100, Math.max(8, Math.round((day.verses / dailyGoal) * 100)))
               return (
-                <div key={day.date} className="flex-1 flex flex-col items-center gap-1.5 min-w-0 relative z-[2]">
+                <div key={day.date} className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
                   <span
-                    className={`text-[11px] font-bold tabular-nums px-1.5 py-0.5 rounded-md bg-[#fbf9f4] shadow-2xs ${
+                    className={`text-[11px] font-bold tabular-nums leading-none ${
                       metGoal ? 'text-[#8e6e33]' : 'text-[#004D40]'
                     }`}
                     title={
