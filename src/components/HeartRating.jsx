@@ -1,4 +1,4 @@
-﻿import { HEART_OPTIONS } from '../data/content'
+import { HEART_OPTIONS } from '../data/content'
 import { MOOD_STICKERS } from '../assets/moodStickers'
 
 export default function HeartRating({ value, onChange }) {
@@ -24,7 +24,7 @@ export default function HeartRating({ value, onChange }) {
                 }`}
             >
               <img
-                src={MOOD_STICKERS[option.stickerKey]}
+                src={MOOD_STICKERS[option.stickerKey] || `/assets/${option.stickerKey}.png`}
                 alt={option.label}
                 className="w-11 h-11 lg:w-14 lg:h-14 object-contain drop-shadow-sm"
                 draggable={false}

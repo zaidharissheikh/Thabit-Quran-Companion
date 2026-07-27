@@ -1,8 +1,11 @@
-﻿import happy from './happy.png'
-import angry from './angry.png'
-import sad from './sad.png'
-import horrified from './horrified.png'
-import spiritual from './spiritual.png'
-
-/** Sticker image map keyed by stickerKey */
-export const MOOD_STICKERS = { happy, angry, sad, horrified, spiritual }
+/**
+ * Mood stickers from /public/assets (stable URLs, no Vite binary hashing).
+ * Files must be valid PNGs - corrupted sources break <img> tags.
+ */
+export const MOOD_STICKERS = {
+  happy: '/assets/happy.png',
+  angry: '/assets/angry.png',
+  sad: '/assets/sad.png',
+  horrified: '/assets/horrified.png',
+  spiritual: '/assets/spiritual.png',
+}

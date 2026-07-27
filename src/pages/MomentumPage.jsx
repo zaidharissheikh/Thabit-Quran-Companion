@@ -53,9 +53,11 @@ export default function MomentumPage({
   }, [state.heartRating])
 
   const weekDays = useMemo(() => buildWeekDays(state.sessions), [state.sessions])
+  const dailyGoal = Math.max(1, Number(state.goal) || 10)
   const maxDay = Math.max(...weekDays.map((d) => d.verses), 1)
   const daysActive = weekDays.filter((d) => d.verses > 0).length
   const totalVersesThisWeek = weekDays.reduce((sum, d) => sum + d.verses, 0)
+  const goalDaysMet = weekDays.filter((d) => d.verses >= dailyGoal).length
   const avgVerses = daysActive
     ? Math.round(totalVersesThisWeek / daysActive)
     : 0
@@ -117,7 +119,7 @@ export default function MomentumPage({
       <main className="pt-20 max-w-[430px] mx-auto px-5 space-y-5 md:space-y-0 md:pt-16 md:px-12 md:max-w-none md:mx-auto md:grid md:grid-cols-2 md:gap-8 flex flex-col"
         style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}
       >
-        {/* This week - simple bars */}
+        {/* This week - bars scaled to daily goal */}
         <section className="cream-card rounded-xl p-6 md:col-span-2">
           <div className="flex justify-between items-start gap-4 mb-2">
             <div>
@@ -138,24 +140,68 @@ export default function MomentumPage({
             </div>
           </div>
 
-          <p className="font-manrope text-sm text-[#004D40]/85 leading-relaxed mb-6 italic">
+          <p className="font-manrope text-sm text-[#004D40]/85 leading-relaxed mb-3 italic">
             {weekSummary}
           </p>
 
-          <div className="flex items-end justify-between gap-2 h-40 px-1">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-5 text-[11px] font-manrope text-[#004D40]/75">
+            <p>
+              <span className="font-semibold text-[#004D40]">Full bar</span>
+              {' = '}
+              daily goal of{' '}
+              <span className="font-bold text-[#8e6e33]">{dailyGoal} verses</span>
+            </p>
+            <p className="text-[#004D40]/60">
+              Goal met {goalDaysMet}/7 days
+              {maxDay > dailyGoal ? ` · Peak day ${maxDay}` : ''}
+            </p>
+          </div>
+
+          <div className="relative flex items-end justify-between gap-2 h-44 px-1">
+            {/* Goal reference line at 100% of bar track (top of h-28 track = 42px from top) */}
+            <div
+              className="pointer-events-none absolute left-0 right-0 top-[42px] border-t border-dashed border-[#D4AF37]/60 z-[1]"
+              title={`Daily goal: ${dailyGoal} verses`}
+            >
+              <span className="absolute -top-2.5 right-0 text-[9px] font-bold uppercase tracking-wider text-[#8e6e33] bg-[#fbf9f4] px-1 rounded">
+                Goal {dailyGoal}
+              </span>
+            </div>
+
             {weekDays.map((day) => {
+              const metGoal = day.verses >= dailyGoal
               const heightPct =
-                day.verses === 0 ? 6 : Math.max(12, Math.round((day.verses / maxDay) * 100))
+                day.verses <= 0
+                  ? 4
+                  : Math.min(100, Math.max(8, Math.round((day.verses / dailyGoal) * 100)))
               return (
-                <div key={day.date} className="flex-1 flex flex-col items-center gap-2 min-w-0">
-                  <span className="text-[11px] font-bold text-[#004D40]">
+                <div key={day.date} className="flex-1 flex flex-col items-center gap-1.5 min-w-0 relative z-[2]">
+                  <span
+                    className={`text-[11px] font-bold tabular-nums px-1.5 py-0.5 rounded-md bg-[#fbf9f4] shadow-2xs ${
+                      metGoal ? 'text-[#8e6e33]' : 'text-[#004D40]'
+                    }`}
+                    title={
+                      day.verses === 0
+                        ? 'No verses logged'
+                        : metGoal
+                          ? `Goal met (${day.verses}/${dailyGoal})`
+                          : `${day.verses} of ${dailyGoal} toward goal`
+                    }
+                  >
                     {day.verses}
+                    {metGoal && day.verses > 0 ? (
+                      <span className="sr-only"> (goal met)</span>
+                    ) : null}
                   </span>
-                  <div className="w-full max-w-[36px] h-28 rounded-full bg-[#004D40]/8 flex items-end overflow-hidden">
+                  <div className="w-full max-w-[36px] h-28 rounded-full bg-[#004D40]/8 flex items-end overflow-hidden relative">
                     <div
-                      className="w-full rounded-full bg-gradient-to-t from-[#af8d11] to-[#ffe088] transition-all duration-500"
+                      className={`w-full rounded-full transition-all duration-500 ${
+                        metGoal
+                          ? 'bg-gradient-to-t from-[#af8d11] to-[#ffe088]'
+                          : 'bg-gradient-to-t from-[#8e6e33]/80 to-[#D4AF37]/70'
+                      }`}
                       style={{ height: `${heightPct}%` }}
-                      title={`${day.label}: ${day.verses} verses`}
+                      title={`${day.label}: ${day.verses} / ${dailyGoal} verses`}
                     />
                   </div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#004D40]/60">
@@ -299,12 +345,12 @@ export default function MomentumPage({
           </button>
         </section>
 
-        {/* Heart + Mood Calendar - full width */}
-        <section className="cream-card rounded-xl p-6 md:col-span-2">
-          <h3 className="font-manrope text-sm font-semibold uppercase tracking-[0.1em] mb-4 text-[#004D40] text-center">
+        {/* Heart + Mood Calendar - full width, tight padding */}
+        <section className="cream-card rounded-xl px-3 sm:px-4 pt-5 pb-3 md:col-span-2">
+          <h3 className="font-manrope text-sm font-semibold uppercase tracking-[0.1em] mb-3 text-[#004D40] text-center">
             How does your heart feel now?
           </h3>
-          <div className="flex justify-center mb-5 border-b border-[#D4AF37]/20 pb-5">
+          <div className="flex justify-center mb-3 border-b border-[#D4AF37]/20 pb-3">
             <HeartRating value={state.heartRating} onChange={onRateHeart} />
           </div>
           <MoodCalendar moodHistory={state.moodHistory} />

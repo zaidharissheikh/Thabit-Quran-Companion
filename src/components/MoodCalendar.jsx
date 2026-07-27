@@ -1,10 +1,14 @@
-﻿import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { HEART_OPTIONS } from '../data/content'
 import { MOOD_STICKERS } from '../assets/moodStickers'
 
 const MOOD_BY_VALUE = Object.fromEntries(
-  HEART_OPTIONS.map((o) => [String(o.value), o])
+  HEART_OPTIONS.map((o) => [String(o.value), o]),
 )
+
+/** Always render 6 weeks so card height never jumps between months. */
+const WEEKS = 6
+const CELLS = WEEKS * 7
 
 function formatDateLabel(dateKey) {
   const [y, m, d] = dateKey.split('-').map(Number)
@@ -19,25 +23,14 @@ function formatDateLabel(dateKey) {
 
 /**
  * colIndex: 0 = Sunday … 6 = Saturday
- * Returns Tailwind classes for the tooltip box and caret so edge columns
- * don't clip off-screen.
  */
 function tooltipClasses(colIndex) {
   if (colIndex <= 1) {
-    // Left-edge columns - align tooltip to the left of the cell
-    return {
-      box: 'left-0',
-      caret: 'left-6',
-    }
+    return { box: 'left-0', caret: 'left-6' }
   }
   if (colIndex >= 5) {
-    // Right-edge columns - align tooltip to the right
-    return {
-      box: 'right-0',
-      caret: 'right-6 left-auto',
-    }
+    return { box: 'right-0', caret: 'right-6 left-auto' }
   }
-  // Middle columns - center
   return {
     box: 'left-1/2 -translate-x-1/2',
     caret: 'left-1/2 -translate-x-1/2',
@@ -50,8 +43,10 @@ function DayCell({ d, dateKey, moodOption, colIndex = 3 }) {
   const { box, caret } = tooltipClasses(colIndex)
 
   useEffect(() => {
-    if (!open) return
-    function onKey(e) { if (e.key === 'Escape') setOpen(false) }
+    if (!open) return undefined
+    function onKey(e) {
+      if (e.key === 'Escape') setOpen(false)
+    }
     function onOutside(e) {
       if (cellRef.current && !cellRef.current.contains(e.target)) setOpen(false)
     }
@@ -63,10 +58,14 @@ function DayCell({ d, dateKey, moodOption, colIndex = 3 }) {
     }
   }, [open])
 
+  if (d == null) {
+    return <div className="min-h-0" aria-hidden />
+  }
+
   if (!moodOption) {
     return (
-      <div className="flex items-center justify-center h-12">
-        <span className="font-manrope text-[11px] font-medium text-[#004D40]/70 select-none">
+      <div className="flex items-center justify-center min-h-0 h-full">
+        <span className="font-manrope text-[11px] sm:text-xs font-medium text-[#004D40]/70 select-none">
           {d}
         </span>
       </div>
@@ -74,28 +73,26 @@ function DayCell({ d, dateKey, moodOption, colIndex = 3 }) {
   }
 
   return (
-    <div ref={cellRef} className="flex items-center justify-center h-12 relative">
+    <div ref={cellRef} className="flex items-center justify-center min-h-0 h-full relative">
       <button
         type="button"
         onClick={() => setOpen((p) => !p)}
-        className="w-11 h-11 rounded-full flex items-center justify-center bg-gradient-to-br from-[#FFF0BE] via-[#E9C349] to-[#D4AF37] shadow-md hover:scale-110 active:scale-95 transition-transform focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+        className="w-[90%] max-w-[3rem] aspect-square rounded-full flex items-center justify-center bg-gradient-to-br from-[#FFF0BE] via-[#E9C349] to-[#D4AF37] shadow-md hover:scale-105 active:scale-95 transition-transform focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
         title={`${moodOption.label} - ${formatDateLabel(dateKey)}`}
       >
         <img
           src={MOOD_STICKERS[moodOption.stickerKey]}
           alt={moodOption.label}
-          className="w-10 h-10 object-contain drop-shadow"
+          className="w-[88%] h-[88%] object-contain drop-shadow"
           draggable={false}
         />
       </button>
 
-      {/* Tooltip - anchored above THIS sticker, edge-aware */}
       {open && (
         <div
-          className={`absolute bottom-full mb-3 z-40 w-52 bg-[#f9f7f2] rounded-2xl shadow-2xl border border-[#D4AF37]/25 p-4 flex flex-col items-center gap-2 ${box}`}
+          className={`absolute bottom-full mb-2 z-40 w-52 bg-[#f9f7f2] rounded-2xl shadow-2xl border border-[#D4AF37]/25 p-4 flex flex-col items-center gap-2 ${box}`}
           style={{ animation: 'fadeSlideUp 0.18s ease-out' }}
         >
-          {/* Caret */}
           <div
             className={`absolute -bottom-2 w-4 h-4 bg-[#f9f7f2] border-r border-b border-[#D4AF37]/25 rotate-45 ${caret}`}
           />
@@ -153,15 +150,31 @@ export default function MoodCalendar({ moodHistory = {} }) {
   const year = currentDate.getFullYear()
   const daysInMonth = new Date(year, currentDate.getMonth() + 1, 0).getDate()
   const firstDayOfWeek = new Date(year, currentDate.getMonth(), 1).getDay()
-  const blanks = Array.from({ length: firstDayOfWeek }).map((_, i) => i)
-  const days = Array.from({ length: daysInMonth }).map((_, i) => i + 1)
   const monthStr = String(currentDate.getMonth() + 1).padStart(2, '0')
+
+  /** Fixed 42-cell month grid (leading + days + trailing). */
+  const cells = Array.from({ length: CELLS }, (_, i) => {
+    const dayNum = i - firstDayOfWeek + 1
+    if (dayNum < 1 || dayNum > daysInMonth) {
+      return { key: `empty-${i}`, d: null, dateKey: null, moodOption: null, colIndex: i % 7 }
+    }
+    const dayStr = String(dayNum).padStart(2, '0')
+    const dateKey = `${year}-${monthStr}-${dayStr}`
+    const moodVal = moodHistory[dateKey]
+    return {
+      key: dateKey,
+      d: dayNum,
+      dateKey,
+      moodOption: moodVal ? MOOD_BY_VALUE[String(moodVal)] : null,
+      colIndex: i % 7,
+    }
+  })
 
   return (
     <div className="w-full">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3 px-1">
+      <div className="flex items-center justify-between mb-2">
         <button
+          type="button"
           onClick={handlePrevMonth}
           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#D4AF37]/10 text-[#004D40] transition active:scale-95"
           aria-label="Previous month"
@@ -172,6 +185,7 @@ export default function MoodCalendar({ moodHistory = {} }) {
           {monthName}, {year}
         </h3>
         <button
+          type="button"
           onClick={handleNextMonth}
           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#D4AF37]/10 text-[#004D40] transition active:scale-95"
           aria-label="Next month"
@@ -182,43 +196,39 @@ export default function MoodCalendar({ moodHistory = {} }) {
         </button>
       </div>
 
-      {/* Grid - overflow-visible so tooltips don't clip, but columns tight */}
-      <div className="grid grid-cols-7 gap-y-1 gap-x-0 text-center overflow-visible">
-        {/* Day-of-week headers */}
+      <div className="grid grid-cols-7 w-full gap-x-0 gap-y-0 mb-0.5">
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
           <div
             // eslint-disable-next-line react/no-array-index-key
             key={`dow-${i}`}
-            className="font-manrope text-[10px] font-bold text-[#004D40]/60 uppercase pb-1"
+            className="font-manrope text-[10px] font-bold text-[#004D40]/60 uppercase py-1 text-center"
           >
             {day}
           </div>
         ))}
+      </div>
 
-        {/* Blank cells */}
-        {blanks.map((b) => (
-          <div key={`blank-${b}`} className="h-12" />
-        ))}
-
-        {/* Day cells */}
-        {days.map((d) => {
-          const dayStr = String(d).padStart(2, '0')
-          const dateKey = `${year}-${monthStr}-${dayStr}`
-          const moodVal = moodHistory[dateKey]
-          const moodOption = moodVal ? MOOD_BY_VALUE[String(moodVal)] : null
-          // 0 = Sunday … 6 = Saturday
-          const colIndex = (firstDayOfWeek + (d - 1)) % 7
-
-          return (
+      {/* Fixed height: 6 equal rows — same size for Jul (5 weeks) and Aug (6 weeks) */}
+      <div
+        className="grid grid-cols-7 w-full gap-x-0 gap-y-0"
+        style={{
+          gridTemplateRows: `repeat(${WEEKS}, minmax(0, 1fr))`,
+          height: '17.5rem',
+        }}
+      >
+        {cells.map((cell) =>
+          cell.d == null ? (
+            <div key={cell.key} className="min-h-0" aria-hidden />
+          ) : (
             <DayCell
-              key={dateKey}
-              d={d}
-              dateKey={dateKey}
-              moodOption={moodOption}
-              colIndex={colIndex}
+              key={cell.key}
+              d={cell.d}
+              dateKey={cell.dateKey}
+              moodOption={cell.moodOption}
+              colIndex={cell.colIndex}
             />
-          )
-        })}
+          ),
+        )}
       </div>
 
       <style>{`

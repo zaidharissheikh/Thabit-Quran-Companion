@@ -1,14 +1,9 @@
-﻿import pfp1 from './pfp1.png'
-import pfp2 from './pfp2.png'
-import pfp3 from './pfp3.png'
-import pfp4 from './pfp4.png'
-
-/** Profile picture options (PFP1–PFP4) */
+/** Profile picture options (PFP1–PFP4) from /public/assets */
 export const AVATAR_OPTIONS = [
-  { id: 'pfp1', label: 'The Scholar',  src: pfp1 },
-  { id: 'pfp2', label: 'The Reciter',  src: pfp2 },
-  { id: 'pfp3', label: 'The Seeker',   src: pfp3 },
-  { id: 'pfp4', label: 'The Pilgrim',  src: pfp4 },
+  { id: 'pfp1', label: 'The Scholar', src: '/assets/pfp1.png' },
+  { id: 'pfp2', label: 'The Reciter', src: '/assets/pfp2.png' },
+  { id: 'pfp3', label: 'The Seeker', src: '/assets/pfp3.png' },
+  { id: 'pfp4', label: 'The Pilgrim', src: '/assets/pfp4.png' },
 ]
 
 const LEGACY_AVATAR_IDS = {
