@@ -3,14 +3,14 @@ import {
   createRefreshToken,
   setAuthCookies,
   signAccessToken,
-} from '../_lib/auth.js';
-import { getCollection } from '../_lib/db.js';
-import { AppError } from '../_lib/errors.js';
-import { createHandler, sendJson } from '../_lib/handler.js';
-import { assertPassword } from '../_lib/password.js';
-import { rateLimitAuthIp } from '../_lib/rateLimit.js';
-import { loginSchema } from '../_lib/schemas/auth.js';
-import { parseOrThrow, readJsonBody } from '../_lib/validate.js';
+} from '../auth.js';
+import { getCollection } from '../db.js';
+import { AppError } from '../errors.js';
+import { createHandler, sendJson } from '../handler.js';
+import { assertPassword } from '../password.js';
+import { rateLimitAuthIp } from '../rateLimit.js';
+import { loginSchema } from '../schemas/auth.js';
+import { parseOrThrow, readJsonBody } from '../validate.js';
 
 export default createHandler({
   methods: ['POST'],

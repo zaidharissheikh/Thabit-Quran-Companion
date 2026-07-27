@@ -52,7 +52,7 @@ export default function SurahPage({
         </button>
       </header>
 
-      <main className="pt-24 px-6 max-w-[430px] mx-auto space-y-8 md:pt-16 md:px-12 md:max-w-5xl md:mx-auto">
+      <main className="pt-24 px-6 max-w-[430px] mx-auto space-y-8 md:pt-16 md:px-12 md:max-w-7xl md:mx-auto">
         <div className="text-center space-y-6">
           <div className="inline-block relative py-8">
             <div className="absolute inset-0 blur-[80px] bg-amber-500/10 rounded-full scale-150" />
@@ -140,7 +140,7 @@ export default function SurahPage({
                         onClick={() =>
                           onReflectVerse({
                             ref: `${surah.name} verse ${verse.num}`,
-                            prompt: `User read: "${verse.ar}" meaning "${verse.en}". Write a warm 2-sentence reflection to apply today.`,
+                            prompt: `User read: "${verse.ar}" meaning "${verse.en}". Write a strictly 1.5-sentence warm reflection to apply today.`,
                           })
                         }
                         className="flex items-center gap-2 px-3 py-1.5 rounded-full text-amber-700/80 hover:bg-amber-100 transition-colors text-sm"

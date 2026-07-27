@@ -21,6 +21,7 @@ export const progressUpdateSchema = z.object({
   sessions: z.array(sessionSchema).max(60).optional(),
   dailyNudge: dailyTextSchema.optional(),
   dailyReflection: dailyTextSchema.optional(),
+  moodHistory: z.record(z.number().int().min(1).max(5)).optional(),
 });
 
 /** Sensible defaults when a user has no progress document yet. */
@@ -37,5 +38,6 @@ export function defaultProgress(name = 'Friend') {
     sessions: [],
     dailyNudge: { date: null, text: '' },
     dailyReflection: { date: null, text: '' },
+    moodHistory: {},
   };
 }

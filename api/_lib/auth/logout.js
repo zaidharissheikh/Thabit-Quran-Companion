@@ -4,10 +4,10 @@ import {
   getRefreshTokenFromRequest,
   hashToken,
   verifyAccessToken,
-} from '../_lib/auth.js';
-import { getCollection } from '../_lib/db.js';
-import { AppError } from '../_lib/errors.js';
-import { createHandler, sendJson } from '../_lib/handler.js';
+} from '../auth.js';
+import { getCollection } from '../db.js';
+import { AppError } from '../errors.js';
+import { createHandler, sendJson } from '../handler.js';
 import { ObjectId } from 'mongodb';
 
 async function clearRefreshByHash(tokenHash) {

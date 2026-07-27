@@ -1,7 +1,7 @@
-import { cacheGet, cacheSet, quranCacheTtl } from '../_lib/cache.js';
-import { createHandler, sendJson } from '../_lib/handler.js';
-import { quranFetch } from '../_lib/quranClient.js';
-import { rateLimitQuranIp } from '../_lib/rateLimit.js';
+import { cacheGet, cacheSet, quranCacheTtl } from '../cache.js';
+import { createHandler, sendJson } from '../handler.js';
+import { quranFetch } from '../quranClient.js';
+import { rateLimitQuranIp } from '../rateLimit.js';
 
 const CACHE_KEY = 'quran:chapters';
 

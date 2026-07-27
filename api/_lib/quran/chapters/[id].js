@@ -1,9 +1,9 @@
-import { cacheGet, cacheSet, quranCacheTtl } from '../../_lib/cache.js';
-import { createHandler, sendJson } from '../../_lib/handler.js';
-import { quranFetch } from '../../_lib/quranClient.js';
-import { rateLimitQuranIp } from '../../_lib/rateLimit.js';
-import { chapterIdSchema } from '../../_lib/schemas/quran.js';
-import { parseOrThrow } from '../../_lib/validate.js';
+import { cacheGet, cacheSet, quranCacheTtl } from '../../cache.js';
+import { createHandler, sendJson } from '../../handler.js';
+import { quranFetch } from '../../quranClient.js';
+import { rateLimitQuranIp } from '../../rateLimit.js';
+import { chapterIdSchema } from '../../schemas/quran.js';
+import { parseOrThrow } from '../../validate.js';
 
 export default createHandler({
   methods: ['GET'],

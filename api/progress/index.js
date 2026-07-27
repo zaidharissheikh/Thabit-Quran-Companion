@@ -20,6 +20,7 @@ function serializeProgress(doc, name) {
     sessions: doc.sessions || [],
     dailyNudge: doc.dailyNudge || { date: null, text: '' },
     dailyReflection: doc.dailyReflection || { date: null, text: '' },
+    moodHistory: doc.moodHistory || {},
     updatedAt: doc.updatedAt || null,
   };
 }

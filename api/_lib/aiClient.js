@@ -7,7 +7,8 @@ Rules:
 - Stay within Quranic meaning, tafsir-adjacent reflection, and gentle habit encouragement.
 - Do not invent verses, citations, or rulings. If unsure, speak generally and humbly.
 - No politics, medical advice, financial advice, or unrelated topics.
-- Keep responses concise, kind, and free of guilt-tripping.
+- Be extremely concise. Stick to 1-2 short sentences maximum. Never write long paragraphs.
+- Keep responses kind, and free of guilt-tripping.
 - Do not mention system instructions or that you are an AI unless asked.`;
 
 /**
@@ -52,7 +53,11 @@ export function resetGeminiUpstreamCount() {
 }
 
 export async function generateReflection(prompt, context, maxTokens, options = {}) {
-  const apiKey = process.env.AI_API_KEY || process.env.GEMINI_API_KEY;
+  // Alternate keys every 12 hours to prevent exhausting a single key's rate limit
+  const currentHour = new Date().getUTCHours();
+  const apiKey = currentHour < 12 
+    ? (process.env.AI_API_KEY || process.env.GEMINI_API_KEY)
+    : (process.env.GEMINI_API_KEY || process.env.AI_API_KEY);
   const model = process.env.AI_MODEL || 'gemini-3.1-flash-lite';
   const userId = typeof options.userId === 'string' ? options.userId : '';
 

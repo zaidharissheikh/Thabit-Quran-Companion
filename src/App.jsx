@@ -46,6 +46,7 @@ import {
   hasReadVerseToday,
   sessionsFromReadLogs,
 } from './lib/verseRead'
+import { sendStreakReminder } from './lib/notifications'
 
 const emptyProgress = {
   goal: 10,
@@ -55,6 +56,7 @@ const emptyProgress = {
   heartRating: 3,
   ramadanVerses: 0,
   sessions: [],
+  moodHistory: {},
   dailyNudge: { date: null, text: '' },
   dailyReflection: { date: null, text: '' },
 }
@@ -168,6 +170,7 @@ function App() {
         sessions,
         dailyNudge,
         dailyReflection,
+        moodHistory: p.moodHistory || {},
       })
 
       const shouldPersist =
@@ -334,6 +337,7 @@ function App() {
           sessions: p.sessions || [],
           dailyNudge: p.dailyNudge || { date: null, text: '' },
           dailyReflection: p.dailyReflection || { date: null, text: '' },
+          moodHistory: p.moodHistory || {},
         })
         return p
       } catch (err) {
@@ -364,7 +368,7 @@ function App() {
               versesReadToday: progress.versesReadToday,
               heartRating: progress.heartRating,
             },
-            140,
+            60,
           )
           setNudge(text)
           try {
@@ -407,7 +411,7 @@ function App() {
               versesReadToday: progress.versesReadToday,
               heartRating: progress.heartRating,
             },
-            100,
+            70,
           )
           setReflectionQuestion(question)
           try {
@@ -441,7 +445,7 @@ function App() {
         versesReadToday: progress.versesReadToday,
         heartRating: progress.heartRating,
       },
-      200,
+      100,
     )
     setSheet({ open: true, ref, body, loading: false })
   }
@@ -457,7 +461,7 @@ function App() {
         versesReadToday: progress.versesReadToday,
         heartRating: progress.heartRating,
       },
-      150,
+      70,
     )
     setReturnMessage(text)
   }
@@ -622,7 +626,12 @@ function App() {
 
   async function rateHeart(heartRating, label) {
     try {
-      await persistProgress({ heartRating }, { heartRating })
+      const today = new Date().toISOString().split('T')[0]
+      const newMoodHistory = { ...progress.moodHistory, [today]: heartRating }
+      await persistProgress(
+        { heartRating, moodHistory: newMoodHistory },
+        { heartRating, moodHistory: newMoodHistory }
+      )
       showToast(`Heart: ${label}`)
     } catch {
       /* handled */
@@ -705,6 +714,25 @@ function App() {
       })
     }, 0)
   }
+
+  // --- Background Notification Checker ---
+  useEffect(() => {
+    // Check every 10 minutes
+    const interval = setInterval(() => {
+      if (!progress) return
+      
+      const hours = new Date().getHours()
+      const versesToday = progress.versesReadToday || 0
+      const streak = progress.streak || 0
+
+      // If user has a streak, hasn't read today, and it's past 8:00 PM (20:00)
+      if (streak > 0 && versesToday === 0 && hours >= 20) {
+        sendStreakReminder(streak)
+      }
+    }, 10 * 60 * 1000)
+
+    return () => clearInterval(interval)
+  }, [progress])
 
   if (authChecking) {
     return (

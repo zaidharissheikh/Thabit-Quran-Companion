@@ -62,3 +62,4 @@ skills-log.json
 *.pem
 *.key
 .npmrc.local
+.vercel

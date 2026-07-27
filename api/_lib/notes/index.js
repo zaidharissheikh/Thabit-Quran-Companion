@@ -1,12 +1,12 @@
 import { ObjectId } from 'mongodb';
-import { requireAuth } from '../_lib/auth.js';
-import { getCollection } from '../_lib/db.js';
-import { createHandler, sendJson } from '../_lib/handler.js';
+import { requireAuth } from '../auth.js';
+import { getCollection } from '../db.js';
+import { createHandler, sendJson } from '../handler.js';
 import {
   createNoteSchema,
   listNotesQuerySchema,
-} from '../_lib/schemas/notes.js';
-import { parseOrThrow, readJsonBody } from '../_lib/validate.js';
+} from '../schemas/notes.js';
+import { parseOrThrow, readJsonBody } from '../validate.js';
 
 function serialize(doc) {
   return {

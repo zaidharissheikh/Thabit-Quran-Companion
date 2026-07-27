@@ -1,8 +1,20 @@
 {
   "rewrites": [
     {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
+      "source": "/api/auth/:path*",
+      "destination": "/api/auth.js"
+    },
+    {
+      "source": "/api/quran/:path*",
+      "destination": "/api/quran.js"
+    },
+    {
+      "source": "/api/bookmarks/:path*",
+      "destination": "/api/bookmarks.js"
+    },
+    {
+      "source": "/api/notes/:path*",
+      "destination": "/api/notes.js"
     }
   ],
   "headers": [

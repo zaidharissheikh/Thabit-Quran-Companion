@@ -6,11 +6,11 @@ import {
   setAuthCookies,
   signAccessToken,
   clearAuthCookies,
-} from '../_lib/auth.js';
-import { getCollection } from '../_lib/db.js';
-import { AppError } from '../_lib/errors.js';
-import { createHandler, sendJson } from '../_lib/handler.js';
-import { rateLimitAuthIp } from '../_lib/rateLimit.js';
+} from '../auth.js';
+import { getCollection } from '../db.js';
+import { AppError } from '../errors.js';
+import { createHandler, sendJson } from '../handler.js';
+import { rateLimitAuthIp } from '../rateLimit.js';
 
 export default createHandler({
   methods: ['POST'],

@@ -34,7 +34,7 @@ export default function BookmarksPage({ state }) {
         <div className="w-10" />
       </header>
 
-      <main className="pt-24 max-w-[430px] mx-auto px-6 space-y-8 md:pt-16 md:px-12 md:max-w-3xl md:mx-0">
+      <main className="pt-24 max-w-[430px] mx-auto px-6 space-y-8 md:pt-16 md:px-12 md:max-w-5xl md:mx-auto">
         <section>
           <h2 className="font-headline text-3xl text-[#e9c349] font-semibold mb-2">Saved verses</h2>
           <p className="text-sm text-[#bfc9c4]/80">

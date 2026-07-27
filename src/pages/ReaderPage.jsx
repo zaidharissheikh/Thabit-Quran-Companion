@@ -35,7 +35,7 @@ export default function ReaderPage({ state }) {
         </div>
       </header>
 
-      <main className="pt-24 pb-32 max-w-[430px] mx-auto px-4 md:pt-16 md:px-12 md:max-w-7xl md:mx-0">
+      <main className="pt-24 pb-32 max-w-[430px] mx-auto px-4 md:pt-16 md:px-12 md:max-w-none md:mx-auto">
         {/* Search Bar */}
         <div className="mb-8">
           <div className="relative">

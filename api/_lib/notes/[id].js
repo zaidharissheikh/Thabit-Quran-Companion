@@ -1,10 +1,10 @@
 import { ObjectId } from 'mongodb';
-import { requireAuth } from '../_lib/auth.js';
-import { getCollection } from '../_lib/db.js';
-import { AppError } from '../_lib/errors.js';
-import { createHandler, sendJson } from '../_lib/handler.js';
-import { updateNoteSchema } from '../_lib/schemas/notes.js';
-import { parseOrThrow, readJsonBody } from '../_lib/validate.js';
+import { requireAuth } from '../auth.js';
+import { getCollection } from '../db.js';
+import { AppError } from '../errors.js';
+import { createHandler, sendJson } from '../handler.js';
+import { updateNoteSchema } from '../schemas/notes.js';
+import { parseOrThrow, readJsonBody } from '../validate.js';
 
 function parseId(raw) {
   if (typeof raw !== 'string' || !ObjectId.isValid(raw)) {

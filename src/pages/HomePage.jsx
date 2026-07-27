@@ -63,24 +63,24 @@ export default function HomePage({
       <header className="md:hidden fixed top-0 left-0 right-0 z-50 bg-[var(--app-nav-bg)] backdrop-blur-xl px-5 py-3 flex justify-between items-center border-b border-[var(--app-border)] max-w-[430px] mx-auto">
         <div className="flex items-center gap-2.5">
           <img src="/logo.png" alt="Thabit" className="w-9 h-9 rounded-lg object-contain" />
-          <span className="text-xl font-arabic text-[#c5a059]">ثابت</span>
+          <span className="text-xl font-arabic text-[var(--app-accent)]">ثابت</span>
         </div>
         <Link
           to="/settings"
-          className="w-10 h-10 rounded-full border border-[#c5a059] overflow-hidden bg-[#0a3d2e] shadow-inner hover:opacity-80 transition-opacity"
+          className="w-10 h-10 rounded-full border border-[var(--app-accent)] overflow-hidden bg-[var(--app-surface)] shadow-inner hover:opacity-80 transition-opacity"
           aria-label="Open settings"
         >
           <AvatarBadge id={avatarId} className="w-full h-full" alt={state.name} />
         </Link>
       </header>
 
-      <main className="pt-[4.5rem] pb-28 px-5 max-w-[430px] mx-auto flex flex-col gap-4 bg-pattern-dark min-h-dvh md:pt-6 md:pb-6 md:px-10 md:max-w-7xl md:mx-0 md:h-full md:min-h-0 md:gap-4 md:overflow-hidden">
+      <main className="pt-[4.5rem] pb-28 px-5 max-w-[430px] mx-auto flex flex-col gap-4 bg-pattern-dark min-h-dvh md:pt-6 md:pb-6 md:px-10 md:max-w-none md:mx-auto md:h-full md:min-h-0 md:gap-4 md:overflow-hidden">
         <section className="afu desktop-hero shrink-0">
-          <h2 className="text-[10px] md:text-xs uppercase tracking-[0.28em] md:tracking-[0.4em] text-[#c5a059]/70 font-bold mb-1 md:mb-2 md:pl-0.5">
+          <h2 className="text-[10px] md:text-xs uppercase tracking-[0.28em] md:tracking-[0.4em] text-[var(--app-accent)]/80 font-bold mb-1 md:mb-2 md:pl-0.5">
             Essence of Mindfulness
           </h2>
           <h1
-            className="font-playfair text-[#e9d19b] leading-tight md:max-w-4xl"
+            className="font-playfair text-[var(--app-accent-text)] leading-tight md:max-w-4xl"
             style={{ fontSize: 'clamp(1.35rem, 2.4vw + 0.6rem, 2.65rem)' }}
           >
             {greeting}, {state.name}{' '}
@@ -199,7 +199,7 @@ export default function HomePage({
                     onClick={() =>
                       onVerseReflection({
                         ref: verse.ref,
-                        prompt: `The user just read: "${verse.ar}" meaning ${verse.en} from ${verse.surah}. Write a 2-3 sentence warm personal reflection connecting this to modern daily life.`,
+                        prompt: `The user just read: "${verse.ar}" meaning ${verse.en} from ${verse.surah}. Write a strictly 1-sentence warm personal reflection (under 20 words) connecting this to daily life.`,
                       })
                     }
                     className="flex flex-col items-center gap-1.5 group/btn"
@@ -246,33 +246,21 @@ export default function HomePage({
           />
 
           <section className="afu4 md:col-span-8 md:row-span-1 bento-card md:min-h-0">
-            <button
-              type="button"
-              onClick={() =>
-                onVerseReflection({
-                  ref: verse.ref,
-                  prompt: `The user just read: "${verse.ar}" meaning ${verse.en} from ${verse.surah}. Write a 2-3 sentence warm personal reflection connecting this to modern daily life.`,
-                })
-              }
-              className="w-full h-full min-h-[5.5rem] bg-[#0a3d2e]/40 md:bg-[#083327] border border-[#c5a059]/20 rounded-2xl px-4 py-4 md:px-6 md:py-4 flex items-start md:items-center gap-3 md:gap-5 backdrop-blur-sm text-left group transition-transform duration-700 ease-out md:hover:scale-[1.01]"
+            <div
+              className="w-full h-full min-h-[5.5rem] bg-[#0a3d2e]/40 md:bg-[#083327] border border-[#c5a059]/20 rounded-2xl px-4 py-4 md:px-6 md:py-4 flex items-start md:items-center gap-3 md:gap-5 backdrop-blur-sm text-left"
             >
-              <div className="gold-gradient rounded-full p-2 md:p-2.5 shadow-lg ring-4 ring-[#0a3d2e] flex-shrink-0 md:group-hover:scale-105 transition-transform duration-500">
+              <div className="gold-gradient rounded-full p-2 md:p-2.5 shadow-lg ring-4 ring-[#0a3d2e] flex-shrink-0">
                 <svg className="h-4 w-4 md:h-5 md:w-5 text-[#062c21]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-playfair text-base md:text-lg text-[#e9d19b] mb-0.5 italic">Royal Counsel</h4>
-                <p className="text-xs md:text-sm text-[#e9d19b]/70 leading-snug font-light md:max-w-3xl line-clamp-3">
+                <h4 className="font-playfair text-base md:text-lg text-[var(--app-accent)] mb-0.5 italic">Royal Counsel</h4>
+                <p className="text-xs md:text-sm text-[var(--app-accent)] opacity-80 leading-snug font-light md:max-w-3xl line-clamp-3">
                   {nudge || <LoadingDots />}
                 </p>
               </div>
-              <div className="self-center p-1 text-[#c5a059] md:group-hover:translate-x-1 transition-transform duration-500 hidden md:block">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                </svg>
-              </div>
-            </button>
+            </div>
           </section>
         </div>
       </main>

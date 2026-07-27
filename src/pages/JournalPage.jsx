@@ -72,7 +72,7 @@ export default function JournalPage({
         </Link>
       </header>
 
-      <main className="pt-24 max-w-[430px] mx-auto px-6 space-y-10 md:space-y-0 md:pt-16 md:px-12 md:max-w-7xl md:mx-0 md:grid md:grid-cols-12 md:gap-12 md:items-start flex flex-col">
+      <main className="pt-24 max-w-[430px] mx-auto px-6 space-y-10 md:space-y-0 md:pt-16 md:px-12 md:max-w-none md:mx-auto md:grid md:grid-cols-12 md:gap-12 md:items-start flex flex-col">
         <section className="text-center md:text-left md:col-span-12 md:flex md:items-end md:gap-6 md:mb-4">
           <div className="flex justify-center md:justify-start mb-4 md:mb-0">
             <div className="w-12 h-12 md:w-16 md:h-16 ayah-medallion flex items-center justify-center rounded-full text-[#3c2f00]">

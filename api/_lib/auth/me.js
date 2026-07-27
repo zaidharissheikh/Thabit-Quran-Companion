@@ -1,5 +1,5 @@
-import { requireAuth, findUserById } from '../_lib/auth.js';
-import { createHandler, sendJson } from '../_lib/handler.js';
+import { requireAuth, findUserById } from '../auth.js';
+import { createHandler, sendJson } from '../handler.js';
 
 export default createHandler({
   methods: ['GET'],

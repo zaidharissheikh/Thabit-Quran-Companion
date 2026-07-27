@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AVATAR_OPTIONS, AvatarBadge, resolveAvatarId } from '../assets/avatars'
+import {
+  requestNotificationPermission,
+  hasNotificationPermission,
+} from '../lib/notifications'
 
 export default function SettingsPage({
   state,
@@ -12,6 +16,8 @@ export default function SettingsPage({
   const navigate = useNavigate()
   const [pickerOpen, setPickerOpen] = useState(false)
   const [soonToast, setSoonToast] = useState('')
+  const [notifsEnabled, setNotifsEnabled] = useState(hasNotificationPermission())
+  const [notifsMuted, setNotifsMuted] = useState(() => localStorage.getItem('thabit_notifications_muted') === 'true')
 
   const userEmail = user?.email || `${(state.name || 'friend').toLowerCase().replace(/\s+/g, '.')}@email.com`
   const activeAvatar = resolveAvatarId(avatarId)
@@ -19,6 +25,24 @@ export default function SettingsPage({
   function showComingSoon(feature) {
     setSoonToast(`${feature} — feature coming soon`)
     window.setTimeout(() => setSoonToast(''), 2200)
+  }
+
+  async function handleToggleNotifications() {
+    if (!hasNotificationPermission()) {
+      const granted = await requestNotificationPermission()
+      setNotifsEnabled(granted)
+      if (!granted) {
+        setSoonToast('Please enable notifications in your browser settings')
+        window.setTimeout(() => setSoonToast(''), 3000)
+      } else {
+        setNotifsMuted(false)
+        localStorage.setItem('thabit_notifications_muted', 'false')
+      }
+    } else {
+      const newMuted = !notifsMuted
+      setNotifsMuted(newMuted)
+      localStorage.setItem('thabit_notifications_muted', newMuted.toString())
+    }
   }
 
   return (
@@ -80,7 +104,7 @@ export default function SettingsPage({
                 >
                   verified
                 </span>
-                <span>Premium Member</span>
+                <span>Premium Momin</span>
               </div>
             </div>
           </div>
@@ -115,7 +139,7 @@ export default function SettingsPage({
           <div className="app-panel-muted rounded-lg p-1 border border-[var(--app-border)]">
             <button
               type="button"
-              onClick={() => showComingSoon('Notifications')}
+              onClick={handleToggleNotifications}
               className="w-full flex items-center justify-between p-4 hover:opacity-90 transition-all group rounded-lg"
             >
               <div className="flex items-center space-x-4">
@@ -133,11 +157,19 @@ export default function SettingsPage({
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-[11px] text-[var(--app-accent)] font-semibold uppercase tracking-wide">
-                  Coming soon
+                  {!notifsEnabled ? 'Click to Enable' : notifsMuted ? 'Muted' : 'Enabled'}
                 </span>
-                <span className="material-symbols-outlined transition-colors text-[var(--app-accent)]">
-                  chevron_right
-                </span>
+                <div
+                  className={`relative w-10 h-5 flex items-center rounded-full transition-colors duration-300 ${
+                    notifsEnabled && !notifsMuted ? 'bg-[var(--app-accent)]' : 'bg-[var(--app-text-muted)] opacity-50'
+                  }`}
+                >
+                  <div
+                    className={`absolute left-0.5 w-4 h-4 bg-[var(--app-bg)] rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+                      notifsEnabled && !notifsMuted ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </div>
               </div>
             </button>
           </div>

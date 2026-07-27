@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import HeartRating from '../components/HeartRating'
 import { AvatarBadge } from '../assets/avatars'
-import { SURAHS } from '../data/content'
+
 import { localDateKey } from '../lib/localDay'
+import moodVerses from '../data/moodVerses.json'
+import MoodCalendar from '../components/MoodCalendar'
 
 function buildWeekDays(sessions) {
   const byDate = new Map((sessions || []).map((s) => [s.date, s.verses || 0]))
@@ -30,7 +32,7 @@ export default function MomentumPage({
   onRateHeart,
   onUpdateRamadanVerses,
 }) {
-  const [reflectionText, setReflectionText] = useState('')
+
   const [isEditingRamadan, setIsEditingRamadan] = useState(false)
   const [tempRamadanVerses, setTempRamadanVerses] = useState(
     String(state.ramadanVerses ?? 0),
@@ -55,10 +57,13 @@ export default function MomentumPage({
   const reflectionsCount = state.notesTotal ?? state.journals?.length ?? 0
   const ramadanVerses = state.ramadanVerses ?? 0
 
-  const recommendedSurah = useMemo(
-    () => SURAHS[new Date().getDay() % SURAHS.length],
-    [],
-  )
+  const recommendedVerse = useMemo(() => {
+    const ratingStr = state.heartRating ? String(state.heartRating) : '5'
+    const verses = moodVerses[ratingStr]
+    if (!verses || verses.length === 0) return null
+    const randomIndex = Math.floor(Math.random() * verses.length)
+    return verses[randomIndex]
+  }, [state.heartRating])
 
   const weekSummary =
     totalVersesThisWeek === 0
@@ -93,7 +98,7 @@ export default function MomentumPage({
         </Link>
       </header>
 
-      <main className="pt-24 max-w-[430px] mx-auto px-6 space-y-10 md:space-y-0 md:pt-16 md:px-12 md:max-w-7xl md:mx-0 md:grid md:grid-cols-2 md:gap-8 flex flex-col">
+      <main className="pt-24 max-w-[430px] mx-auto px-6 space-y-10 md:space-y-0 md:pt-16 md:px-12 md:max-w-none md:mx-auto md:grid md:grid-cols-2 md:gap-8 flex flex-col">
         {/* This week — simple bars */}
         <section className="cream-card rounded-xl p-6 md:col-span-2">
           <div className="flex justify-between items-start gap-4 mb-2">
@@ -165,7 +170,7 @@ export default function MomentumPage({
                     if (e.key === 'Enter') saveRamadan()
                   }}
                   autoFocus
-                  className="font-headline text-4xl text-[#004D40] font-bold leading-none mb-1 w-20 text-center bg-transparent border-b border-[#004D40]/30 outline-none"
+                  className="font-headline text-4xl text-[#004D40] font-bold leading-none mb-1 w-20 text-center bg-transparent border-b border-[#004D40]/30 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               ) : (
                 <button
@@ -289,76 +294,42 @@ export default function MomentumPage({
           <h3 className="font-manrope text-sm font-semibold uppercase tracking-[0.1em] mb-4 text-[#004D40] text-center">
             How does your heart feel now?
           </h3>
-          <div className="mb-6 flex justify-center">
+          <div className="flex justify-center mb-5 border-b border-[#D4AF37]/20 pb-5">
             <HeartRating value={state.heartRating} onChange={onRateHeart} />
           </div>
-
-          <div className="pt-6 border-t border-[#D4AF37]/20">
-            <p className="font-manrope text-[10px] font-bold uppercase tracking-[.15em] text-[#D4AF37] mb-2">
-              Quick note
-            </p>
-            <p className="text-sm text-[#004D40]/70 mb-3 font-manrope">
-              A free thought — saved to your journal without linking to a verse.
-            </p>
-            <textarea
-              rows="3"
-              value={reflectionText}
-              onChange={(event) => setReflectionText(event.target.value)}
-              className="w-full resize-none rounded-xl border border-[#D4AF37]/30 bg-[#F2EDE1] px-4 py-3 text-sm text-[#004D40] outline-none transition placeholder:text-[#004D40]/40 focus:border-[#D4AF37]"
-              placeholder="Write anything on your mind…"
-            />
-            <div className="flex gap-2 mt-4 justify-end">
-              <button
-                type="button"
-                onClick={async () => {
-                  await onPostReflection(reflectionText, {
-                    verseLabel: null,
-                    verseRef: null,
-                  })
-                  setReflectionText('')
-                }}
-                className="flex items-center gap-1.5 text-sm font-semibold text-[#D4AF37] transition hover:text-[#b08c20]"
-              >
-                <span className="material-symbols-outlined text-lg">send</span>
-                Save to journal
-              </button>
-            </div>
-          </div>
+          <MoodCalendar moodHistory={state.moodHistory} />
         </section>
 
         <section className="pb-8">
           <h4 className="font-headline text-sm uppercase tracking-[0.25em] mb-4 flex items-center gap-2 text-[#FDFBF7]">
             Recommended for You
           </h4>
-          <div
-            onClick={() => navigate(`/surah/${recommendedSurah.num}`)}
-            className="cream-card rounded-xl p-6 flex flex-col items-center gap-6 overflow-hidden group cursor-pointer hover:shadow-xl transition-all"
-          >
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg bg-gradient-to-br from-[#FFF0BE] via-[#E9C349] to-[#D4AF37]">
-                <span
-                  className="material-symbols-outlined text-3xl text-[#004D40]"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
+          {recommendedVerse && (
+            <div className="cream-card rounded-xl p-6 flex flex-col items-center gap-6 overflow-hidden transition-all shadow-lg">
+              <div className="relative w-full text-center">
+                <p className="font-headline text-[#D4AF37] font-semibold mb-4 text-lg">
+                  {recommendedVerse.ref}
+                </p>
+                <div
+                  className="font-arabic text-[#004D40] text-[1.4rem] leading-relaxed mb-5 px-2"
+                  dir="rtl"
                 >
-                  star
-                </span>
+                  {recommendedVerse.ar}
+                </div>
+                <div className="w-8 h-px bg-[#D4AF37]/40 mx-auto mb-4" />
+                <p className="font-manrope text-sm text-[#004D40]/90 italic max-w-sm mx-auto leading-snug">
+                  {recommendedVerse.en}
+                </p>
               </div>
+              <button
+                type="button"
+                onClick={() => navigate(`/surah/${recommendedVerse.surahNum}`)}
+                className="bg-gradient-to-br from-[#FFF0BE] via-[#E9C349] to-[#D4AF37] px-6 py-3 rounded-full font-manrope text-sm uppercase tracking-widest transition-all shadow-md hover:shadow-lg font-bold text-[#004D40] w-full"
+              >
+                Read Context
+              </button>
             </div>
-            <div className="text-center">
-              <h5 className="font-headline text-2xl text-[#D4AF37] font-semibold mb-2">
-                Surah {recommendedSurah.name}
-              </h5>
-              <p className="font-manrope text-sm text-[#004D40] max-w-[250px] mx-auto mt-3 font-medium">
-                &quot;{recommendedSurah.meaning}&quot;. A gentle place to open the mushaf today.
-              </p>
-            </div>
-            <button
-              type="button"
-              className="bg-gradient-to-br from-[#FFF0BE] via-[#E9C349] to-[#D4AF37] px-6 py-3 rounded-full font-manrope text-sm uppercase tracking-widest transition-all shadow-lg font-bold text-[#004D40] w-full"
-            >
-              Read Now
-            </button>
-          </div>
+          )}
         </section>
       </main>
 
