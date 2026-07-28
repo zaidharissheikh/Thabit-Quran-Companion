@@ -33,7 +33,7 @@ export default function MomentumPage({
   onPostReflection: _onPostReflection,
   onRateHeart,
   onUpdateRamadanVerses,
-  onUpdateStickerPack,
+  onUpdateStickerPack: _onUpdateStickerPack,
 }) {
 
   const [isEditingRamadan, setIsEditingRamadan] = useState(false)
@@ -338,34 +338,20 @@ export default function MomentumPage({
 
         {/* Heart + Mood Calendar - full width, tight padding */}
         <section className="cream-card rounded-xl px-3 sm:px-4 pt-5 pb-3 md:col-span-2">
-          <h3 className="font-manrope text-sm font-semibold uppercase tracking-[0.1em] mb-3 text-[#004D40] text-center">
+          <h3 className="font-manrope text-sm font-semibold uppercase tracking-[0.1em] mb-2 text-[#004D40] text-center">
             How does your heart feel now?
           </h3>
-
-          <div className="flex justify-center gap-2 mb-3">
-            {[
-              { id: 'girl', label: 'Girl', preview: '/assets/happy.png' },
-              { id: 'boy', label: 'Boy', preview: '/assets/boy_happy.png' },
-            ].map((opt) => {
-              const active = (state.preferences?.stickerPack || 'girl') === opt.id
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => onUpdateStickerPack?.(opt.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wide transition-colors ${
-                    active
-                      ? 'bg-[#004D40] text-[#FFD700]'
-                      : 'bg-[#004D40]/10 text-[#004D40]/70 hover:bg-[#004D40]/15'
-                  }`}
-                  aria-pressed={active}
-                >
-                  <img src={opt.preview} alt="" className="w-5 h-5 object-contain" draggable={false} />
-                  {opt.label}
-                </button>
-              )
-            })}
-          </div>
+          <p className="font-manrope text-[11px] text-[#004D40]/65 text-center mb-3 leading-relaxed px-2">
+            You can change mood stickers anytime in{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/settings/display')}
+              className="text-[#8e6e33] font-semibold underline underline-offset-2 hover:opacity-80"
+            >
+              Settings → Display
+            </button>
+            .
+          </p>
 
           <div className="flex justify-center mb-3 border-b border-[#D4AF37]/20 pb-3">
             <HeartRating value={state.heartRating} onChange={onRateHeart} stickerPack={state.preferences?.stickerPack} />

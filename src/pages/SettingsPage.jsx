@@ -114,7 +114,7 @@ export default function SettingsPage({
             >
               <div className="flex items-center space-x-4">
                 <div className="w-10 h-10 rounded-full bg-[var(--app-surface)] flex items-center justify-center text-[var(--app-accent)] border border-[var(--app-border)]">
-                  <span className="material-symbols-outlined">auto_stories</span>
+                  <i className="fa-solid fa-person-praying text-[1.1rem]" aria-hidden />
                 </div>
                 <div className="text-left">
                   <span className="block font-manrope font-semibold text-[var(--app-text)] text-sm">
@@ -195,7 +195,7 @@ export default function SettingsPage({
                     Display
                   </span>
                   <span className="block text-[12px] text-[var(--app-text-muted)]">
-                    Theme and ayah typography
+                    Theme, ayah typography, and mood calendar stickers
                   </span>
                 </div>
               </div>
@@ -235,12 +235,12 @@ export default function SettingsPage({
           <button
             type="button"
             onClick={onLogout}
-            className="w-full py-4 border border-[#ffb4ab]/30 text-[#ffb4ab] font-manrope font-semibold rounded-xl hover:bg-[#ffb4ab]/5 transition-colors active:scale-95 duration-200"
+            className="w-full py-4 border border-[var(--app-danger)] text-[var(--app-danger)] font-manrope font-semibold rounded-xl hover:bg-[color-mix(in_srgb,var(--app-danger)_10%,transparent)] transition-colors active:scale-95 duration-200"
           >
             Sign Out
           </button>
-          <p className="text-center text-[10px] text-[#bfc9c4] mt-6 opacity-40 font-manrope tracking-widest uppercase font-semibold">
-            Version 2.4.0 • Royal Heritage Edition
+          <p className="text-center text-[10px] text-[var(--app-text-muted)] mt-6 opacity-60 font-manrope tracking-widest uppercase font-semibold">
+            Version 1.0 · Thabit Quran Companion
           </p>
         </div>
       </main>

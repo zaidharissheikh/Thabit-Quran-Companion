@@ -1,6 +1,7 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
+import RoyalCounselSheet from '../components/RoyalCounselSheet'
 import { VERSES } from '../data/content'
 import LoadingDots from '../components/LoadingDots'
 import { parseRefIds } from '../lib/bookmarks'
@@ -19,6 +20,7 @@ export default function HomePage({
   onBookmarkTodayVerse,
   onVerseReflection,
 }) {
+  const [counselOpen, setCounselOpen] = useState(false)
   const verse = useMemo(() => VERSES[new Date().getDay() % VERSES.length], [])
   const verseIds = useMemo(() => parseRefIds(verse.ref), [verse.ref])
   const greeting = useMemo(() => greetingForNow(), [])
@@ -244,22 +246,36 @@ export default function HomePage({
           </section>
 
           <section className="afu4 md:col-span-8 md:row-span-1 bento-card md:min-h-0">
-            <div
-              className="w-full h-full min-h-[5.5rem] bg-[#0a3d2e]/40 md:bg-[#083327] border border-[#c5a059]/20 rounded-2xl px-4 py-4 md:px-6 md:py-4 flex items-start md:items-center gap-3 md:gap-5 backdrop-blur-sm text-left"
+            <button
+              type="button"
+              onClick={() => setCounselOpen(true)}
+              className="w-full h-full min-h-[5.5rem] bg-[#0a3d2e]/40 md:bg-[#083327] border border-[#c5a059]/20 rounded-2xl px-4 py-4 md:px-6 md:py-4 flex items-start md:items-center gap-3 md:gap-5 backdrop-blur-sm text-left transition-opacity active:opacity-90 md:cursor-default md:pointer-events-none"
+              aria-label="Read full Royal Counsel"
             >
               <div className="gold-gradient rounded-full p-2 md:p-2.5 shadow-lg ring-4 ring-[#0a3d2e] flex-shrink-0 flex items-center justify-center">
                 <i className="fa-solid fa-mosque text-[#062c21] text-sm md:text-base" aria-hidden />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-playfair text-base md:text-lg text-[var(--app-accent)] mb-0.5 italic">Royal Counsel</h4>
-                <p className="text-xs md:text-sm text-[var(--app-accent)] opacity-80 leading-snug font-light md:max-w-3xl line-clamp-3">
+                <h4 className="font-playfair text-base md:text-lg text-[var(--app-accent)] mb-0.5 italic">
+                  Royal Counsel
+                </h4>
+                <p className="text-xs md:text-sm text-[var(--app-accent)] opacity-80 leading-snug font-light md:max-w-3xl line-clamp-3 md:line-clamp-none">
                   {counsel}
                 </p>
+                <p className="mt-1.5 text-[10px] uppercase tracking-wider text-[var(--app-accent)]/70 font-semibold md:hidden">
+                  Tap to read more
+                </p>
               </div>
-            </div>
+            </button>
           </section>
         </div>
       </main>
+
+      <RoyalCounselSheet
+        open={counselOpen}
+        body={counsel}
+        onClose={() => setCounselOpen(false)}
+      />
 
       <BottomNav active="/" dark />
     </div>

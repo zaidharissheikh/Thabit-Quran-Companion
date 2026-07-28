@@ -15,7 +15,7 @@ export default function GoalsPage({ state, onUpdateGoal }) {
         <div className="relative flex items-center justify-center w-full px-6 py-2 h-14">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/settings')}
             className="absolute left-6 p-2 transition-colors hover:opacity-80 active:scale-95 duration-150 text-[var(--app-accent)]"
           >
             <span className="material-symbols-outlined">arrow_back</span>
@@ -27,16 +27,15 @@ export default function GoalsPage({ state, onUpdateGoal }) {
       </header>
 
       <main className="pt-24 px-6 max-w-[430px] mx-auto space-y-8 md:pt-16 md:px-12 md:max-w-2xl md:mx-auto">
+        <button
+          type="button"
+          onClick={() => navigate('/settings')}
+          className="hidden md:inline-flex items-center gap-1 text-[var(--app-accent)] hover:opacity-80 mb-2 -ml-1"
+        >
+          <span className="material-symbols-outlined text-[22px]">arrow_back</span>
+          <span className="font-manrope text-sm font-semibold">Settings</span>
+        </button>
         <div className="bg-[var(--app-card-bg)] text-[var(--app-card-text)] rounded-xl p-8 flex flex-col justify-between min-h-[340px] shadow-2xl relative overflow-hidden border border-[var(--app-border)]">
-          <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-            <span
-              className="material-symbols-outlined text-[120px]"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              menu_book
-            </span>
-          </div>
-
           <div className="relative z-10">
             <h3 className="text-2xl font-headline font-semibold mb-2">Daily Quran Goal</h3>
             <p className="text-base opacity-70 mb-8 font-medium">
@@ -63,7 +62,7 @@ export default function GoalsPage({ state, onUpdateGoal }) {
             type="button"
             onClick={() => {
               onUpdateGoal(quranGoal)
-              navigate(-1)
+              navigate('/settings')
             }}
             className="mt-8 relative z-10 w-full bg-[#cda72f] hover:bg-[#ebc349] text-[#4f3e00] font-manrope font-bold text-sm py-4 rounded-lg transition-all active:scale-95 flex items-center justify-center space-x-2 shadow-md uppercase tracking-wider"
           >

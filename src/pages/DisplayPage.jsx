@@ -20,8 +20,8 @@ export default function DisplayPage({
       >
         <button
           type="button"
-          onClick={() => navigate(-1)}
-          aria-label="Go back"
+          onClick={() => navigate('/settings')}
+          aria-label="Back to settings"
           className="flex items-center justify-center w-10 h-10 text-[var(--app-accent)] hover:opacity-80 transition-opacity active:scale-95"
         >
           <span className="material-symbols-outlined text-[28px]">arrow_back</span>
@@ -33,6 +33,14 @@ export default function DisplayPage({
       </header>
 
       <main className="pt-24 px-6 max-w-[430px] mx-auto space-y-10 md:pt-16 md:px-12 md:max-w-2xl md:mx-auto">
+        <button
+          type="button"
+          onClick={() => navigate('/settings')}
+          className="hidden md:inline-flex items-center gap-1 text-[var(--app-accent)] hover:opacity-80 -ml-1"
+        >
+          <span className="material-symbols-outlined text-[22px]">arrow_back</span>
+          <span className="font-manrope text-sm font-semibold">Settings</span>
+        </button>
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[var(--app-accent)] text-[20px]">palette</span>
@@ -84,7 +92,7 @@ export default function DisplayPage({
 
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[var(--app-accent)] text-[20px]">face</span>
+            <i className="fa-solid fa-user-check text-[var(--app-accent)] text-[18px]" aria-hidden />
             <h2 className="font-manrope font-semibold text-[var(--app-accent)] uppercase tracking-[0.2em] text-[12px]">
               Mood Sticker Character
             </h2>
