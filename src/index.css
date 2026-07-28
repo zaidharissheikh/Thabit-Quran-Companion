@@ -351,13 +351,14 @@ body {
   transform: translateY(0);
 }
 
-.toast {
+.toast,
+.app-notice {
   position: fixed;
   left: 50%;
   bottom: 88px;
   z-index: 200;
   opacity: 0;
-  color: #e9d19b;
+  color: #e9d19b !important;
   font-family: 'Manrope', 'Plus Jakarta Sans', system-ui, sans-serif;
   font-size: 13px;
   white-space: nowrap;
@@ -365,8 +366,8 @@ body {
   border-radius: 999px;
   padding: 10px 20px;
   transform: translateX(-50%) translateY(8px);
-  background: #0a3d2e;
-  border: 1px solid rgba(197, 160, 89, 0.4);
+  background: #0a3d2e !important;
+  border: 1px solid rgba(197, 160, 89, 0.4) !important;
   box-shadow: 0 8px 24px rgba(6, 44, 33, 0.35);
   transition: all 0.25s;
 }
@@ -374,6 +375,17 @@ body {
 .toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* Top loading banner shares toast colors but not bottom positioning */
+.app-notice {
+  position: static;
+  left: auto;
+  bottom: auto;
+  opacity: 1;
+  transform: none;
+  z-index: auto;
+  white-space: normal;
 }
 
 .dot {

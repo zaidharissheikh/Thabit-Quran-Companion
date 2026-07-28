@@ -97,19 +97,14 @@ export default function SignupPage({ onSignup }) {
   }
 
   const inputClass = (hasError) =>
-    `w-full bg-[#001f1b] border rounded-lg py-3 pl-11 pr-11 text-[#e5e2db] transition-all outline-none placeholder:text-[#c6a34f]/30 ${
+    `w-full bg-[var(--app-bg)] border rounded-lg py-3 pl-11 pr-11 text-[var(--app-text)] transition-all outline-none placeholder:text-[var(--app-text-muted)] ${
       hasError
-        ? 'border-red-400/70 focus:border-red-300'
-        : 'border-[#c6a34f]/30 focus:border-[#c6a34f]'
+        ? 'border-[var(--app-danger)] focus:border-[var(--app-danger)]'
+        : 'border-[var(--app-border)] focus:border-[var(--app-accent)]'
     }`
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#00231e] p-6 text-[#e5e2db]">
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-10 right-10 w-64 h-64 border border-[#c6a34f]/10 rounded-full rotate-45" />
-        <div className="absolute bottom-20 -left-20 w-96 h-96 border border-[#c6a34f]/10 rounded-full" />
-      </div>
-
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--app-bg)] p-6 text-[var(--app-text)]">
       <div className="relative z-10 w-full max-w-md mx-auto flex flex-col items-center">
         <header className="afu text-center mb-10 space-y-2">
           <div className="w-40 h-40 mx-auto mb-6 flex items-center justify-center overflow-hidden">
@@ -119,21 +114,21 @@ export default function SignupPage({ onSignup }) {
               src="/logo.png"
             />
           </div>
-          <h1 className="font-headline text-[40px] leading-[48px] font-bold tracking-wide uppercase text-[#c6a34f] gold-text-glow">
+          <h1 className="font-headline text-[40px] leading-[48px] font-bold tracking-wide uppercase text-[var(--app-accent)]">
             THAABIT
           </h1>
-          <p className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/70 italic">
+          <p className="font-manrope text-sm font-semibold tracking-[0.05em] text-[var(--app-accent)]/80 italic">
             A Journey into Divine Wisdom
           </p>
         </header>
 
-        <main className="afu2 w-full metallic-border bg-[#00322b] rounded-2xl p-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute -top-6 -left-6 opacity-20">
-            <span className="material-symbols-outlined text-[120px] text-[#c6a34f]">flare</span>
+        <main className="afu2 w-full bg-[var(--app-surface)] rounded-2xl p-8 shadow-2xl relative overflow-hidden border border-[var(--app-border)]">
+          <div className="absolute -top-6 -left-6 opacity-10">
+            <span className="material-symbols-outlined text-[120px] text-[var(--app-accent)]">flare</span>
           </div>
 
           <div className="relative z-10">
-            <h2 className="font-headline text-[32px] leading-[40px] font-semibold text-[#c6a34f] text-center mb-8 border-b border-[#c6a34f]/20 pb-4">
+            <h2 className="font-headline text-[32px] leading-[40px] font-semibold text-[var(--app-accent)] text-center mb-8 border-b border-[var(--app-border)] pb-4">
               Create Account
             </h2>
 
@@ -141,7 +136,7 @@ export default function SignupPage({ onSignup }) {
               <div className="space-y-2">
                 <label
                   htmlFor="signup-name"
-                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1"
+                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[var(--app-accent)]/80 ml-1"
                 >
                   Full Name
                 </label>
@@ -157,12 +152,12 @@ export default function SignupPage({ onSignup }) {
                     aria-invalid={Boolean(showError('name'))}
                     className={inputClass(Boolean(showError('name')))}
                   />
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c6a34f]/70">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-accent)]/70">
                     person
                   </span>
                 </div>
                 {showError('name') ? (
-                  <p className="text-xs text-red-300/90 font-manrope ml-1" role="alert">
+                  <p className="text-xs text-[var(--app-danger)] font-manrope ml-1" role="alert">
                     {showError('name')}
                   </p>
                 ) : null}
@@ -171,7 +166,7 @@ export default function SignupPage({ onSignup }) {
               <div className="space-y-2">
                 <label
                   htmlFor="signup-email"
-                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1"
+                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[var(--app-accent)]/80 ml-1"
                 >
                   Email
                 </label>
@@ -187,12 +182,12 @@ export default function SignupPage({ onSignup }) {
                     aria-invalid={Boolean(showError('email'))}
                     className={inputClass(Boolean(showError('email')))}
                   />
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c6a34f]/70">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-accent)]/70">
                     mail
                   </span>
                 </div>
                 {showError('email') ? (
-                  <p className="text-xs text-red-300/90 font-manrope ml-1" role="alert">
+                  <p className="text-xs text-[var(--app-danger)] font-manrope ml-1" role="alert">
                     {showError('email')}
                   </p>
                 ) : null}
@@ -201,7 +196,7 @@ export default function SignupPage({ onSignup }) {
               <div className="space-y-2">
                 <label
                   htmlFor="signup-dob"
-                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1"
+                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[var(--app-accent)]/80 ml-1"
                 >
                   Date of Birth
                 </label>
@@ -216,11 +211,11 @@ export default function SignupPage({ onSignup }) {
                   }}
                 />
                 {showError('dob') ? (
-                  <p className="text-xs text-red-300/90 font-manrope ml-1" role="alert">
+                  <p className="text-xs text-[var(--app-danger)] font-manrope ml-1" role="alert">
                     {showError('dob')}
                   </p>
                 ) : (
-                  <p className="text-[11px] text-[#c6a34f]/55 font-manrope ml-1">
+                  <p className="text-[11px] text-[var(--app-text-muted)] font-manrope ml-1">
                     Tap the calendar to choose your birthday (age 11+)
                   </p>
                 )}
@@ -229,7 +224,7 @@ export default function SignupPage({ onSignup }) {
               <div className="space-y-2">
                 <label
                   htmlFor="signup-password"
-                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1"
+                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[var(--app-accent)]/80 ml-1"
                 >
                   Password
                 </label>
@@ -245,13 +240,13 @@ export default function SignupPage({ onSignup }) {
                     aria-invalid={Boolean(showError('password'))}
                     className={inputClass(Boolean(showError('password')))}
                   />
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c6a34f]/70">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-accent)]/70">
                     lock
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-[#c6a34f]/70 hover:text-[#c6a34f] hover:bg-[#c6a34f]/10 transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-[var(--app-accent)]/70 hover:text-[var(--app-accent)] hover:bg-[var(--app-accent)]/10 transition-colors"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     <span className="material-symbols-outlined text-[22px]">
@@ -267,7 +262,7 @@ export default function SignupPage({ onSignup }) {
                         <li
                           key={rule.key}
                           className={`flex items-center gap-1.5 text-[11px] font-manrope ${
-                            ok ? 'text-emerald-300/90' : 'text-[#c6a34f]/55'
+                            ok ? 'text-emerald-600' : 'text-[var(--app-text-muted)]'
                           }`}
                         >
                           <span className="material-symbols-outlined text-[14px]">
@@ -280,7 +275,7 @@ export default function SignupPage({ onSignup }) {
                   </ul>
                 ) : null}
                 {showError('password') ? (
-                  <p className="text-xs text-red-300/90 font-manrope ml-1" role="alert">
+                  <p className="text-xs text-[var(--app-danger)] font-manrope ml-1" role="alert">
                     {showError('password')}
                   </p>
                 ) : null}
@@ -289,7 +284,7 @@ export default function SignupPage({ onSignup }) {
               <div className="space-y-2">
                 <label
                   htmlFor="signup-confirm"
-                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[#c6a34f]/80 ml-1"
+                  className="font-manrope text-sm font-semibold tracking-[0.05em] text-[var(--app-accent)]/80 ml-1"
                 >
                   Confirm Password
                 </label>
@@ -305,13 +300,13 @@ export default function SignupPage({ onSignup }) {
                     aria-invalid={Boolean(showError('confirmPassword'))}
                     className={inputClass(Boolean(showError('confirmPassword')))}
                   />
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c6a34f]/70">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-accent)]/70">
                     verified_user
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowConfirm((v) => !v)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-[#c6a34f]/70 hover:text-[#c6a34f] hover:bg-[#c6a34f]/10 transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-[var(--app-accent)]/70 hover:text-[var(--app-accent)] hover:bg-[var(--app-accent)]/10 transition-colors"
                     aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
                   >
                     <span className="material-symbols-outlined text-[22px]">
@@ -320,14 +315,14 @@ export default function SignupPage({ onSignup }) {
                   </button>
                 </div>
                 {showError('confirmPassword') ? (
-                  <p className="text-xs text-red-300/90 font-manrope ml-1" role="alert">
+                  <p className="text-xs text-[var(--app-danger)] font-manrope ml-1" role="alert">
                     {showError('confirmPassword')}
                   </p>
                 ) : null}
               </div>
 
               {formError ? (
-                <p className="font-manrope text-sm text-red-300/90" role="alert">
+                <p className="font-manrope text-sm text-[var(--app-danger)]" role="alert">
                   {formError}
                 </p>
               ) : null}
@@ -344,9 +339,9 @@ export default function SignupPage({ onSignup }) {
         </main>
 
         <footer className="afu3 mt-8 text-center">
-          <p className="font-manrope text-base text-[#e5e2db]/60">
+          <p className="font-manrope text-base text-[var(--app-text-muted)]">
             Already part of the journey?{' '}
-            <Link to="/login" className="text-[#c6a34f] font-bold hover:underline ml-1">
+            <Link to="/login" className="text-[var(--app-accent)] font-bold hover:underline ml-1">
               Sign In
             </Link>
           </p>

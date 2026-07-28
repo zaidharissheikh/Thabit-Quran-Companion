@@ -119,21 +119,21 @@ export default function DateOfBirthPicker({
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className={`w-full bg-[#001f1b] border rounded-lg py-3 pl-11 pr-11 text-left transition-all outline-none ${
+        className={`w-full bg-[var(--app-bg)] border rounded-lg py-3 pl-11 pr-11 text-left transition-all outline-none ${
           error
-            ? 'border-red-400/70 focus:border-red-300'
-            : 'border-[#c6a34f]/30 focus:border-[#c6a34f]'
-        } ${value ? 'text-[#e5e2db]' : 'text-[#c6a34f]/30'}`}
+            ? 'border-[var(--app-danger)] focus:border-[var(--app-danger)]'
+            : 'border-[var(--app-border)] focus:border-[var(--app-accent)]'
+        } ${value ? 'text-[var(--app-text)]' : 'text-[var(--app-text-muted)]'}`}
       >
         {display}
       </button>
-      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c6a34f]/70 pointer-events-none">
+      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--app-accent)]/70 pointer-events-none">
         calendar_today
       </span>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-[#c6a34f] hover:bg-[#c6a34f]/10 transition-colors"
+        className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-[var(--app-accent)] hover:bg-[var(--app-accent)]/10 transition-colors"
         aria-label="Open calendar"
       >
         <span className="material-symbols-outlined text-[22px]">edit_calendar</span>
@@ -143,13 +143,13 @@ export default function DateOfBirthPicker({
         <div
           role="dialog"
           aria-label="Choose date of birth"
-          className="absolute z-50 mt-2 left-0 right-0 rounded-xl border border-[#c6a34f]/35 bg-[#002822] shadow-2xl p-3"
+          className="absolute z-50 mt-2 left-0 right-0 rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] shadow-2xl p-3"
         >
           <div className="flex items-center justify-between gap-2 mb-3">
             <button
               type="button"
               onClick={() => shiftMonth(-1)}
-              className="w-8 h-8 rounded-full text-[#c6a34f] hover:bg-[#c6a34f]/10"
+              className="w-8 h-8 rounded-full text-[var(--app-accent)] hover:bg-[var(--app-accent)]/10"
               aria-label="Previous month"
             >
               <span className="material-symbols-outlined text-[20px]">chevron_left</span>
@@ -160,7 +160,7 @@ export default function DateOfBirthPicker({
                 onChange={(e) =>
                   setView(new Date(view.getFullYear(), Number(e.target.value), 1))
                 }
-                className="bg-[#001f1b] border border-[#c6a34f]/30 text-[#e5e2db] text-sm rounded-md px-2 py-1 outline-none"
+                className="bg-[var(--app-bg)] border border-[var(--app-border)] text-[var(--app-text)] text-sm rounded-md px-2 py-1 outline-none"
               >
                 {MONTHS.map((label, idx) => (
                   <option key={label} value={idx}>
@@ -173,7 +173,7 @@ export default function DateOfBirthPicker({
                 onChange={(e) =>
                   setView(new Date(Number(e.target.value), view.getMonth(), 1))
                 }
-                className="bg-[#001f1b] border border-[#c6a34f]/30 text-[#e5e2db] text-sm rounded-md px-2 py-1 outline-none max-w-[5.5rem]"
+                className="bg-[var(--app-bg)] border border-[var(--app-border)] text-[var(--app-text)] text-sm rounded-md px-2 py-1 outline-none max-w-[5.5rem]"
               >
                 {years.map((y) => (
                   <option key={y} value={y}>
@@ -185,7 +185,7 @@ export default function DateOfBirthPicker({
             <button
               type="button"
               onClick={() => shiftMonth(1)}
-              className="w-8 h-8 rounded-full text-[#c6a34f] hover:bg-[#c6a34f]/10"
+              className="w-8 h-8 rounded-full text-[var(--app-accent)] hover:bg-[var(--app-accent)]/10"
               aria-label="Next month"
             >
               <span className="material-symbols-outlined text-[20px]">chevron_right</span>
@@ -196,7 +196,7 @@ export default function DateOfBirthPicker({
             {WEEKDAYS.map((d) => (
               <div
                 key={d}
-                className="text-center text-[10px] font-manrope font-bold uppercase tracking-wide text-[#c6a34f]/55 py-1"
+                className="text-center text-[10px] font-manrope font-bold uppercase tracking-wide text-[var(--app-text-muted)] py-1"
               >
                 {d}
               </div>
@@ -219,10 +219,10 @@ export default function DateOfBirthPicker({
                   onClick={() => selectDay(date)}
                   className={`h-9 rounded-lg text-sm font-manrope transition-colors ${
                     selected
-                      ? 'bg-[#c6a34f] text-[#241a00] font-bold'
+                      ? 'bg-[var(--app-accent)] text-[#241a00] font-bold'
                       : disabled
-                        ? 'text-[#e5e2db]/20 cursor-not-allowed'
-                        : 'text-[#e5e2db] hover:bg-[#c6a34f]/15'
+                        ? 'text-[var(--app-text-muted)]/40 cursor-not-allowed'
+                        : 'text-[var(--app-text)] hover:bg-[var(--app-accent)]/15'
                   }`}
                 >
                   {date.getDate()}
@@ -231,7 +231,7 @@ export default function DateOfBirthPicker({
             })}
           </div>
 
-          <p className="mt-3 text-[11px] font-manrope text-[#c6a34f]/65 text-center">
+          <p className="mt-3 text-[11px] font-manrope text-[var(--app-text-muted)] text-center">
             You must be at least {minAge} years old
           </p>
         </div>

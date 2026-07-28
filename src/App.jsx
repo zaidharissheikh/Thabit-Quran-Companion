@@ -842,7 +842,7 @@ function App() {
       <div className="flex-1 w-full relative">
         {isLoggedIn && dataLoading && (
           <div className="fixed top-0 left-0 right-0 z-[60] flex justify-center pt-3 pointer-events-none">
-            <div className="bg-[#0a3d2e] text-[#e9d19b] text-xs font-manrope px-4 py-2 rounded-full border border-[#c5a059]/40 shadow-lg">
+            <div className="app-notice text-xs font-manrope px-4 py-2 shadow-lg">
               Loading your progress…
             </div>
           </div>

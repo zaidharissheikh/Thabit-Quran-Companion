@@ -46,8 +46,9 @@ export default function SettingsPage({
         <div className="flex items-center justify-between w-full">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/')}
             className="tap-highlight-transparent active:scale-95 hover:opacity-80 transition-colors text-[var(--app-accent)]"
+            aria-label="Back to home"
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
@@ -60,6 +61,16 @@ export default function SettingsPage({
 
       <main className="pt-24 pb-28 px-6 max-w-[430px] mx-auto space-y-8 relative md:pt-16 md:px-12 md:max-w-3xl md:mx-auto">
         <div className="fixed inset-0 subtle-pattern pointer-events-none" />
+
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="hidden md:inline-flex relative z-10 items-center gap-1 text-[var(--app-accent)] hover:opacity-80 -ml-1"
+          aria-label="Back to home"
+        >
+          <span className="material-symbols-outlined text-[22px]">arrow_back</span>
+          <span className="font-manrope text-sm font-semibold">Home</span>
+        </button>
 
         <section className="relative z-10">
           <div
