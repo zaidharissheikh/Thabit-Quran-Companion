@@ -1,6 +1,6 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ApiError } from '../lib/api'
+import { ApiError, authApi } from '../lib/api'
 import { validateEmail, validateLoginPassword } from '../lib/formValidation'
 
 export default function LoginPage({ onLogin }) {
@@ -8,9 +8,34 @@ export default function LoginPage({ onLogin }) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [forgotOpen, setForgotOpen] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotStatus, setForgotStatus] = useState('idle')
+  const [forgotError, setForgotError] = useState('')
   const [touched, setTouched] = useState({ email: false, password: false })
   const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault()
+    setForgotError('')
+    const error = validateEmail(forgotEmail)
+    if (error) {
+      setForgotError(error)
+      return
+    }
+    setForgotStatus('submitting')
+    try {
+      await authApi.forgotPassword(forgotEmail.trim())
+      setForgotStatus('success')
+    } catch (err) {
+      if (err instanceof ApiError && err.isRateLimited) {
+        setForgotError('Too many requests. Please try again later.')
+      } else {
+        setForgotError(err.message || 'Could not send reset link. Please try again.')
+      }
+      setForgotStatus('error')
+    }
+  }
 
   const fieldErrors = useMemo(
     () => ({
@@ -213,36 +238,100 @@ export default function LoginPage({ onLogin }) {
         <div
           className="fixed inset-0 z-[80] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
           role="presentation"
-          onClick={() => setForgotOpen(false)}
+          onClick={() => {
+            if (forgotStatus !== 'submitting') {
+              setForgotOpen(false)
+              setForgotStatus('idle')
+              setForgotEmail('')
+            }
+          }}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="forgot-title"
-            className="w-full max-w-sm rounded-2xl border border-[#c8ae6d]/35 bg-[#0a2f28] p-6 shadow-2xl text-center"
+            className="w-full max-w-sm rounded-2xl border border-[#c8ae6d]/35 bg-[#0a2f28] p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-12 mx-auto mb-4 rounded-full border border-[#c8ae6d]/40 flex items-center justify-center text-[#c8ae6d]">
-              <span className="material-symbols-outlined text-[28px]">schedule</span>
+              <span className="material-symbols-outlined text-[28px]">lock_reset</span>
             </div>
             <h3
               id="forgot-title"
-              className="font-headline text-xl font-semibold text-[#c8ae6d] mb-2"
+              className="font-headline text-xl font-semibold text-[#c8ae6d] mb-2 text-center"
             >
-              Coming soon
+              Reset Password
             </h3>
-            <p className="font-manrope text-sm text-[#e5e2db]/75 leading-relaxed mb-6">
-              Password reset is not implemented yet. This feature is coming soon -
-              please sign in with your current password, or create a new account if
-              you need access.
-            </p>
-            <button
-              type="button"
-              onClick={() => setForgotOpen(false)}
-              className="w-full gold-gradient py-3 rounded-full font-manrope text-sm font-bold tracking-widest uppercase text-[#342800]"
-            >
-              Got it
-            </button>
+            
+            {forgotStatus === 'success' ? (
+              <div className="text-center">
+                <p className="font-manrope text-sm text-[#e5e2db]/75 leading-relaxed mb-6">
+                  If an account exists with {forgotEmail}, we've sent a password reset link. Please check your inbox.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotOpen(false)
+                    setForgotStatus('idle')
+                    setForgotEmail('')
+                  }}
+                  className="w-full gold-gradient py-3 rounded-full font-manrope text-sm font-bold tracking-widest uppercase text-[#342800]"
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotSubmit} noValidate>
+                <p className="font-manrope text-sm text-[#e5e2db]/75 leading-relaxed mb-4 text-center">
+                  Enter your email address and we'll send you a link to reset your password.
+                </p>
+                <div className="space-y-4 mb-6">
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#c8ae6d]/50 text-xl">
+                      mail
+                    </span>
+                    <input
+                      type="email"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      placeholder="royal@heirloom.com"
+                      autoComplete="email"
+                      className={`w-full bg-[#001F1A] border-b-2 text-[#e5e2db] placeholder:text-[#bfc9c4]/30 pl-12 pr-4 py-3 rounded-t-lg transition-all outline-none ${
+                        forgotError
+                          ? 'border-red-400/70 focus:border-red-300'
+                          : 'border-[#c8ae6d]/30 focus:border-[#c8ae6d]'
+                      }`}
+                    />
+                  </div>
+                  {forgotError && (
+                    <p className="font-manrope text-xs text-red-300/90 text-center" role="alert">
+                      {forgotError}
+                    </p>
+                  )}
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotOpen(false)
+                      setForgotStatus('idle')
+                      setForgotEmail('')
+                    }}
+                    disabled={forgotStatus === 'submitting'}
+                    className="flex-1 py-3 rounded-full border border-[#c8ae6d]/30 font-manrope text-sm font-bold tracking-widest uppercase text-[#c8ae6d] hover:bg-[#c8ae6d]/10 disabled:opacity-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={forgotStatus === 'submitting' || !forgotEmail.trim()}
+                    className="flex-1 gold-gradient py-3 rounded-full font-manrope text-sm font-bold tracking-widest uppercase text-[#342800] disabled:opacity-60 transition-opacity"
+                  >
+                    {forgotStatus === 'submitting' ? 'Sending…' : 'Send Link'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       ) : null}

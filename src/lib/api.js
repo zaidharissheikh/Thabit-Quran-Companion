@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Single client for all /api/* calls (credentials + refresh-once on 401).
  */
 
@@ -128,6 +128,16 @@ export const authApi = {
     }),
   logout: () => apiRequest('/api/auth/logout', { method: 'POST' }),
   refresh: () => apiRequest('/api/auth/refresh', { method: 'POST' }),
+  forgotPassword: (email) =>
+    apiRequest('/api/auth/forgot-password', {
+      method: 'POST',
+      json: { email },
+    }),
+  resetPassword: (token, password) =>
+    apiRequest('/api/auth/reset-password', {
+      method: 'POST',
+      json: { token, password },
+    }),
 };
 
 export const progressApi = {

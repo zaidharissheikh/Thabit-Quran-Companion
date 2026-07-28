@@ -1,4 +1,4 @@
-﻿import { z } from 'zod';
+import { z } from 'zod';
 import {
   STRONG_PASSWORD_MESSAGE,
   isAtLeastAge,
@@ -45,4 +45,13 @@ export const loginSchema = z.object({
     .string()
     .min(1, 'Password is required')
     .max(128, 'Password is too long'),
+});
+
+export const forgotPasswordSchema = z.object({
+  email: emailField,
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Token is required'),
+  password: strongPasswordField,
 });

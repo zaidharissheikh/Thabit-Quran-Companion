@@ -1,4 +1,4 @@
-﻿import surahsJson from './surahs.json'
+import surahsJson from './surahs.json'
 
 export const VERSES = [
   {

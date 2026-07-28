@@ -19,6 +19,7 @@ import SignupPage from './pages/SignupPage'
 import SurahPage from './pages/SurahPage'
 import BookmarksPage from './pages/BookmarksPage'
 import ReturnPage from './pages/ReturnPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import { askAi } from './utils/ai'
 import {
   ApiError,
@@ -878,6 +879,7 @@ function App() {
           {!isLoggedIn ? (
             <>
               <Route path="/signup" element={<SignupPage onSignup={handleSignup} />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="*" element={<LoginPage onLogin={handleLogin} />} />
             </>
           ) : (
