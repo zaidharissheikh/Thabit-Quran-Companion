@@ -4,7 +4,7 @@ import { requireOrigin } from '../auth.js';
 import { getCollection } from '../db.js';
 import { getFromEmail } from '../emailConfig.js';
 import { createHandler, sendJson } from '../handler.js';
-import { rateLimitAuthIp } from '../rateLimit.js';
+import { rateLimitAuthIp, consumeRateLimit } from '../rateLimit.js';
 import { forgotPasswordSchema } from '../schemas/auth.js';
 import { parseOrThrow, readJsonBody } from '../validate.js';
 
@@ -15,6 +15,8 @@ export default createHandler({
     await rateLimitAuthIp(req);
 
     const body = parseOrThrow(forgotPasswordSchema, await readJsonBody(req));
+    
+    await consumeRateLimit(`forgot-pwd:${body.email.toLowerCase()}`, 3, 24 * 60 * 60 * 1000);
     const users = await getCollection('users');
     const user = await users.findOne({ email: body.email });
 

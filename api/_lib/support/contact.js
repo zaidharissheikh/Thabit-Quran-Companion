@@ -31,7 +31,7 @@ export default createHandler({
     const auth = await requireAuth(req);
 
     const ip = getClientIp(req);
-    await consumeRateLimit(`support:${auth.userId}`, 5, 60 * 60 * 1000);
+    await consumeRateLimit(`support:${auth.userId}`, 2, 24 * 60 * 60 * 1000);
     await consumeRateLimit(`support-ip:${ip}`, 10, 60 * 60 * 1000);
 
     const { apiKey, fromAddress, toEmail } = requireEmailConfig();
