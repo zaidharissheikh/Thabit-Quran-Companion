@@ -15,6 +15,14 @@
     {
       "source": "/api/notes/:path*",
       "destination": "/api/notes.js"
+    },
+    {
+      "source": "/api/support/:path*",
+      "destination": "/api/support.js"
+    },
+    {
+      "source": "/api/support",
+      "destination": "/api/support.js"
     }
   ],
   "headers": [

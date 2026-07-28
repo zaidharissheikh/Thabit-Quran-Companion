@@ -172,6 +172,14 @@ export const aiApi = {
     }),
 };
 
+export const supportApi = {
+  contact: (body) =>
+    apiRequest('/api/support/contact', {
+      method: 'POST',
+      json: body,
+    }),
+};
+
 export const quranApi = {
   chapters: () => apiRequest('/api/quran/chapters'),
   chapter: (id) => apiRequest(`/api/quran/chapters/${id}`),

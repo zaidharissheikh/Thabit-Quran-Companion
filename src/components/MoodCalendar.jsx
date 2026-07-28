@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { HEART_OPTIONS } from '../data/content'
-import { MOOD_STICKERS } from '../assets/moodStickers'
+import { getMoodStickers } from '../assets/moodStickers'
+import { localDateKey } from '../lib/localDay'
 
 const MOOD_BY_VALUE = Object.fromEntries(
   HEART_OPTIONS.map((o) => [String(o.value), o]),
@@ -29,43 +30,34 @@ function tooltipClasses(colIndex) {
     return { box: 'left-0', caret: 'left-6' }
   }
   if (colIndex >= 5) {
-    return { box: 'right-0', caret: 'right-6 left-auto' }
+    return { box: 'right-0', caret: 'right-6' }
   }
-  return {
-    box: 'left-1/2 -translate-x-1/2',
-    caret: 'left-1/2 -translate-x-1/2',
-  }
+  return { box: 'left-1/2 -translate-x-1/2', caret: 'left-1/2 -translate-x-1/2' }
 }
 
-function DayCell({ d, dateKey, moodOption, colIndex = 3 }) {
+function DayCell({ d, dateKey, moodOption, colIndex, stickerPack }) {
   const [open, setOpen] = useState(false)
   const cellRef = useRef(null)
-  const { box, caret } = tooltipClasses(colIndex)
+  const stickers = getMoodStickers(stickerPack)
 
   useEffect(() => {
-    if (!open) return undefined
-    function onKey(e) {
-      if (e.key === 'Escape') setOpen(false)
+    function handleOutside(e) {
+      if (cellRef.current && !cellRef.current.contains(e.target)) {
+        setOpen(false)
+      }
     }
-    function onOutside(e) {
-      if (cellRef.current && !cellRef.current.contains(e.target)) setOpen(false)
+    if (open) {
+      document.addEventListener('mousedown', handleOutside)
     }
-    document.addEventListener('keydown', onKey)
-    document.addEventListener('mousedown', onOutside)
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.removeEventListener('mousedown', onOutside)
-    }
+    return () => document.removeEventListener('mousedown', handleOutside)
   }, [open])
 
-  if (d == null) {
-    return <div className="min-h-0" aria-hidden />
-  }
+  const { box, caret } = tooltipClasses(colIndex)
 
   if (!moodOption) {
     return (
-      <div className="flex items-center justify-center min-h-0 h-full">
-        <span className="font-manrope text-[11px] sm:text-xs font-medium text-[#004D40]/70 select-none">
+      <div className="flex items-center justify-center h-12">
+        <span className="font-manrope text-xs font-medium text-black select-none">
           {d}
         </span>
       </div>
@@ -73,26 +65,28 @@ function DayCell({ d, dateKey, moodOption, colIndex = 3 }) {
   }
 
   return (
-    <div ref={cellRef} className="flex items-center justify-center min-h-0 h-full relative">
+    <div ref={cellRef} className="flex items-center justify-center h-12 relative">
       <button
         type="button"
         onClick={() => setOpen((p) => !p)}
-        className="w-[90%] max-w-[3rem] aspect-square rounded-full flex items-center justify-center bg-gradient-to-br from-[#FFF0BE] via-[#E9C349] to-[#D4AF37] shadow-md hover:scale-105 active:scale-95 transition-transform focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+        className="w-11 h-11 rounded-full flex items-center justify-center bg-gradient-to-br from-[#FFF0BE] via-[#E9C349] to-[#D4AF37] shadow-md hover:scale-110 active:scale-95 transition-transform focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
         title={`${moodOption.label} - ${formatDateLabel(dateKey)}`}
       >
         <img
-          src={MOOD_STICKERS[moodOption.stickerKey]}
+          src={stickers[moodOption.stickerKey]}
           alt={moodOption.label}
-          className="w-[88%] h-[88%] object-contain drop-shadow"
+          className="w-10 h-10 object-contain drop-shadow"
           draggable={false}
         />
       </button>
 
+      {/* Tooltip - anchored above THIS sticker, edge-aware */}
       {open && (
         <div
-          className={`absolute bottom-full mb-2 z-40 w-52 bg-[#f9f7f2] rounded-2xl shadow-2xl border border-[#D4AF37]/25 p-4 flex flex-col items-center gap-2 ${box}`}
+          className={`absolute bottom-full mb-3 z-40 w-56 bg-[#f9f7f2] rounded-2xl shadow-2xl border border-[#D4AF37]/25 p-4 flex flex-col items-center gap-2 ${box}`}
           style={{ animation: 'fadeSlideUp 0.18s ease-out' }}
         >
+          {/* Caret */}
           <div
             className={`absolute -bottom-2 w-4 h-4 bg-[#f9f7f2] border-r border-b border-[#D4AF37]/25 rotate-45 ${caret}`}
           />
@@ -107,7 +101,7 @@ function DayCell({ d, dateKey, moodOption, colIndex = 3 }) {
           </button>
 
           <img
-            src={MOOD_STICKERS[moodOption.stickerKey]}
+            src={stickers[moodOption.stickerKey]}
             alt={moodOption.label}
             className="w-14 h-14 object-contain drop-shadow-md"
             draggable={false}
@@ -115,17 +109,26 @@ function DayCell({ d, dateKey, moodOption, colIndex = 3 }) {
           <p className="font-manrope text-xs text-[#004D40]/60 text-center leading-tight">
             {formatDateLabel(dateKey)}
           </p>
-          <p className="font-headline text-sm font-semibold text-[#004D40] text-center">
-            You were feeling{' '}
-            <span className="text-[#8e6e33]">{moodOption.label}</span> on this day
-          </p>
+          {dateKey === localDateKey() ? (
+            <p className="font-headline text-sm font-semibold text-[#004D40] text-center leading-snug">
+              You are feeling{' '}
+              <span className="text-[#8e6e33]">{moodOption.label}</span> right
+              now. Check the recommendation below to care for your heart.
+            </p>
+          ) : (
+            <p className="font-headline text-sm font-semibold text-[#004D40] text-center">
+              You were feeling{' '}
+              <span className="text-[#8e6e33]">{moodOption.label}</span> on this
+              day
+            </p>
+          )}
         </div>
       )}
     </div>
   )
 }
 
-export default function MoodCalendar({ moodHistory = {} }) {
+export default function MoodCalendar({ moodHistory = {}, stickerPack }) {
   const [currentDate, setCurrentDate] = useState(() => {
     const d = new Date()
     d.setDate(1)
@@ -199,8 +202,7 @@ export default function MoodCalendar({ moodHistory = {} }) {
       <div className="grid grid-cols-7 w-full gap-x-0 gap-y-0 mb-0.5">
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
           <div
-            // eslint-disable-next-line react/no-array-index-key
-            key={`dow-${i}`}
+            key={`dow-${day}-${i}`}
             className="font-manrope text-[10px] font-bold text-[#004D40]/60 uppercase py-1 text-center"
           >
             {day}
@@ -208,7 +210,7 @@ export default function MoodCalendar({ moodHistory = {} }) {
         ))}
       </div>
 
-      {/* Fixed height: 6 equal rows — same size for Jul (5 weeks) and Aug (6 weeks) */}
+      {/* Fixed height: 6 equal rows - same size for Jul (5 weeks) and Aug (6 weeks) */}
       <div
         className="grid grid-cols-7 w-full gap-x-0 gap-y-0"
         style={{
@@ -226,6 +228,7 @@ export default function MoodCalendar({ moodHistory = {} }) {
               dateKey={cell.dateKey}
               moodOption={cell.moodOption}
               colIndex={cell.colIndex}
+              stickerPack={stickerPack}
             />
           ),
         )}

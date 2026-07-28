@@ -1,4 +1,4 @@
-﻿import indexHandler from './_lib/notes/index.js';
+import indexHandler from './_lib/notes/index.js';
 import idHandler from './_lib/notes/[id].js';
 
 export default async function notesRouter(req, res) {
@@ -8,7 +8,7 @@ export default async function notesRouter(req, res) {
     return indexHandler(req, res);
   }
 
-  const match = path.match(/\/notes\/([^\/]+)\/?$/);
+  const match = path.match(/\/notes\/([^/]+)\/?$/);
   if (match) {
     req.query = req.query || {};
     req.query.id = match[1];

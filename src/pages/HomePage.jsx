@@ -1,7 +1,6 @@
-﻿import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
-import JournalComposeModal from '../components/JournalComposeModal'
 import { VERSES } from '../data/content'
 import LoadingDots from '../components/LoadingDots'
 import { parseRefIds } from '../lib/bookmarks'
@@ -15,13 +14,11 @@ gsap.registerPlugin(useGSAP)
 
 export default function HomePage({
   state,
-  nudge,
+  nudge: _nudge,
   avatarId,
   onBookmarkTodayVerse,
   onVerseReflection,
-  onPostReflection,
 }) {
-  const [journalOpen, setJournalOpen] = useState(false)
   const verse = useMemo(() => VERSES[new Date().getDay() % VERSES.length], [])
   const verseIds = useMemo(() => parseRefIds(verse.ref), [verse.ref])
   const greeting = useMemo(() => greetingForNow(), [])
@@ -230,48 +227,28 @@ export default function HomePage({
                     </div>
                     <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#8e6e33]">Reflect</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setJournalOpen(true)}
+                  <Link
+                    to="/journal?mode=today"
                     className="flex flex-col items-center gap-1.5 group/btn transition-transform hover:scale-105"
                   >
-                    <div className="p-2.5 md:p-3 bg-[#062c21]/5 border border-[#c5a059]/30 rounded-full group-hover/btn:bg-[#c5a059]/20 group-hover/btn:border-[#c5a059] shadow-sm transition-all duration-300">
-                      <span className="material-symbols-outlined text-[#8e6e33] text-[20px]">
-                        edit_note
-                      </span>
+                    <div className="p-2.5 md:p-3 bg-[#062c21]/5 border border-[#c5a059]/30 rounded-full group-hover/btn:bg-[#c5a059]/20 group-hover/btn:border-[#c5a059] shadow-sm transition-all duration-300 flex items-center justify-center">
+                      <i className="fa-solid fa-file-pen text-[#8e6e33] text-[18px]" aria-hidden />
                     </div>
                     <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#8e6e33]">
                       Journal
                     </span>
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
           </section>
 
-          <JournalComposeModal
-            open={journalOpen}
-            title="Journal - ayah of the day"
-            subtitle="Your note will appear in Sacred Journal linked to this verse."
-            verseHint={verse.ref}
-            onClose={() => setJournalOpen(false)}
-            onSave={async (text) => {
-              const ids = parseRefIds(verse.ref)
-              await onPostReflection(text, {
-                verseLabel: verse.ref,
-                verseRef: ids ? `${ids.surahId}:${ids.ayahNumber}` : null,
-              })
-            }}
-          />
-
           <section className="afu4 md:col-span-8 md:row-span-1 bento-card md:min-h-0">
             <div
               className="w-full h-full min-h-[5.5rem] bg-[#0a3d2e]/40 md:bg-[#083327] border border-[#c5a059]/20 rounded-2xl px-4 py-4 md:px-6 md:py-4 flex items-start md:items-center gap-3 md:gap-5 backdrop-blur-sm text-left"
             >
-              <div className="gold-gradient rounded-full p-2 md:p-2.5 shadow-lg ring-4 ring-[#0a3d2e] flex-shrink-0">
-                <svg className="h-4 w-4 md:h-5 md:w-5 text-[#062c21]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                </svg>
+              <div className="gold-gradient rounded-full p-2 md:p-2.5 shadow-lg ring-4 ring-[#0a3d2e] flex-shrink-0 flex items-center justify-center">
+                <i className="fa-solid fa-mosque text-[#062c21] text-sm md:text-base" aria-hidden />
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="font-playfair text-base md:text-lg text-[var(--app-accent)] mb-0.5 italic">Royal Counsel</h4>

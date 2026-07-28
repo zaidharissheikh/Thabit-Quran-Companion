@@ -2,12 +2,11 @@ import { randomBytes, createHash } from 'node:crypto';
 import { Resend } from 'resend';
 import { requireOrigin } from '../auth.js';
 import { getCollection } from '../db.js';
+import { getFromEmail } from '../emailConfig.js';
 import { createHandler, sendJson } from '../handler.js';
 import { rateLimitAuthIp } from '../rateLimit.js';
 import { forgotPasswordSchema } from '../schemas/auth.js';
 import { parseOrThrow, readJsonBody } from '../validate.js';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default createHandler({
   methods: ['POST'],
@@ -35,19 +34,30 @@ export default createHandler({
         }
       );
 
-      const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
-      const frontendUrl = isProd ? 'https://thabitquran.com' : 'http://localhost:3000';
-      const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(user.email)}`;
+      const fromAddress = getFromEmail();
+      const apiKey = process.env.RESEND_API_KEY?.trim();
 
-      try {
-        await resend.emails.send({
-          from: 'Thaabit <onboarding@thabitquran.com>',
-          to: user.email,
-          subject: 'Reset your password for Thaabit',
-          html: `<p>You requested a password reset.</p><p>Click <a href="${resetUrl}">here</a> to reset your password. This link will expire in 1 hour.</p>`
-        });
-      } catch (err) {
-        console.error('Failed to send email with Resend:', err);
+      if (fromAddress && apiKey) {
+        const isProd =
+          process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
+        const frontendUrl = isProd ? 'https://thabitquran.com' : 'http://localhost:3000';
+        const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(user.email)}`;
+
+        try {
+          const resend = new Resend(apiKey);
+          await resend.emails.send({
+            from: fromAddress,
+            to: user.email,
+            subject: 'Reset your password for Thaabit',
+            html: `<p>You requested a password reset.</p><p>Click <a href="${resetUrl}">here</a> to reset your password. This link will expire in 1 hour.</p>`,
+          });
+        } catch (err) {
+          console.error('Failed to send email with Resend:', err);
+        }
+      } else {
+        console.error(
+          'Password reset email skipped: set RESEND_API_KEY and RESEND_FROM_EMAIL in .env',
+        );
       }
     }
 

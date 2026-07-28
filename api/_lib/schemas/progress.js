@@ -1,4 +1,4 @@
-﻿import { z } from 'zod';
+import { z } from 'zod';
 
 const sessionSchema = z.object({
   date: z.string().min(1).max(40),
@@ -15,6 +15,7 @@ const preferencesSchema = z.object({
   avatarId: z.string().max(40).optional(),
   theme: z.enum(['light', 'dark']).optional(),
   fontSize: z.number().int().min(1).max(5).optional(),
+  stickerPack: z.enum(['girl', 'boy']).optional(),
   favoriteSurahIds: z
     .array(z.number().int().min(1).max(114))
     .max(114)

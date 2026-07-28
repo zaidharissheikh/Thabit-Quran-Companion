@@ -1,9 +1,17 @@
-﻿import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
-export default function DisplayPage({ theme, fontSize, onUpdateTheme, onUpdateFontSize }) {
+export default function DisplayPage({
+  theme,
+  fontSize,
+  stickerPack,
+  onUpdateTheme,
+  onUpdateFontSize,
+  onUpdateStickerPack,
+}) {
   const navigate = useNavigate()
   const size = fontSize ?? 3
   const resolvedTheme = theme === 'light' ? 'light' : 'dark'
+  const resolvedStickerPack = stickerPack || 'girl'
 
   return (
     <div className="min-h-screen text-[var(--app-text)] font-manrope selection:bg-[#e9c349]/30 pb-32 md:pl-[256px] overflow-x-hidden app-shell bg-[var(--app-bg)]">
@@ -69,6 +77,55 @@ export default function DisplayPage({ theme, fontSize, onUpdateTheme, onUpdateFo
               </div>
               <p className="text-[11px] text-[var(--app-card-text)]/55 font-manrope">
                 Light uses cream/white pages; dark uses deep green. Both keep gold accents for contrast.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[var(--app-accent)] text-[20px]">face</span>
+            <h2 className="font-manrope font-semibold text-[var(--app-accent)] uppercase tracking-[0.2em] text-[12px]">
+              Mood Sticker Character
+            </h2>
+          </div>
+          <div className="app-card-theme rounded-xl p-6 border">
+            <div className="flex flex-col gap-5">
+              <label className="text-[var(--app-card-text)] font-manrope font-semibold uppercase tracking-widest text-[11px] opacity-60">
+                Choose Character Style
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { id: 'girl', label: 'Girl Character', preview: '/assets/happy.png' },
+                  { id: 'boy', label: 'Boy Character', preview: '/assets/boy_happy.png' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onUpdateStickerPack?.(opt.id)}
+                    className={`flex flex-col items-center justify-center py-4 px-2 rounded-lg transition-all shadow-sm ${
+                      resolvedStickerPack === opt.id
+                        ? 'bg-[color-mix(in_srgb,var(--app-accent)_14%,transparent)] border border-[var(--app-accent)] text-[var(--app-accent)]'
+                        : 'border border-[var(--app-border)] text-[var(--app-card-text)]/75 hover:border-[var(--app-accent)]/50 hover:text-[var(--app-accent)] hover:bg-[color-mix(in_srgb,var(--app-accent)_10%,transparent)]'
+                    }`}
+                  >
+                    <img src={opt.preview} alt={opt.label} className="w-12 h-12 object-contain mb-2 drop-shadow" />
+                    <span className="font-manrope font-semibold text-[10px] uppercase tracking-wider mb-1">
+                      {opt.label}
+                    </span>
+                    {resolvedStickerPack === opt.id ? (
+                      <span
+                        className="material-symbols-outlined text-[14px]"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        check_circle
+                      </span>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-[var(--app-card-text)]/55 font-manrope">
+                Switches character stickers across heart rating bar, calendar logging, and recommendations.
               </p>
             </div>
           </div>

@@ -58,7 +58,11 @@ Set these in the Vercel project settings (Production + Preview as noted).
 | `QF_PROD_CLIENT_SECRET` | Yes (production) | Server only |
 | `AI_API_KEY` | Recommended | Gemini key (server-side) |
 | `QF_ENV` | No | Set `production` to force Quran.com production credentials locally |
-| `QURAN_TRANSLATION_ID` | No | Default `20` (Sahih International). Do **not** use `131` on Quran Foundation production — it returns Arabic without English. |
+| `QURAN_TRANSLATION_ID` | No | Default `20` (Sahih International). Do **not** use `131` on Quran Foundation production - it returns Arabic without English. |
+| `RESEND_API_KEY` | Yes (email) | Resend API key for password reset + Help & Support |
+| `RESEND_FROM_EMAIL` | Yes (email) | Sending address, e.g. `Thaabit <onboarding@…>` (no hardcoded fallback in code) |
+| `SUPPORT_TO_EMAIL` | Yes (support) | Inbox for Help & Support form (optional alias: `RESEND_TO_EMAIL`) |
+| `VITE_SUPPORT_TO_EMAIL` | Recommended | Public support address shown on the Help query form |
 
 **QF environment selection:** local and Vercel Preview always use the **prelive** credential set. Vercel Production (`VERCEL_ENV=production`) uses the **prod** credential set. Optional override: `QF_ENV=production`.
 
@@ -114,6 +118,15 @@ Error shape (all failures):
 | GET | `/api/notes?page=&limit=` | Yes |
 | POST | `/api/notes` | Yes |
 | GET / PATCH / DELETE | `/api/notes/:id` | Yes |
+
+### Support
+
+| Method | Path | Auth |
+|--------|------|------|
+| POST | `/api/support/contact` | Yes + rate limit |
+
+Body: `{ "topic": "suggestion|bug|question|other", "subject": "...", "message": "..." }`  
+Sends email via Resend to `SUPPORT_TO_EMAIL` and optionally stores a copy in `support_messages`.
 
 ### Quran (public, IP rate-limited, Mongo-cached)
 

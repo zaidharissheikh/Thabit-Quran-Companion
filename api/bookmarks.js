@@ -1,4 +1,4 @@
-﻿import indexHandler from './_lib/bookmarks/index.js';
+import indexHandler from './_lib/bookmarks/index.js';
 import idHandler from './_lib/bookmarks/[id].js';
 
 export default async function bookmarksRouter(req, res) {
@@ -10,7 +10,7 @@ export default async function bookmarksRouter(req, res) {
   }
 
   // Otherwise, it must be /bookmarks/[id]
-  const match = path.match(/\/bookmarks\/([^\/]+)\/?$/);
+  const match = path.match(/\/bookmarks\/([^/]+)\/?$/);
   if (match) {
     req.query = req.query || {};
     req.query.id = match[1];

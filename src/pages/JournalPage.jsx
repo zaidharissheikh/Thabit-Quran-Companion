@@ -1,5 +1,5 @@
-﻿import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+﻿import { useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import LoadingDots from '../components/LoadingDots'
 import { AvatarBadge } from '../assets/avatars'
@@ -19,6 +19,11 @@ const MODES = [
   },
 ]
 
+function initialModeFromSearch(searchParams) {
+  const raw = searchParams.get('mode')
+  return raw === 'today' ? 'today' : 'free'
+}
+
 export default function JournalPage({
   state,
   avatarId,
@@ -27,10 +32,15 @@ export default function JournalPage({
   onGenerateReflectionQuestion,
   onPostReflection,
 }) {
-  const [mode, setMode] = useState('free')
+  const [searchParams] = useSearchParams()
+  const [mode, setMode] = useState(() => initialModeFromSearch(searchParams))
   const [reflectionText, setReflectionText] = useState('')
   const [saving, setSaving] = useState(false)
   const journals = state.journals || []
+
+  useEffect(() => {
+    setMode(initialModeFromSearch(searchParams))
+  }, [searchParams])
 
   const verseOfDay = useMemo(
     () => todayVerse || VERSES[new Date().getDay() % VERSES.length],

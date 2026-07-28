@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import DateOfBirthPicker from '../components/DateOfBirthPicker'
 import { ApiError } from '../lib/api'
@@ -182,7 +182,7 @@ export default function SignupPage({ onSignup }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onBlur={() => markTouched('email')}
-                    placeholder="example@wisdom.com"
+                    placeholder="Email address"
                     autoComplete="email"
                     aria-invalid={Boolean(showError('email'))}
                     className={inputClass(Boolean(showError('email')))}

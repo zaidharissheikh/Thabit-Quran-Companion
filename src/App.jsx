@@ -15,6 +15,7 @@ import ReaderPage from './pages/ReaderPage'
 import SettingsPage from './pages/SettingsPage'
 import GoalsPage from './pages/GoalsPage'
 import DisplayPage from './pages/DisplayPage'
+import HelpSupportPage from './pages/HelpSupportPage'
 import SignupPage from './pages/SignupPage'
 import SurahPage from './pages/SurahPage'
 import BookmarksPage from './pages/BookmarksPage'
@@ -31,7 +32,6 @@ import {
 import {
   findBookmark,
   normalizeBookmark,
-  parseRefIds,
   payloadFromSurahVerse,
   payloadFromTodayVerse,
 } from './lib/bookmarks'
@@ -84,8 +84,8 @@ function App() {
   const [bookmarks, setBookmarks] = useState([])
   const [notes, setNotes] = useState([])
   const [notesTotal, setNotesTotal] = useState(0)
-  const [audioPlaying, setAudioPlaying] = useState(false)
-  const [audioProgress, setAudioProgress] = useState(0)
+  const [audioPlaying, _setAudioPlaying] = useState(false)
+  const [audioProgress, _setAudioProgress] = useState(0)
   const [theme, setTheme] = useState(() => {
     const stored = localStorage.getItem('thabit_theme')
     if (stored === 'light' || stored === 'dark') return stored
@@ -98,6 +98,10 @@ function App() {
   const [avatarId, setAvatarId] = useState(() =>
     resolveAvatarId(localStorage.getItem('thabit_avatar') || 'pfp1'),
   )
+  const [stickerPack, setStickerPack] = useState(() => {
+    const stored = localStorage.getItem('thabit_sticker_pack')
+    return stored === 'boy' ? 'boy' : 'girl'
+  })
   const [nudge, setNudge] = useState('')
   const [reflectionQuestion, setReflectionQuestion] = useState('')
   const [returnMessage, setReturnMessage] = useState('')
@@ -110,13 +114,17 @@ function App() {
     () => ({
       name: user?.name || 'Friend',
       ...progress,
+      preferences: {
+        ...(progress.preferences || {}),
+        stickerPack,
+      },
       bookmarks,
       journals: notes,
       notesTotal,
       audioPlaying,
       audioProgress,
     }),
-    [user, progress, bookmarks, notes, notesTotal, audioPlaying, audioProgress],
+    [user, progress, stickerPack, bookmarks, notes, notesTotal, audioPlaying, audioProgress],
   )
 
   const showToast = useCallback((message) => {
@@ -175,6 +183,10 @@ function App() {
       if (prefs.avatarId) setAvatarId(resolveAvatarId(prefs.avatarId))
       if (prefs.theme === 'light' || prefs.theme === 'dark') setTheme(prefs.theme)
       if (prefs.fontSize >= 1 && prefs.fontSize <= 5) setFontSize(prefs.fontSize)
+      if (prefs.stickerPack === 'boy' || prefs.stickerPack === 'girl') {
+        setStickerPack(prefs.stickerPack)
+        localStorage.setItem('thabit_sticker_pack', prefs.stickerPack)
+      }
       favoriteIdsRef.current = Array.isArray(prefs.favoriteSurahIds)
         ? prefs.favoriteSurahIds.map(Number)
         : []
@@ -309,6 +321,7 @@ function App() {
       avatarId,
       theme,
       fontSize,
+      stickerPack,
       favoriteSurahIds: Array.isArray(prev.favoriteSurahIds)
         ? prev.favoriteSurahIds
         : [],
@@ -316,7 +329,8 @@ function App() {
     if (
       prev.avatarId === prefs.avatarId &&
       prev.theme === prefs.theme &&
-      prev.fontSize === prefs.fontSize
+      prev.fontSize === prefs.fontSize &&
+      prev.stickerPack === prefs.stickerPack
     ) {
       return undefined
     }
@@ -344,6 +358,7 @@ function App() {
     avatarId,
     theme,
     fontSize,
+    stickerPack,
     progress.preferences,
   ])
 
@@ -636,10 +651,6 @@ function App() {
         await persistProgress(patch, patch)
         if (reachedGoal) {
           showToast(`MashaAllah! Daily goal met - ${result.streak}-day streak`)
-        } else {
-          showToast(
-            `Ayah ${surahId}:${ayahNumber} counted (${result.versesReadToday}/${progress.goal})`,
-          )
         }
       } catch {
         /* handled - read log already claimed; next load will resync */
@@ -661,7 +672,6 @@ function App() {
       try {
         await bookmarksApi.remove(existing.id)
         setBookmarks((prev) => prev.filter((b) => b.id !== existing.id))
-        showToast('Bookmark removed')
       } catch (err) {
         showApiError(err, 'Could not remove bookmark')
       }
@@ -670,10 +680,8 @@ function App() {
     try {
       const res = await bookmarksApi.create(payload)
       setBookmarks((prev) => [normalizeBookmark(res.bookmark), ...prev])
-      showToast('Verse bookmarked')
     } catch (err) {
       if (err instanceof ApiError && err.code === 'BOOKMARK_EXISTS') {
-        showToast('Already bookmarked')
         return
       }
       showApiError(err, 'Could not bookmark')
@@ -687,7 +695,6 @@ function App() {
       try {
         await bookmarksApi.remove(existing.id)
         setBookmarks((prev) => prev.filter((b) => b.id !== existing.id))
-        showToast('Bookmark removed')
       } catch (err) {
         showApiError(err, 'Could not remove bookmark')
       }
@@ -696,10 +703,8 @@ function App() {
     try {
       const res = await bookmarksApi.create(payload)
       setBookmarks((prev) => [normalizeBookmark(res.bookmark), ...prev])
-      showToast('Verse bookmarked')
     } catch (err) {
       if (err instanceof ApiError && err.code === 'BOOKMARK_EXISTS') {
-        showToast('Already bookmarked')
         return
       }
       showApiError(err, 'Could not bookmark')
@@ -725,7 +730,6 @@ function App() {
         ...p,
         preferences: { ...(p.preferences || {}), favoriteSurahIds },
       }))
-      showToast(adding ? 'Added to favorites' : 'Removed from favorites')
 
       if (favoritePersistTimer.current) {
         window.clearTimeout(favoritePersistTimer.current)
@@ -741,7 +745,7 @@ function App() {
     [showToast],
   )
 
-  async function rateHeart(heartRating, label) {
+  async function rateHeart(heartRating) {
     try {
       const today = localDateKey()
       const newMoodHistory = { ...progress.moodHistory, [today]: heartRating }
@@ -749,7 +753,6 @@ function App() {
         { heartRating, moodHistory: newMoodHistory },
         { heartRating, moodHistory: newMoodHistory }
       )
-      showToast(`Heart: ${label}`)
     } catch {
       /* handled */
     }
@@ -795,41 +798,10 @@ function App() {
       }
       setNotes((prev) => [entry, ...prev])
       setNotesTotal((t) => t + 1)
-      showToast('Saved to journal')
     } catch (err) {
       showApiError(err, 'Could not save reflection')
       throw err
     }
-  }
-
-  function togglePlayVerse(verseNum) {
-    if (verseNum) showToast(`Playing verse ${verseNum}`)
-
-    setAudioPlaying((prev) => !prev)
-
-    if (audioTimer.current) {
-      clearInterval(audioTimer.current)
-      audioTimer.current = null
-    }
-
-    setTimeout(() => {
-      setAudioPlaying((playing) => {
-        if (!playing) return playing
-        audioTimer.current = setInterval(() => {
-          setAudioProgress((inner) => {
-            const next = Math.min(100, inner + 0.4)
-            if (next >= 100 && audioTimer.current) {
-              clearInterval(audioTimer.current)
-              audioTimer.current = null
-              setAudioPlaying(false)
-              return 0
-            }
-            return next
-          })
-        }, 200)
-        return playing
-      })
-    }, 0)
   }
 
   // --- Background Notification Checker ---
@@ -870,7 +842,7 @@ function App() {
       <div className="flex-1 w-full relative">
         {isLoggedIn && dataLoading && (
           <div className="fixed top-0 left-0 right-0 z-[60] flex justify-center pt-3 pointer-events-none">
-            <div className="bg-[var(--app-surface)] text-[var(--app-accent-text)] text-xs font-manrope px-4 py-2 rounded-full border border-[var(--app-border)]">
+            <div className="bg-[#0a3d2e] text-[#e9d19b] text-xs font-manrope px-4 py-2 rounded-full border border-[#c5a059]/40 shadow-lg">
               Loading your progress…
             </div>
           </div>
@@ -895,7 +867,6 @@ function App() {
                     onRateHeart={rateHeart}
                     onVerseReflection={openReflection}
                     onShowReturn={showReturnPage}
-                    onPostReflection={postReflection}
                   />
                 }
               />
@@ -943,10 +914,19 @@ function App() {
                   <DisplayPage
                     theme={theme}
                     fontSize={fontSize}
+                    stickerPack={stickerPack}
                     onUpdateTheme={setTheme}
                     onUpdateFontSize={setFontSize}
+                    onUpdateStickerPack={(pack) => {
+                      setStickerPack(pack)
+                      localStorage.setItem('thabit_sticker_pack', pack)
+                    }}
                   />
                 }
+              />
+              <Route
+                path="/settings/help"
+                element={<HelpSupportPage user={user} state={state} />}
               />
               <Route path="/goals" element={<GoalsPage state={state} onUpdateGoal={updateGoal} />} />
               <Route
@@ -958,6 +938,10 @@ function App() {
                     onPostReflection={postReflection}
                     onRateHeart={rateHeart}
                     onUpdateRamadanVerses={updateRamadanVerses}
+                    onUpdateStickerPack={(pack) => {
+                      setStickerPack(pack)
+                      localStorage.setItem('thabit_sticker_pack', pack)
+                    }}
                   />
                 }
               />

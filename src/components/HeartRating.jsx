@@ -1,7 +1,9 @@
 import { HEART_OPTIONS } from '../data/content'
-import { MOOD_STICKERS } from '../assets/moodStickers'
+import { getMoodStickers } from '../assets/moodStickers'
 
-export default function HeartRating({ value, onChange }) {
+export default function HeartRating({ value, onChange, stickerPack }) {
+  const stickers = getMoodStickers(stickerPack)
+
   return (
     // gap-2 on mobile (5×60 + 4×8 = 332px ✓), gap-3 on lg (5×76 + 4×12 = 428px ✓)
     <div className="flex items-center justify-center gap-2 lg:gap-3">
@@ -16,17 +18,17 @@ export default function HeartRating({ value, onChange }) {
             className="group flex flex-col items-center gap-1.5 transition-transform duration-300 hover:scale-110 min-w-0"
           >
             <div
-              className={`hicon flex items-center justify-center rounded-full transition-all duration-200
+              className={`hicon flex items-center justify-center transition-all duration-200
                 h-[60px] w-[60px] lg:h-[76px] lg:w-[76px]
                 ${selected
-                  ? 'scale-110 border-2 border-[#D4AF37]/50 bg-[#FFF0BE]/30 shadow-md'
-                  : 'bg-[#004D40]/8 grayscale hover:grayscale-0 hover:bg-[#FFF0BE]/20'
+                  ? 'scale-110'
+                  : 'grayscale hover:grayscale-0 opacity-80 hover:opacity-100'
                 }`}
             >
               <img
-                src={MOOD_STICKERS[option.stickerKey] || `/assets/${option.stickerKey}.png`}
+                src={stickers[option.stickerKey] || `/assets/${option.stickerKey}.png`}
                 alt={option.label}
-                className="w-11 h-11 lg:w-14 lg:h-14 object-contain drop-shadow-sm"
+                className="w-12 h-12 lg:w-[4.25rem] lg:h-[4.25rem] object-contain drop-shadow-sm"
                 draggable={false}
               />
             </div>

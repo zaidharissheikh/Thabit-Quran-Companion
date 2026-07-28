@@ -4,7 +4,7 @@ Thabit (ثابت) is a modern, responsive React web application designed for dai
 
 ---
 
-## 🚀 Tech Stack
+## Tech Stack
 
 - **Framework**: React 19 + Vite 6
 - **Styling**: Tailwind CSS 4 + Vanilla CSS Design System (`index.css`, `global.css`)
@@ -15,7 +15,7 @@ Thabit (ثابت) is a modern, responsive React web application designed for dai
 
 ---
 
-## 📁 Directory Structure
+## Directory Structure
 
 ```text
 src/
@@ -59,7 +59,7 @@ src/
 
 ---
 
-## ✨ Key Features & Architecture
+## Key Features & Architecture
 
 ### 1. Bento Dashboard (`HomePage.jsx`)
 - Displays daily greeting, streak counter, and daily devotion progress bar.
@@ -84,7 +84,7 @@ src/
 
 ---
 
-## 🛠️ Local Development
+## Local Development
 
 ```bash
 # Run Vite dev server with HMR

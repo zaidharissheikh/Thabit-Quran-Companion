@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AVATAR_OPTIONS, AvatarBadge, resolveAvatarId } from '../assets/avatars'
 import {
@@ -19,13 +19,8 @@ export default function SettingsPage({
   const [notifsEnabled, setNotifsEnabled] = useState(hasNotificationPermission())
   const [notifsMuted, setNotifsMuted] = useState(() => localStorage.getItem('thabit_notifications_muted') === 'true')
 
-  const userEmail = user?.email || `${(state.name || 'friend').toLowerCase().replace(/\s+/g, '.')}@email.com`
+  const userEmail = user?.email || 'Not set'
   const activeAvatar = resolveAvatarId(avatarId)
-
-  function showComingSoon(feature) {
-    setSoonToast(`${feature} - feature coming soon`)
-    window.setTimeout(() => setSoonToast(''), 2200)
-  }
 
   async function handleToggleNotifications() {
     if (!hasNotificationPermission()) {
@@ -213,8 +208,8 @@ export default function SettingsPage({
           <div className="app-panel-muted rounded-lg p-1 border border-[var(--app-border)]">
             <button
               type="button"
-              onClick={() => showComingSoon('Help & Support')}
-              className="w-full flex items-center justify-between p-4 hover:opacity-90 transition-all group rounded-lg"
+              onClick={() => navigate('/settings/help')}
+              className="cursor-pointer w-full flex items-center justify-between p-4 hover:opacity-90 transition-all group rounded-lg"
             >
               <div className="flex items-center space-x-4">
                 <div className="w-10 h-10 rounded-full bg-[var(--app-surface)] flex items-center justify-center text-[var(--app-accent)] border border-[var(--app-border)]">
@@ -229,14 +224,9 @@ export default function SettingsPage({
                   </span>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-[11px] text-[var(--app-accent)] font-semibold uppercase tracking-wide">
-                  Coming soon
-                </span>
-                <span className="material-symbols-outlined transition-colors text-[var(--app-accent)]">
-                  chevron_right
-                </span>
-              </div>
+              <span className="material-symbols-outlined transition-colors text-[var(--app-accent)]">
+                chevron_right
+              </span>
             </button>
           </div>
         </div>
@@ -302,7 +292,7 @@ export default function SettingsPage({
       ) : null}
 
       {soonToast ? (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[90] px-4 py-2 rounded-full bg-[#062c21] border border-[#c5a059]/40 text-[#e9d19b] text-sm font-manrope shadow-lg">
+        <div className={`toast ${soonToast ? 'show' : ''}`} style={{ bottom: '2rem' }}>
           {soonToast}
         </div>
       ) : null}

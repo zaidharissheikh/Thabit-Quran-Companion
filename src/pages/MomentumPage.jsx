@@ -1,9 +1,9 @@
-﻿import { useMemo, useState, useRef, useEffect } from 'react'
+import { useMemo, useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import HeartRating from '../components/HeartRating'
 import { AvatarBadge } from '../assets/avatars'
-import { MOOD_STICKERS } from '../assets/moodStickers'
+import { getMoodStickers } from '../assets/moodStickers'
 import { HEART_OPTIONS } from '../data/content'
 
 import { localDateKey } from '../lib/localDay'
@@ -30,9 +30,10 @@ function buildWeekDays(sessions) {
 export default function MomentumPage({
   state,
   avatarId,
-  onPostReflection,
+  onPostReflection: _onPostReflection,
   onRateHeart,
   onUpdateRamadanVerses,
+  onUpdateStickerPack,
 }) {
 
   const [isEditingRamadan, setIsEditingRamadan] = useState(false)
@@ -340,10 +341,36 @@ export default function MomentumPage({
           <h3 className="font-manrope text-sm font-semibold uppercase tracking-[0.1em] mb-3 text-[#004D40] text-center">
             How does your heart feel now?
           </h3>
-          <div className="flex justify-center mb-3 border-b border-[#D4AF37]/20 pb-3">
-            <HeartRating value={state.heartRating} onChange={onRateHeart} />
+
+          <div className="flex justify-center gap-2 mb-3">
+            {[
+              { id: 'girl', label: 'Girl', preview: '/assets/happy.png' },
+              { id: 'boy', label: 'Boy', preview: '/assets/boy_happy.png' },
+            ].map((opt) => {
+              const active = (state.preferences?.stickerPack || 'girl') === opt.id
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => onUpdateStickerPack?.(opt.id)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wide transition-colors ${
+                    active
+                      ? 'bg-[#004D40] text-[#FFD700]'
+                      : 'bg-[#004D40]/10 text-[#004D40]/70 hover:bg-[#004D40]/15'
+                  }`}
+                  aria-pressed={active}
+                >
+                  <img src={opt.preview} alt="" className="w-5 h-5 object-contain" draggable={false} />
+                  {opt.label}
+                </button>
+              )
+            })}
           </div>
-          <MoodCalendar moodHistory={state.moodHistory} />
+
+          <div className="flex justify-center mb-3 border-b border-[#D4AF37]/20 pb-3">
+            <HeartRating value={state.heartRating} onChange={onRateHeart} stickerPack={state.preferences?.stickerPack} />
+          </div>
+          <MoodCalendar moodHistory={state.moodHistory} stickerPack={state.preferences?.stickerPack} />
         </section>
 
         <section className="pb-8 md:col-span-2">
@@ -358,7 +385,7 @@ export default function MomentumPage({
                 {HEART_OPTIONS.map((o) => (
                   <img
                     key={o.value}
-                    src={MOOD_STICKERS[o.stickerKey]}
+                    src={getMoodStickers(state.preferences?.stickerPack)[o.stickerKey]}
                     alt={o.label}
                     className="w-8 h-8 object-contain grayscale opacity-40"
                     draggable={false}
@@ -380,7 +407,7 @@ export default function MomentumPage({
               {/* Mood chip */}
               <div className="flex items-center gap-2 self-start bg-[#004D40]/8 rounded-full px-3 py-1.5">
                 <img
-                  src={MOOD_STICKERS[currentMoodOption.stickerKey]}
+                  src={getMoodStickers(state.preferences?.stickerPack)[currentMoodOption.stickerKey]}
                   alt={currentMoodOption.label}
                   className="w-5 h-5 object-contain"
                   draggable={false}

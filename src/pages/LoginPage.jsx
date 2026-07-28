@@ -142,7 +142,7 @@ export default function LoginPage({ onLogin }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onBlur={() => markTouched('email')}
-                  placeholder="royal@heirloom.com"
+                  placeholder="Email address"
                   autoComplete="email"
                   aria-invalid={Boolean(showError('email'))}
                   className={inputClass(Boolean(showError('email')))}
@@ -294,7 +294,7 @@ export default function LoginPage({ onLogin }) {
                       type="email"
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
-                      placeholder="royal@heirloom.com"
+                      placeholder="Email address"
                       autoComplete="email"
                       className={`w-full bg-[#001F1A] border-b-2 text-[#e5e2db] placeholder:text-[#bfc9c4]/30 pl-12 pr-4 py-3 rounded-t-lg transition-all outline-none ${
                         forgotError

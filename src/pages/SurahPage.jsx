@@ -246,7 +246,7 @@ export default function SurahPage({
                         onClick={() => setJournalVerse(verse)}
                         className="flex items-center gap-2 px-3 py-1.5 rounded-full text-amber-700/80 hover:bg-amber-100 transition-colors text-sm"
                       >
-                        <span className="material-symbols-outlined text-[20px]">edit_note</span>
+                        <i className="fa-solid fa-file-pen text-[18px]" aria-hidden />
                         <span className="font-manrope text-sm font-semibold tracking-[0.05em]">
                           Journal
                         </span>

@@ -1,4 +1,4 @@
-﻿import chaptersHandler from './_lib/quran/chapters.js';
+import chaptersHandler from './_lib/quran/chapters.js';
 import chapterIdHandler from './_lib/quran/chapters/[id].js';
 import chapterVersesHandler from './_lib/quran/chapters/[id]/verses.js';
 
@@ -9,14 +9,14 @@ export default async function quranRouter(req, res) {
     return chaptersHandler(req, res);
   }
 
-  let match = path.match(/\/quran\/chapters\/([^\/]+)\/verses\/?$/);
+  let match = path.match(/\/quran\/chapters\/([^/]+)\/verses\/?$/);
   if (match) {
     req.query = req.query || {};
     req.query.id = match[1];
     return chapterVersesHandler(req, res);
   }
 
-  match = path.match(/\/quran\/chapters\/([^\/]+)\/?$/);
+  match = path.match(/\/quran\/chapters\/([^/]+)\/?$/);
   if (match) {
     req.query = req.query || {};
     req.query.id = match[1];
