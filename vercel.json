@@ -23,6 +23,10 @@
     {
       "source": "/api/support",
       "destination": "/api/support.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
