@@ -1,4 +1,4 @@
-﻿import { localDateKey } from './localDay'
+import { localDateKey } from './localDay'
 
 /**
  * @param {number} surahId
@@ -8,8 +8,14 @@ export function verseReadKey(surahId, ayahNumber) {
   return `${Number(surahId)}:${Number(ayahNumber)}`
 }
 
+let currentUserId = 'guest'
+
+export function setUserIdForStorage(id) {
+  currentUserId = id || 'guest'
+}
+
 function storageKey(day = localDateKey()) {
-  return `thabit_read_${day}`
+  return `thabit_read_${currentUserId}_${day}`
 }
 
 /**

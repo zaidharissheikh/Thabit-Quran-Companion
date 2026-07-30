@@ -48,6 +48,7 @@ import {
   hydrateLocalReadLogs,
   mergeReadLogs,
   mergeSessionsWithReadLogs,
+  setUserIdForStorage,
 } from './lib/verseRead'
 import { sendStreakReminder } from './lib/notifications'
 
@@ -132,6 +133,10 @@ function App() {
     if (toastTimer.current) clearTimeout(toastTimer.current)
     toastTimer.current = window.setTimeout(() => setToast(''), 2600)
   }, [])
+
+  useEffect(() => {
+    setUserIdForStorage(user?.id || user?.email || 'guest')
+  }, [user])
 
   const showApiError = useCallback(
     (err, fallback = 'Something went wrong') => {
@@ -979,3 +984,5 @@ function App() {
 }
 
 export default App
+
+
