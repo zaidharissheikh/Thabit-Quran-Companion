@@ -21,6 +21,7 @@ import SurahPage from './pages/SurahPage'
 import BookmarksPage from './pages/BookmarksPage'
 import ReturnPage from './pages/ReturnPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import { Analytics } from "@vercel/analytics/react"
 import { askAi } from './utils/ai'
 import {
   ApiError,
@@ -980,6 +981,7 @@ function App() {
         <Toast message={toast} />
       </div>
     </div>
+    <Analytics />
   )
 }
 
