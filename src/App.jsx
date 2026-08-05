@@ -841,6 +841,7 @@ function App() {
   }
 
   return (
+    <>
     <div className="flex w-full min-h-screen relative app-shell">
       {isLoggedIn && (
         <DesktopSidebar avatarId={avatarId} userName={user?.name || 'Friend'} />
@@ -982,6 +983,7 @@ function App() {
       </div>
     </div>
     <Analytics />
+    </>
   )
 }
 
