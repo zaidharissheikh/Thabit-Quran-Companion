@@ -49,6 +49,7 @@ import {
   hydrateLocalReadLogs,
   mergeReadLogs,
   mergeSessionsWithReadLogs,
+  setUserIdForStorage,
 } from './lib/verseRead'
 import { sendStreakReminder } from './lib/notifications'
 
