@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AVATAR_OPTIONS, AvatarBadge, resolveAvatarId } from '../assets/avatars'
+import { smartGoBack } from '../lib/navigation'
 import {
   requestNotificationPermission,
   hasNotificationPermission,
@@ -46,7 +47,7 @@ export default function SettingsPage({
         <div className="flex items-center justify-between w-full">
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => smartGoBack(navigate, '/')}
             className="tap-highlight-transparent active:scale-95 hover:opacity-80 transition-colors text-[var(--app-accent)]"
             aria-label="Back to home"
           >

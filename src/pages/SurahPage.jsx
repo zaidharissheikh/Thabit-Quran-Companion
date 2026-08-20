@@ -1,8 +1,9 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import JournalComposeModal from '../components/JournalComposeModal'
 import LoadingDots from '../components/LoadingDots'
 import { FATIHA, SURAHS } from '../data/content'
+import { smartGoBack } from '../lib/navigation'
 import { getCachedChapterVerses, hydrateChapterFromIdb, loadChapterVerses } from '../lib/verseCache'
 import { hasReadVerseToday } from '../lib/verseRead'
 
@@ -118,12 +119,14 @@ export default function SurahPage({
   return (
     <div className="min-h-screen bg-[var(--app-bg)] font-manrope text-[var(--app-text)] royal-pattern pb-24 md:pl-[256px] overflow-x-hidden app-shell">
       <header className="fixed md:hidden top-0 w-full z-50 flex items-center justify-between px-4 h-16 bg-[var(--app-nav-bg)] max-w-[430px] mx-auto">
-        <Link
-          to="/reader"
+        <button
+          type="button"
+          onClick={() => smartGoBack(navigate, '/reader')}
           className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-emerald-900/50 transition-colors"
+          aria-label="Go back"
         >
           <span className="material-symbols-outlined text-[var(--app-accent)]">arrow_back</span>
-        </Link>
+        </button>
         <h1 className="font-headline text-2xl font-semibold text-[var(--app-accent)] tracking-wide">
           {surah.name}
         </h1>

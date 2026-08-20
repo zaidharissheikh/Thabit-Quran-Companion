@@ -1,6 +1,7 @@
-﻿import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { SURAHS } from '../data/content'
+import { smartGoBack } from '../lib/navigation'
 
 export default function BookmarksPage({ state }) {
   const navigate = useNavigate()
@@ -22,7 +23,7 @@ export default function BookmarksPage({ state }) {
       <header className="fixed md:hidden top-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-[#082620] border-b border-[#D4AF37]/20 max-w-[430px] mx-auto">
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => smartGoBack(navigate, '/')}
           className="w-10 h-10 flex items-center justify-center text-[#E9D7A5]"
           aria-label="Back"
         >

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { HELP_FAQS } from '../data/helpFaqs'
 import { ApiError, supportApi } from '../lib/api'
+import { smartGoBack } from '../lib/navigation'
 
 const TOPICS = [
   { id: 'suggestion', label: 'Suggestion' },
@@ -60,7 +61,7 @@ export default function HelpSupportPage({ user, state }) {
       <header className="fixed md:hidden top-0 left-0 right-0 max-w-[430px] mx-auto z-50 h-16 flex items-center justify-between px-6 border-b border-[var(--app-border)] bg-[var(--app-nav-bg)]">
         <button
           type="button"
-          onClick={() => navigate('/settings')}
+          onClick={() => smartGoBack(navigate, '/settings')}
           aria-label="Back to settings"
           className="flex items-center justify-center w-10 h-10 text-[var(--app-accent)] hover:opacity-80 transition-opacity active:scale-95"
         >

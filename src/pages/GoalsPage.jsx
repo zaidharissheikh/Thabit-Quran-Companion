@@ -1,5 +1,6 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { smartGoBack } from '../lib/navigation'
 
 export default function GoalsPage({ state, onUpdateGoal }) {
   const navigate = useNavigate()
@@ -15,7 +16,7 @@ export default function GoalsPage({ state, onUpdateGoal }) {
         <div className="relative flex items-center justify-center w-full px-6 py-2 h-14">
           <button
             type="button"
-            onClick={() => navigate('/settings')}
+            onClick={() => smartGoBack(navigate, '/settings')}
             className="absolute left-6 p-2 transition-colors hover:opacity-80 active:scale-95 duration-150 text-[var(--app-accent)]"
           >
             <span className="material-symbols-outlined">arrow_back</span>
@@ -29,7 +30,7 @@ export default function GoalsPage({ state, onUpdateGoal }) {
       <main className="pt-24 px-6 max-w-[430px] mx-auto space-y-8 md:pt-16 md:px-12 md:max-w-2xl md:mx-auto">
         <button
           type="button"
-          onClick={() => navigate('/settings')}
+          onClick={() => smartGoBack(navigate, '/settings')}
           className="hidden md:inline-flex items-center gap-1 text-[var(--app-accent)] hover:opacity-80 mb-2 -ml-1"
         >
           <span className="material-symbols-outlined text-[22px]">arrow_back</span>

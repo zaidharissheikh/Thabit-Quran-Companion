@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { smartGoBack } from '../lib/navigation'
 
 export default function DisplayPage({
   theme,
@@ -20,7 +21,7 @@ export default function DisplayPage({
       >
         <button
           type="button"
-          onClick={() => navigate('/settings')}
+          onClick={() => smartGoBack(navigate, '/settings')}
           aria-label="Back to settings"
           className="flex items-center justify-center w-10 h-10 text-[var(--app-accent)] hover:opacity-80 transition-opacity active:scale-95"
         >
@@ -35,7 +36,7 @@ export default function DisplayPage({
       <main className="pt-24 px-6 max-w-[430px] mx-auto space-y-10 md:pt-16 md:px-12 md:max-w-2xl md:mx-auto">
         <button
           type="button"
-          onClick={() => navigate('/settings')}
+          onClick={() => smartGoBack(navigate, '/settings')}
           className="hidden md:inline-flex items-center gap-1 text-[var(--app-accent)] hover:opacity-80 -ml-1"
         >
           <span className="material-symbols-outlined text-[22px]">arrow_back</span>

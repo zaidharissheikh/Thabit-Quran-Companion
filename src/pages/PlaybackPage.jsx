@@ -1,8 +1,9 @@
-﻿import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { SURAHS } from '../data/content'
 import { formatAudioTime } from '../lib/quranAudio'
 import { resolveAyahAudioUrl, cacheAyahAudio } from '../lib/ayahAudioCache'
+import { smartGoBack } from '../lib/navigation'
 import {
   getCachedVerse,
   hydrateChapterFromIdb,
@@ -294,7 +295,7 @@ export default function PlaybackPage({ onVerseRead }) {
     autoPlayAfterLoad.current = autoPlay
     stopAndReset()
     const qs = continuous ? '?mode=surah' : ''
-    navigate(`/play/${surahNum}/${next}${qs}`)
+    navigate(`/play/${surahNum}/${next}${qs}`, { replace: true })
   }
 
   function shuffleVerse() {
@@ -334,7 +335,7 @@ export default function PlaybackPage({ onVerseRead }) {
           type="button"
           onClick={() => {
             stopAndReset()
-            navigate(-1)
+            smartGoBack(navigate, '/')
           }}
           className="flex items-center justify-center text-[var(--app-accent)] hover:opacity-80 transition-opacity active:scale-95 shrink-0"
           aria-label="Go back"
